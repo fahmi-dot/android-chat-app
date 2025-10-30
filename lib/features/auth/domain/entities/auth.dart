@@ -1,0 +1,18 @@
+import 'package:equatable/equatable.dart';
+
+class Auth extends Equatable {
+  final String accessToken;
+
+  const Auth({required this.accessToken});
+  
+  Auth copyWith({
+    String? accessToken
+  }) {
+    return Auth(
+      accessToken: accessToken ?? this.accessToken
+    );
+  }
+
+  @override
+  List<Object?> get props => [accessToken];  
+}
