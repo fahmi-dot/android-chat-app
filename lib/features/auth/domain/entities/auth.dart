@@ -1,18 +1,18 @@
 import 'package:equatable/equatable.dart';
 
 class Auth extends Equatable {
-  final String accessToken;
+  final bool isLoggedIn;
 
-  const Auth({required this.accessToken});
+  const Auth({required this.isLoggedIn});
   
   Auth copyWith({
-    String? accessToken
+    bool? isLoggedIn
   }) {
     return Auth(
-      accessToken: accessToken ?? this.accessToken
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn
     );
   }
 
   @override
-  List<Object?> get props => [accessToken];  
+  List<Object?> get props => [isLoggedIn];  
 }

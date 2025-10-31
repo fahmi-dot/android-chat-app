@@ -1,5 +1,5 @@
-import '../entities/auth.dart';
-import '../repositories/auth_repository.dart';
+import 'package:android_chat_app/features/auth/domain/entities/auth.dart';
+import 'package:android_chat_app/features/auth/domain/repositories/auth_repository.dart';
 
 class LoginUseCase {
   final AuthRepository _authRepository;
