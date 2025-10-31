@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../features/auth/presentation/screens/splash_screen.dart';
+import 'package:android_chat_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:android_chat_app/features/auth/presentation/screens/splash_screen.dart';
 
 class Routes {
   static const splash = '/';
@@ -19,12 +20,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: Routes.login,
-      // builder: (context, state) => const LoginScreen(),
-      builder: (context, state) => Scaffold(
-        body: Center(
-          child: Text("Login Page"),
-        ),
-      ),
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: Routes.chatList,
