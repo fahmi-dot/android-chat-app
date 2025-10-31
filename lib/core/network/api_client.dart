@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import '../config/env.dart';
-import '../utils/token_holder.dart';
+import 'package:android_chat_app/core/config/env.dart';  
+import 'package:android_chat_app/core/utils/token_holder.dart';
 
 class ApiClient {
   final Dio _dio = Dio(BaseOptions(
@@ -9,10 +9,10 @@ class ApiClient {
     receiveTimeout: const Duration(seconds: 10),
   ));
 
-  apiClient() {
+  ApiClient() {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await TokenHolder.getToken();
+        final token = await TokenHolder.getAccessToken();
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
