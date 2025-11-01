@@ -7,7 +7,6 @@ import 'package:dio/dio.dart';
 abstract class AuthRemoteDataSource {
   Future<Auth> login(String username, String password);
   Future<Auth> check();
-  Future<Auth> refresh();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -29,7 +28,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       refreshToken: data['tokens']['refreshToken']
     );
 
-    return AuthModel(isLoggedIn: data != null).toEntity();
+    return getProfile();
   }
   
   @override
@@ -40,14 +39,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final data = response.data['data'];
 
       return (data != null)
-        ? AuthModel(isLoggedIn: data != null).toEntity()
+        ? getProfile()
         : refresh();
     } on DioException {
       return refresh();
     }
   }
 
-  @override
   Future<Auth> refresh() async {
     final refreshToken = await TokenHolder.getRefreshToken();
 
@@ -63,6 +61,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       refreshToken: data['refreshToken']
     );
 
-    return AuthModel(isLoggedIn: data != null).toEntity();
+    return getProfile();
+  }
+
+  Future<Auth> getProfile() async {
+    final response = await api.get('/user');
+
+    final data = response.data['data'];
+
+    return AuthModel(
+      username: data['username'], 
+      displayName: data['displayName'], 
+      phoneNumber: data['phoneNumber'], 
+      avatarUrl: data['avatarUrl'], 
+      bio: data['bio']
+    ).toEntity();
   }
 }
