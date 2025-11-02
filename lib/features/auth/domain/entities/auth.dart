@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Auth extends Equatable {
+  final String id;
   final String username;
   final String displayName;
   final String phoneNumber;
@@ -8,6 +9,7 @@ class Auth extends Equatable {
   final String? bio;
 
   const Auth({
+    required this.id,
     required this.username,
     required this.displayName,
     required this.phoneNumber,
@@ -23,6 +25,7 @@ class Auth extends Equatable {
     String? bio,
   }) {
     return Auth(
+      id: id,
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -33,6 +36,7 @@ class Auth extends Equatable {
 
   @override
   List<Object?> get props => [
+    id,
     username,
     displayName,
     phoneNumber,

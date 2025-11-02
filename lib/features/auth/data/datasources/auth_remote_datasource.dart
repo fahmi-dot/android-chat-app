@@ -69,7 +69,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     final data = response.data['data'];
 
+    print(data);
+
     return AuthModel(
+      id: data['id'],
       username: data['username'], 
       displayName: data['displayName'], 
       phoneNumber: data['phoneNumber'], 
