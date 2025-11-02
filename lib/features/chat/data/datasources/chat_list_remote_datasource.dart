@@ -3,7 +3,7 @@ import 'package:android_chat_app/features/chat/data/models/chat_list_model.dart'
 import 'package:android_chat_app/features/chat/domain/entities/chat_list.dart';
 
 abstract class ChatListRemoteDataSource {
-  Future<List<ChatList>> list();
+  Future<List<ChatList>> getRooms();
 }
 
 class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
@@ -13,23 +13,23 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
   ChatListRemoteDataSourceImpl({required this.api, required this.currentUsername});
 
   @override
-  Future<List<ChatList>> list() async {
+  Future<List<ChatList>> getRooms() async {
     final response = await api.get('/chat/list');
     final data = response.data['data'] as List;
 
-    return data.map((chatListData) {
-      final participants = chatListData['participants'] as List;
+    return data.map((room) {
+      final participants = room['participants'] as List;
       final target = participants.firstWhere(
         (p) => p['username'] != currentUsername,
         orElse: () => null,
       );
 
       return ChatListModel(
-        id: chatListData['id'],
+        id: room['id'],
         username: target?['username'] ?? '',
         displayName: target?['displayName'] ?? '',
         avatarUrl: target?['avatarUrl'] ?? '',
-      );
+      ).toEntity();
     }).toList();
   }
 }

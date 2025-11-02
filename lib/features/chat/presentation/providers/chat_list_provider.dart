@@ -14,12 +14,17 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   return apiClient;
 });
 
-final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((ref) {
+final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((
+  ref,
+) {
   final api = ref.read(apiClientProvider);
   final authState = ref.watch(authProvider);
   final currentUsername = authState.value?.username ?? '';
 
-  return ChatListRemoteDataSourceImpl(api: api, currentUsername: currentUsername);
+  return ChatListRemoteDataSourceImpl(
+    api: api,
+    currentUsername: currentUsername,
+  );
 });
 
 final chatListRepositoryProvider = Provider<ChatListRepository>((ref) {
@@ -27,32 +32,33 @@ final chatListRepositoryProvider = Provider<ChatListRepository>((ref) {
   return ChatListRepositoryImpl(chatListRemoteDataSource: datasource);
 });
 
-final getChatListUseCaseProvider = Provider<GetChatListUsecase>((ref) {
+final getChatListUseCaseProvider = Provider<GetChatListUseCase>((ref) {
   final repository = ref.read(chatListRepositoryProvider);
-  return GetChatListUsecase(repository);
+  return GetChatListUseCase(repository);
 });
 
-final chatListProvider = AsyncNotifierProvider<ChatListNotifier, List<ChatList>?>(
-  ChatListNotifier.new,
-);
+final chatListProvider =
+    AsyncNotifierProvider<ChatListNotifier, List<ChatList>?>(
+      ChatListNotifier.new,
+    );
 
 class ChatListNotifier extends AsyncNotifier<List<ChatList>?> {
-  late final GetChatListUsecase _getChatListUsecase;
+  late final GetChatListUseCase _getChatListUseCase;
 
   @override
   FutureOr<List<ChatList>?> build() async {
-    _getChatListUsecase = ref.read(getChatListUseCaseProvider);
+    _getChatListUseCase = ref.read(getChatListUseCaseProvider);
 
     final auth = await ref.watch(authProvider.future);
     if (auth == null) return [];
 
-    return await _getChatListUsecase.execute();
+    return await _getChatListUseCase.execute();
   }
 
-  Future<void> list() async {
+  Future<void> getRooms() async {
     state = const AsyncLoading();
     try {
-      final chatList = await _getChatListUsecase.execute();
+      final chatList = await _getChatListUseCase.execute();
       state = AsyncData(chatList);
     } catch (e, trace) {
       state = AsyncError(e, trace);
