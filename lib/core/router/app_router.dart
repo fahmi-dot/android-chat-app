@@ -29,11 +29,10 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: Routes.chatRoom,
-      builder: (context, state) => const ChatRoomScreen(),
-      // builder: (context, state) {
-      //   final roomId = state.pathParameters['roomId']!;
-      //   return ChatRoomScreen(roomId: roomId);
-      // },
+      builder: (context, state) {
+        final roomId = state.pathParameters['roomId']!;
+        return ChatRoomScreen(roomId: roomId);
+      },
     ),
   ],
 );
