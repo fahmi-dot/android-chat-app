@@ -13,20 +13,6 @@ class ChatList extends Equatable {
     required this.avatarUrl,
   });
 
-  ChatList copyWith({
-    String? id,
-    String? username,
-    String? displayName,
-    String? avatarUrl,
-  }) {
-    return ChatList(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      displayName: displayName ?? this.displayName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-    );
-  }
-
   @override
   List<Object?> get props => [id, username, displayName, avatarUrl];
 }
