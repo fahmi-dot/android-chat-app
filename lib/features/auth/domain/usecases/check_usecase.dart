@@ -6,7 +6,7 @@ class CheckUsecase {
 
   CheckUsecase(this._authRepository);
   
-  Future<Auth> execute() {
+  Future<Auth?> execute() {
     return _authRepository.check();
   }
 }

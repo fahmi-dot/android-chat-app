@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -32,6 +33,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
 
     await ref.read(authProvider.notifier).login(username, password);
+
+    if (!mounted) return;
+
+    final authState = ref.read(authProvider);
+
+    if (authState.hasValue && authState.value != null) {
+      context.go('/chats');
+    } else if (authState.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login gagal: ${authState.error}')),
+      );
+    }
   }
 
   @override
@@ -56,31 +69,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             const SizedBox(height: 32),
             authState.when(
-              data: (user) => ElevatedButton(
-                onPressed: _login,
-                child: const Text('Login'),
-              ),
+              data: (user) =>
+                  ElevatedButton(onPressed: _login, child: const Text('Login')),
               loading: () => const CircularProgressIndicator(),
               error: (e, _) => Column(
                 children: [
-                  ElevatedButton(
-                    onPressed: _login,
-                    child: const Text('Login'),
-                  ),
+                  ElevatedButton(onPressed: _login, child: const Text('Login')),
                   const SizedBox(height: 16),
-                  Text(
-                    'Error: $e',
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                  Text('Error: $e', style: const TextStyle(color: Colors.red)),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            authState.maybeWhen(
-              data: (user) => user != null 
-                  ? Text('Halo!') 
-                  : const SizedBox.shrink(),
-              orElse: () => const SizedBox.shrink(),
             ),
           ],
         ),

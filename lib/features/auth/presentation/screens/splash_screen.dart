@@ -12,22 +12,35 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  bool _hasNavigated = false;
 
   @override
   void initState() {
     super.initState();
-    _navigateAfterDelay();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        _checkAuthAndNavigate();
+      }
+    });
   }
 
-  Future<void> _navigateAfterDelay() async {
-    await Future.delayed(const Duration(seconds: 2));
+  Future<void> _checkAuthAndNavigate() async {
+    if (_hasNavigated) return;
 
-    if (!context.mounted) return;
+    try {
+      final auth = await ref.read(authProvider.future);
+      
+      if (!mounted) return;
+      _hasNavigated = true;
 
-    final authState = await ref.read(authProvider.future);
-    if (authState != null) {
-      context.go('/chats');
-    } else {
+      if (auth != null) {
+        context.go('/chats');
+      } else {
+        context.go('/login');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _hasNavigated = true;
       context.go('/login');
     }
   }

@@ -13,7 +13,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
   
   @override
-  Future<Auth> check() async {
+  Future<Auth?> check() async {
     return await authRemoteDataSource.check();
   }
 }
