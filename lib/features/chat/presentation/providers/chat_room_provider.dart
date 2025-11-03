@@ -9,8 +9,7 @@ import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_use
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) {
-  final apiClient = ApiClient();
-  return apiClient;
+  return ApiClient();
 });
 
 final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((ref) {
