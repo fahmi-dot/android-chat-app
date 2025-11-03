@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:stomp_dart_client/stomp_dart_client.dart';
@@ -8,47 +9,62 @@ class WsClient {
   static final WsClient _instance = WsClient._internal();
 
   factory WsClient() => _instance;
-  WsClient._internal();
 
-  late final StompClient _stompClient;
-  bool _connected = false;
-
-  Future<void> connect() async {
-    if (_connected) return;
-    final token = await TokenHolder.getAccessToken();
-
+  late StompClient _stompClient;
+  final _messageController = StreamController<dynamic>.broadcast();
+  final _subscriptions = <String, String>{};
+  
+  Stream<dynamic> get messageStream => _messageController.stream;
+  
+  WsClient._internal() {
     _stompClient = StompClient(
       config: StompConfig(
         url: Env.wsBaseUrl,
-        onConnect: onConnect,
-        onWebSocketError: (e) => Exception('WebSocket error: $e'),
-        stompConnectHeaders: {'Authorization': 'Bearer $token'},
-        webSocketConnectHeaders: {'Authorization': 'Bearer $token'},
         reconnectDelay: const Duration(seconds: 5),
+        
+        onConnect: (StompFrame frame) async {
+          final token = await TokenHolder.getAccessToken();
+          
+          _stompClient.subscribe(
+            destination: '/user/queue/messages',
+            headers: {'Authorization': 'Bearer $token'},
+            callback: (StompFrame frame) {
+              final data = jsonDecode(frame.body!);
+              final roomId = data['id'];
+
+              if (roomId != null && !_subscriptions.containsKey(roomId)) {
+                subscribeToRoom(roomId);
+              }
+              
+              _messageController.add(data);
+            },
+          );
+        },
       ),
     );
-
+  }
+  
+  void connect() {
     _stompClient.activate();
   }
 
-  void onConnect(StompFrame frame) {
-    _connected = true;
-
-    _stompClient.subscribe(
-      destination: '/user/queue/notifications',
-      callback: (frame) {
-        print('Pesan baru: ${frame.body}');
-      },
-    );
-  }
-
   void subscribeToRoom(String roomId) {
-    _stompClient.subscribe(
+    if (_subscriptions.containsKey(roomId)) {
+      return;
+    }
+    
+    final subscriptionId = _stompClient.subscribe(
       destination: '/topic/messages/$roomId',
-      callback: (frame) {
-        print('Pesan baru di room $roomId: ${frame.body}');
+      callback: (StompFrame frame) {
+        final message = jsonDecode(frame.body!);
+        message['type'] = 'message';
+        message['id'] = roomId;
+        
+        _messageController.add(message);
       },
     );
+    
+    _subscriptions[roomId] = subscriptionId as String;
   }
 
   void sendMessage({
@@ -63,10 +79,13 @@ class WsClient {
     });
     _stompClient.send(destination: '/app/chat/send', body: body);
   }
+  
+  void dispose() {
+    _messageController.close();
+  }
 
   void disconnect() {
-    _connected = false;
-
     _stompClient.deactivate();
+    _subscriptions.clear();
   }
 }
