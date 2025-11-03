@@ -1,41 +1,72 @@
+import 'dart:convert';
+
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:android_chat_app/core/config/env.dart';
 import 'package:android_chat_app/core/utils/token_holder.dart';
 
 class WsClient {
-  late StompClient _stompClient;
+  static final WsClient _instance = WsClient._internal();
 
-  void connect({required String roomId}) async {
+  factory WsClient() => _instance;
+  WsClient._internal();
+
+  late final StompClient _stompClient;
+  bool _connected = false;
+
+  Future<void> connect() async {
+    if (_connected) return;
     final token = await TokenHolder.getAccessToken();
+
     _stompClient = StompClient(
       config: StompConfig(
         url: Env.wsBaseUrl,
-        onConnect: (frame) => onConnect(frame, roomId: roomId),
+        onConnect: onConnect,
+        onWebSocketError: (e) => Exception('WebSocket error: $e'),
         stompConnectHeaders: {'Authorization': 'Bearer $token'},
         webSocketConnectHeaders: {'Authorization': 'Bearer $token'},
+        reconnectDelay: const Duration(seconds: 5),
       ),
     );
 
     _stompClient.activate();
   }
 
-  void onConnect(StompFrame frame, {required String roomId}) {
+  void onConnect(StompFrame frame) {
+    _connected = true;
+
     _stompClient.subscribe(
-      destination: '/topic/messages/$roomId',
+      destination: '/user/queue/notifications',
       callback: (frame) {
-        print('📩 Pesan baru: ${frame.body}');
+        print('Pesan baru: ${frame.body}');
       },
     );
   }
 
-  void sendMessage(String roomId, String message) {
-    _stompClient.send(
-      destination: '/app/chat/$roomId',
-      body: '{"content": "$message"}',
+  void subscribeToRoom(String roomId) {
+    _stompClient.subscribe(
+      destination: '/topic/messages/$roomId',
+      callback: (frame) {
+        print('Pesan baru di room $roomId: ${frame.body}');
+      },
     );
   }
 
+  void sendMessage({
+    String? roomId,
+    required String receiver,
+    required String message,
+  }) {
+    final body = jsonEncode({
+      'roomId': roomId ?? '',
+      'receiver': receiver,
+      'content': message,
+    });
+    _stompClient.send(destination: '/app/chat/send', body: body);
+  }
+
   void disconnect() {
+    _connected = false;
+
     _stompClient.deactivate();
   }
 }
