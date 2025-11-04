@@ -6,6 +6,9 @@ class ChatListModel extends ChatList {
     required super.username,
     required super.displayName,
     required super.avatarUrl,
+    required super.lastMessage,
+    required super.lastMessageSentAt,
+    required super.unreadMessagesCount,
   });
 
   factory ChatListModel.fromEntity(ChatList chatList) {
@@ -14,6 +17,9 @@ class ChatListModel extends ChatList {
       username: chatList.username,
       displayName: chatList.displayName,
       avatarUrl: chatList.avatarUrl,
+      lastMessage: chatList.lastMessage,
+      lastMessageSentAt: chatList.lastMessageSentAt,
+      unreadMessagesCount: chatList.unreadMessagesCount,
     );
   }
 
@@ -23,6 +29,9 @@ class ChatListModel extends ChatList {
       username: username,
       displayName: displayName,
       avatarUrl: avatarUrl,
+      lastMessage: lastMessage,
+      lastMessageSentAt: lastMessageSentAt,
+      unreadMessagesCount: unreadMessagesCount,
     );
   }
 }
