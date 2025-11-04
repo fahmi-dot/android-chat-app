@@ -7,85 +7,163 @@ import 'package:android_chat_app/core/utils/token_holder.dart';
 
 class WsClient {
   static final WsClient _instance = WsClient._internal();
-
   factory WsClient() => _instance;
+  WsClient._internal();
 
   late StompClient _stompClient;
-  final _messageController = StreamController<dynamic>.broadcast();
-  final _subscriptions = <String, String>{};
-  
-  Stream<dynamic> get messageStream => _messageController.stream;
-  
-  WsClient._internal() {
+
+  final _messageController = StreamController<Map<String, dynamic>>.broadcast();
+
+  final Map<String, Function> _subscriptions = {};
+  final Set<String> _pendingSubscriptions = {};
+
+  bool _isConnected = false;
+  bool _isInitialized = false;
+
+  Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
+  bool get isConnected => _isConnected;
+
+  Future<void> initialize() async {
+    if (_isInitialized) {
+      return;
+    }
+
+    _isInitialized = true;
+    connect();
+  }
+
+  Future<void> connect() async {
+    final token = await TokenHolder.getAccessToken();
+
     _stompClient = StompClient(
       config: StompConfig(
         url: Env.wsBaseUrl,
-        reconnectDelay: const Duration(seconds: 5),
-        
-        onConnect: (StompFrame frame) async {
-          final token = await TokenHolder.getAccessToken();
-          
-          _stompClient.subscribe(
-            destination: '/user/queue/messages',
-            headers: {'Authorization': 'Bearer $token'},
-            callback: (StompFrame frame) {
-              final data = jsonDecode(frame.body!);
-              final roomId = data['id'];
-
-              if (roomId != null && !_subscriptions.containsKey(roomId)) {
-                subscribeToRoom(roomId);
-              }
-              
-              _messageController.add(data);
-            },
-          );
+        onConnect: _onConnect,
+        onWebSocketError: (dynamic error) {
+          print('WebSocket error: $error');
         },
+        onStompError: (StompFrame frame) {
+          print('STOMP error: ${frame.body}');
+        },
+        onDisconnect: (frame) {
+          print('Disconnected');
+          _isConnected = false;
+
+          Future.delayed(Duration(seconds: 5), () {
+            if (_isInitialized) {
+              print('Attempting to reconnect...');
+              _stompClient.activate();
+            }
+          });
+        },
+        beforeConnect: () async {
+          print('Connecting...');
+        },
+        stompConnectHeaders: {'Authorization': 'Bearer $token'},
+        webSocketConnectHeaders: {'Authorization': 'Bearer $token'},
       ),
     );
-  }
-  
-  void connect() {
+
     _stompClient.activate();
+  }
+
+  void _onConnect(StompFrame frame) {
+    print('Connected to STOMP');
+    _isConnected = true;
+
+    if (_pendingSubscriptions.isNotEmpty) {
+      print('Processing ${_pendingSubscriptions.length} pending subscriptions');
+      final pending = List<String>.from(_pendingSubscriptions);
+      _pendingSubscriptions.clear();
+
+      for (final roomId in pending) {
+        _performSubscription(roomId);
+      }
+    }
   }
 
   void subscribeToRoom(String roomId) {
     if (_subscriptions.containsKey(roomId)) {
+      print('Already subscribed to room: $roomId');
       return;
     }
-    
-    final subscriptionId = _stompClient.subscribe(
-      destination: '/topic/messages/$roomId',
-      callback: (StompFrame frame) {
-        final message = jsonDecode(frame.body!);
-        message['type'] = 'message';
-        message['id'] = roomId;
-        
-        _messageController.add(message);
-      },
-    );
-    
-    _subscriptions[roomId] = subscriptionId as String;
+
+    if (!_isConnected) {
+      print('STOMP client not connected yet, adding to pending: $roomId');
+      _pendingSubscriptions.add(roomId);
+      return;
+    }
+
+    _performSubscription(roomId);
+  }
+
+  void _performSubscription(String roomId) {
+    try {
+      print('Subscribing to room: $roomId');
+
+      final subscription = _stompClient.subscribe(
+        destination: '/topic/messages/$roomId',
+        callback: (StompFrame frame) {
+          print('Received frame for room $roomId: ${frame.body}');
+
+          if (frame.body == null || frame.body!.isEmpty) return;
+
+          try {
+            final message = jsonDecode(frame.body!) as Map<String, dynamic>;
+
+            message['roomId'] = roomId;
+            message['type'] = 'message';
+
+            _messageController.add(message);
+          } catch (e) {}
+        },
+      );
+
+      if (subscription != null) {
+        _subscriptions[roomId] = subscription;
+        print('Successfully subscribed to room: $roomId');
+      } else {
+        print('Failed to subscribe');
+      }
+    } catch (e) {
+      print('Error subscribing to room $roomId: $e');
+    }
   }
 
   void sendMessage({
-    String? roomId,
-    required String receiver,
-    required String message,
+    required String roomId,
+    required String content,
+    String? receiver,
   }) {
-    final body = jsonEncode({
-      'roomId': roomId ?? '',
-      'receiver': receiver,
-      'content': message,
-    });
-    _stompClient.send(destination: '/app/chat/send', body: body);
-  }
-  
-  void dispose() {
-    _messageController.close();
+    if (!_isConnected) return;
+
+    try {
+      final message = {
+        'roomId': roomId,
+        'content': content,
+        if (receiver != null) 'receiver': receiver,
+      };
+
+      _stompClient.send(
+        destination: '/app/chat/send',
+        body: jsonEncode(message),
+      );
+
+      print('Message sent: $message');
+    } catch (e) {
+      print('Error sending message: $e');
+    }
   }
 
   void disconnect() {
-    _stompClient.deactivate();
     _subscriptions.clear();
+    _pendingSubscriptions.clear();
+    _isConnected = false;
+    _stompClient.deactivate();
+  }
+
+  void dispose() {
+    disconnect();
+    _messageController.close();
   }
 }
