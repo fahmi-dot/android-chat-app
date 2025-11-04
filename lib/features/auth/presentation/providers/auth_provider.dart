@@ -6,7 +6,7 @@ import 'package:android_chat_app/features/auth/domain/usecases/check_usecase.dar
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:android_chat_app/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:android_chat_app/features/auth/domain/entities/auth.dart';
+import 'package:android_chat_app/features/auth/domain/entities/user.dart';
 import 'package:android_chat_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/login_usecase.dart';
 
@@ -39,16 +39,16 @@ final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
   return CheckUsecase(repository);
 });
 
-final authProvider = AsyncNotifierProvider<AuthNotifier, Auth?>(
+final authProvider = AsyncNotifierProvider<AuthNotifier, User?>(
   AuthNotifier.new,
 );
 
-class AuthNotifier extends AsyncNotifier<Auth?> {
+class AuthNotifier extends AsyncNotifier<User?> {
   late final LoginUseCase _loginUseCase;
   late final CheckUsecase _checkUsecase;
 
   @override
-  FutureOr<Auth?> build() async {
+  FutureOr<User?> build() async {
     _loginUseCase = ref.read(loginUseCaseProvider);
     _checkUsecase = ref.read(checkUseCaseProvider);
 

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class Auth extends Equatable {
+class User extends Equatable {
   final String id;
   final String username;
   final String displayName;
@@ -8,7 +8,7 @@ class Auth extends Equatable {
   final String avatarUrl;
   final String? bio;
 
-  const Auth({
+  const User({
     required this.id,
     required this.username,
     required this.displayName,
@@ -17,14 +17,14 @@ class Auth extends Equatable {
     required this.bio,
   });
 
-  Auth copyWith({
+  User copyWith({
     String? username,
     String? displayName,
     String? phoneNumber,
     String? avatarUrl,
     String? bio,
   }) {
-    return Auth(
+    return User(
       id: id,
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,

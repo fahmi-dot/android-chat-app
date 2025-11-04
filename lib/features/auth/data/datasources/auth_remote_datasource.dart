@@ -1,13 +1,13 @@
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/core/network/ws_client.dart';
 import 'package:android_chat_app/core/utils/token_holder.dart';
-import 'package:android_chat_app/features/auth/data/models/auth_model.dart';
-import 'package:android_chat_app/features/auth/domain/entities/auth.dart';
+import 'package:android_chat_app/features/auth/data/models/user_model.dart';
+import 'package:android_chat_app/features/auth/domain/entities/user.dart';
 import 'package:dio/dio.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<Auth> login(String username, String password);
-  Future<Auth?> check();
+  Future<User> login(String username, String password);
+  Future<User?> check();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -19,7 +19,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> connect() async => ws.connect();
 
   @override
-  Future<Auth> login(String username, String password) async {
+  Future<User> login(String username, String password) async {
     try {
       final response = await api.post(
         '/auth/login',
@@ -41,12 +41,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
   
   @override
-  Future<Auth?> check() async {
+  Future<User?> check() async {
     try {
       final response = await api.get('/user');
       final data = response.data['data'];
 
-      return AuthModel(
+      return UserModel(
         id: data['id'],
         username: data['username'], 
         displayName: data['displayName'], 
@@ -59,7 +59,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  Future<Auth?> refresh() async {
+  Future<User?> refresh() async {
     try {
       final refreshToken = await TokenHolder.getRefreshToken();
 
@@ -85,12 +85,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } 
   }
 
-  Future<Auth> getProfile() async {
+  Future<User> getProfile() async {
     try {
       final response = await api.get('/user');
       final data = response.data['data'];
 
-      return AuthModel(
+      return UserModel(
         id: data['id'],
         username: data['username'], 
         displayName: data['displayName'], 

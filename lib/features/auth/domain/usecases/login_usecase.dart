@@ -1,4 +1,4 @@
-import 'package:android_chat_app/features/auth/domain/entities/auth.dart';
+import 'package:android_chat_app/features/auth/domain/entities/user.dart';
 import 'package:android_chat_app/features/auth/domain/repositories/auth_repository.dart';
 
 class LoginUseCase {
@@ -6,7 +6,7 @@ class LoginUseCase {
 
   LoginUseCase(this._authRepository);
 
-  Future<Auth> execute(String username, String password) {
+  Future<User> execute(String username, String password) {
     return _authRepository.login(username, password);
   }
 }

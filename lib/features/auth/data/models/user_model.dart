@@ -10,14 +10,14 @@ class UserModel extends User {
     required super.bio,
   });
 
-  factory UserModel.fromEntity(User auth) {
+  factory UserModel.fromEntity(User user) {
     return UserModel(
-      id: auth.id,
-      username: auth.username,
-      displayName: auth.displayName,
-      phoneNumber: auth.phoneNumber,
-      avatarUrl: auth.avatarUrl,
-      bio: auth.bio,
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      phoneNumber: user.phoneNumber,
+      avatarUrl: user.avatarUrl,
+      bio: user.bio,
     );
   }
 
