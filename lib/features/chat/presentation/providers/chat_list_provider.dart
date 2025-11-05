@@ -5,7 +5,7 @@ import 'package:android_chat_app/features/chat/data/datasources/chat_list_remote
 import 'package:android_chat_app/features/chat/data/repositories/chat_list_repository_impl.dart';
 import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_list_repository.dart';
-import 'package:android_chat_app/features/chat/domain/usecases/get_chat_list_usecase.dart';
+import 'package:android_chat_app/features/chat/domain/usecases/get_chat_rooms_usecase.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_detail_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,14 +32,14 @@ final chatListRepositoryProvider = Provider<ChatListRepository>((ref) {
   return ChatListRepositoryImpl(chatListRemoteDataSource: datasource);
 });
 
-final getChatListUseCaseProvider = Provider<GetChatListUseCase>((ref) {
+final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
   final repository = ref.read(chatListRepositoryProvider);
-  return GetChatListUseCase(repository);
+  return GetChatRoomsUseCase(repository);
 });
 
-final getChatRoomUseCaseProvider = Provider<GetChatListUseCase>((ref) {
+final getChatRoomDetailUseCaseProvider = Provider<GetChatRoomDetailUseCase>((ref) {
   final repository = ref.read(chatListRepositoryProvider);
-  return GetChatListUseCase(repository);
+  return GetChatRoomDetailUseCase(repository);
 });
 
 final chatListProvider =
@@ -48,18 +48,19 @@ final chatListProvider =
     );
 
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
-  late final GetChatListUseCase _getChatListUseCase;
+  late final GetChatRoomsUseCase _getChatRoomsUseCase;
   late final GetChatRoomDetailUseCase _getChatRoomDetailUseCase;
 
   @override
   FutureOr<List<Room>?> build() async {
-    _getChatListUseCase = ref.read(getChatListUseCaseProvider);
+    _getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
+    _getChatRoomDetailUseCase = ref.read(getChatRoomDetailUseCaseProvider);
 
     final auth = ref.read(authProvider).value;
     if (auth == null) return [];
 
     final ws = ref.read(wsClientProvider);
-    final chatList = await _getChatListUseCase.execute();
+    final chatList = await _getChatRoomsUseCase.execute();
     for (final room in chatList) {
       ws.subscribeToRoom(room.id);
     }
@@ -163,7 +164,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     try {
       final ws = ref.read(wsClientProvider);
 
-      final chatList = await _getChatListUseCase.execute();
+      final chatList = await _getChatRoomsUseCase.execute();
       for (final room in chatList) {
         ws.subscribeToRoom(room.id);
       }

@@ -8,8 +8,8 @@ class ChatListRepositoryImpl implements ChatListRepository {
   ChatListRepositoryImpl({required this.chatListRemoteDataSource});
 
   @override
-  Future<List<Room>> getChatRoomList() async {
-    return await chatListRemoteDataSource.getChatRoomList();
+  Future<List<Room>> getChatRooms() async {
+    return await chatListRemoteDataSource.getChatRooms();
   }
   
   @override

@@ -4,7 +4,7 @@ import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:dio/dio.dart';
 
 abstract class ChatListRemoteDataSource {
-  Future<List<Room>> getChatRoomList();
+  Future<List<Room>> getChatRooms();
   Future<Room> getChatRoomDetail(String roomId);
 }
 
@@ -18,7 +18,7 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
   });
 
   @override
-  Future<List<Room>> getChatRoomList() async {
+  Future<List<Room>> getChatRooms() async {
     try {
       final response = await api.get('/chat/room');
       final data = response.data['data'] as List;
