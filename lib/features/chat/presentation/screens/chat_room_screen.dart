@@ -29,7 +29,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             itemCount: message.length,
             itemBuilder: (context, index) {
               final m = message[index];
-              return ListTile(title: Text(m.content), subtitle: Text(m.sentAt));
+              return ListTile(title: Text(m.content), subtitle: Text(m.sentAt.toString()));
             },
           );
         },

@@ -6,6 +6,7 @@ class ChatRoomModel extends ChatRoom {
     required super.content,
     required super.sentAt,
     required super.senderId,
+    required super.isSentByMe,
   });
 
   factory ChatRoomModel.fromEntity(ChatRoom chatRoom) {
@@ -14,6 +15,7 @@ class ChatRoomModel extends ChatRoom {
       content: chatRoom.content,
       sentAt: chatRoom.sentAt,
       senderId: chatRoom.senderId,
+      isSentByMe: chatRoom.isSentByMe,
     );
   }
 
@@ -23,6 +25,7 @@ class ChatRoomModel extends ChatRoom {
       content: content,
       sentAt: sentAt,
       senderId: senderId,
+      isSentByMe: isSentByMe,
     );
   }
 }
