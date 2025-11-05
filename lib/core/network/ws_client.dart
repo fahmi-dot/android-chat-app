@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, unnecessary_null_comparison
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -74,11 +76,11 @@ class WsClient {
     if (_pendingSubscriptions.isNotEmpty) {
       print('Processing ${_pendingSubscriptions.length} pending subscriptions');
       final pending = List<String>.from(_pendingSubscriptions);
-      _pendingSubscriptions.clear();
 
       for (final roomId in pending) {
         _performSubscription(roomId);
       }
+      _pendingSubscriptions.clear();
     }
   }
 
@@ -89,7 +91,7 @@ class WsClient {
     }
 
     if (!_isConnected) {
-      print('STOMP client not connected yet, adding to pending: $roomId');
+      print('STOMP client not connected yet, adding room $roomId to pending');
       _pendingSubscriptions.add(roomId);
       return;
     }
@@ -110,12 +112,11 @@ class WsClient {
 
           try {
             final message = jsonDecode(frame.body!) as Map<String, dynamic>;
-
-            message['roomId'] = roomId;
-            message['type'] = 'message';
-
+            
             _messageController.add(message);
-          } catch (e) {}
+          } catch (e) {
+            print('Error: $e');
+          }
         },
       );
 
@@ -130,16 +131,16 @@ class WsClient {
     }
   }
 
-  void sendMessage({
-    required String roomId,
-    required String content,
+  void sendMessage(
+    String? roomId,
+    String content,
     String? receiver,
-  }) {
+  ) {
     if (!_isConnected) return;
 
     try {
       final message = {
-        'roomId': roomId,
+        if (roomId != null) 'roomId': roomId,
         'content': content,
         if (receiver != null) 'receiver': receiver,
       };
