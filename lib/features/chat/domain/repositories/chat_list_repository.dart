@@ -1,5 +1,6 @@
-import 'package:android_chat_app/features/chat/domain/entities/chat_list.dart';
+import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 
 abstract class ChatListRepository {
-  Future<List<ChatList>> getRooms();
+  Future<List<Room>> getChatRoomList();
+  Future<Room> getChatRoomDetail(String roomId);
 }

@@ -20,6 +20,8 @@ class Room extends Equatable {
   });
 
   Room copyWith({
+    String? lastMessage,
+    DateTime? lastMessageSentAt,
     int? unreadMessagesCount,
   }) {
     return Room(
@@ -27,8 +29,8 @@ class Room extends Equatable {
       username: username,
       displayName: displayName,
       avatarUrl: avatarUrl,
-      lastMessage: lastMessage,
-      lastMessageSentAt: lastMessageSentAt,
+      lastMessage: lastMessage ?? this.lastMessage,
+      lastMessageSentAt: lastMessageSentAt ?? this.lastMessageSentAt,
       unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
     );
   }

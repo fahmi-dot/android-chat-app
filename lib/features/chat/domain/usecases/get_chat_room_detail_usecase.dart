@@ -1,12 +1,12 @@
 import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_list_repository.dart';
 
-class GetChatListUseCase {
+class GetChatRoomDetailUseCase {
   final ChatListRepository _chatListRepository;
 
-  GetChatListUseCase(this._chatListRepository);
+  GetChatRoomDetailUseCase(this._chatListRepository);
 
-  Future<List<Room>> execute() {
-    return _chatListRepository.getChatRoomList();
+  Future<Room> execute(String roomId) {
+    return _chatListRepository.getChatRoomDetail(roomId);
   }
 }

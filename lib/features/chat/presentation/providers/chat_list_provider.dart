@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/data/datasources/chat_list_remote_datasource.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_list_repository_impl.dart';
-import 'package:android_chat_app/features/chat/domain/entities/chat_list.dart';
+import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_list_repository.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_list_usecase.dart';
+import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_detail_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final wsMessageStreamProvider = StreamProvider<dynamic>((ref) {
@@ -36,107 +37,105 @@ final getChatListUseCaseProvider = Provider<GetChatListUseCase>((ref) {
   return GetChatListUseCase(repository);
 });
 
+final getChatRoomUseCaseProvider = Provider<GetChatListUseCase>((ref) {
+  final repository = ref.read(chatListRepositoryProvider);
+  return GetChatListUseCase(repository);
+});
+
 final chatListProvider =
-    AsyncNotifierProvider<ChatListNotifier, List<ChatList>?>(
+    AsyncNotifierProvider<ChatListNotifier, List<Room>?>(
       ChatListNotifier.new,
     );
 
-class ChatListNotifier extends AsyncNotifier<List<ChatList>?> {
+class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   late final GetChatListUseCase _getChatListUseCase;
+  late final GetChatRoomDetailUseCase _getChatRoomDetailUseCase;
 
   @override
-  FutureOr<List<ChatList>?> build() async {
+  FutureOr<List<Room>?> build() async {
     _getChatListUseCase = ref.read(getChatListUseCaseProvider);
 
-    final authState = ref.read(authProvider).value;
-    if (authState == null) return [];
+    final auth = ref.read(authProvider).value;
+    if (auth == null) return [];
 
+    final ws = ref.read(wsClientProvider);
     final chatList = await _getChatListUseCase.execute();
-    if (chatList != null) {
-      final ws = ref.read(wsClientProvider);
-      for (final room in chatList) {
-        ws.subscribeToRoom(room.id);
-      }
+    for (final room in chatList) {
+      ws.subscribeToRoom(room.id);
     }
 
-    ref.listen<AsyncValue<dynamic>>(
-      wsMessageStreamProvider,
-      (previous, next) {
-        next.whenData((data) {
-          final type = data['type'] as String?;
-          
-          if (type == 'new_chat') {
-            _handleNewRoom(data);
-          } else if (type == 'message') {
-            _handleNewMessage(data);
-          }
-        });
-      },
-    );
+    ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
+      next.whenData((data) {
+        final type = data['type'] as String?;
+
+        if (type == 'new_chat') {
+          _handleNewRoom(data);
+        } else if (type == 'message') {
+          _handleNewMessage(data);
+        }
+      });
+    });
 
     return chatList;
   }
 
-  void _handleNewRoom(dynamic data) {
+  void _handleNewRoom(dynamic data) async {
     try {
-      final id = data['id'];
+      final roomId = data['roomId'];
       final content = data['content'];
-      final sentAtStr = data['sentAt'];
+      final sentAtStr = data['sentAt'] as String?;
       final senderId = data['senderId'];
-      
-      if (id == null || content == null || senderId == null) {
-        return;
-      }
 
-      final sentAt = sentAtStr != null 
-          ? DateTime.parse(sentAtStr) 
+      if (roomId == null || content == null || senderId == null) return;
+      final roomDetail = await _getChatRoomDetailUseCase.execute(roomId);
+
+      final sentAt = sentAtStr != null
+          ? DateTime.parse(sentAtStr)
           : DateTime.now();
-      
+
       state.whenData((rooms) {
         if (rooms == null) return;
-        
-        final exists = rooms.any((room) => room.id == id);
-        
+
+        final exists = rooms.any((room) => room.id == roomId);
+
         if (!exists) {
-          final newRoom = ChatList(
-            id: id,
-            username: senderId,
-            displayName: senderId,
-            avatarUrl: 'url',
+          final newRoom = Room(
+            id: roomId,
+            username: roomDetail.username,
+            displayName: roomDetail.displayName,
+            avatarUrl: roomDetail.avatarUrl,
             lastMessage: content,
             lastMessageSentAt: sentAt,
             unreadMessagesCount: 1,
           );
-          
-          ref.read(wsClientProvider).subscribeToRoom(id);
-          
+
+          ref.read(wsClientProvider).subscribeToRoom(roomId);
+
           state = AsyncData([newRoom, ...rooms]);
         } else {
           _handleNewMessage(data);
         }
       });
     } catch (e) {
-      print('Terjadi kesalahan: $e');
+      print('Failed to handle new room: $e');
     }
   }
-  
+
   void _handleNewMessage(dynamic data) {
     try {
       final id = data['id'] as String?;
       final content = data['content'] as String?;
       final sentAtStr = data['sentAt'] as String?;
-      
-      if (id == null || content == null) {
-        return;
-      }
 
-      final sentAt = sentAtStr != null 
-          ? DateTime.parse(sentAtStr) 
+      if (id == null || content == null) return;
+
+      final sentAt = sentAtStr != null
+          ? DateTime.parse(sentAtStr)
           : DateTime.now();
-      
+
       state.whenData((rooms) {
         if (rooms == null) return;
-        
+
         final updatedChats = rooms.map((room) {
           if (room.id == id) {
             return room.copyWith(
@@ -147,47 +146,45 @@ class ChatListNotifier extends AsyncNotifier<List<ChatList>?> {
           }
           return room;
         }).toList();
-        
+
         updatedChats.sort((a, b) => 
-          b.lastMessageSentAt.compareTo(a.lastMessageSentAt)
+          b.lastMessageSentAt.compareTo(a.lastMessageSentAt),
         );
-        
+
         state = AsyncData(updatedChats);
       });
     } catch (e) {
-      print('Terjadi kesalahan: $e');
+      print('Failed to handle new message: $e');
     }
   }
 
   Future<void> getRooms() async {
     state = const AsyncLoading();
     try {
-      final chatList = await _getChatListUseCase.execute();
-      
       final ws = ref.read(wsClientProvider);
-      if (chatList != null) {
-        for (final room in chatList) {
-          ws.subscribeToRoom(room.id);
-        }
+
+      final chatList = await _getChatListUseCase.execute();
+      for (final room in chatList) {
+        ws.subscribeToRoom(room.id);
       }
-      
+
       state = AsyncData(chatList);
     } catch (e, trace) {
       state = AsyncError(e, trace);
     }
   }
-  
+
   void markAsRead(String roomId) {
     state.whenData((rooms) {
       if (rooms == null) return;
-      
+
       final updatedChats = rooms.map((room) {
         if (room.id == roomId) {
           return room.copyWith(unreadMessagesCount: 0);
         }
         return room;
       }).toList();
-      
+
       state = AsyncData(updatedChats);
     });
   }
