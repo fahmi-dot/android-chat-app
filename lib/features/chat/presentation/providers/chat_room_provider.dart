@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/data/datasources/chat_room_remote_datasource.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_room_repository_impl.dart';
-import 'package:android_chat_app/features/chat/domain/entities/chat_room.dart';
+import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_room_repository.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_usecase.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
@@ -25,18 +24,18 @@ final getChatRoomUseCaseProvider = Provider<GetChatRoomUseCase>((ref) {
   return GetChatRoomUseCase(repository);
 });
 
-final chatRoomProvider = AsyncNotifierProvider.family<ChatRoomNotifier, List<ChatRoom>?, String>(
+final chatRoomProvider = AsyncNotifierProvider.family<ChatRoomNotifier, List<Message>?, String>(
   ChatRoomNotifier.new
 );
 
-class ChatRoomNotifier extends AsyncNotifier<List<ChatRoom>?> {
+class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
   late final GetChatRoomUseCase _getChatRoomUseCase;
   final String roomId;
 
   ChatRoomNotifier(this.roomId);
 
   @override
-  FutureOr<List<ChatRoom>?> build() async {
+  FutureOr<List<Message>?> build() async {
     _getChatRoomUseCase = ref.read(getChatRoomUseCaseProvider);
     
     final messages = await _getChatRoomUseCase.execute(roomId);
@@ -98,7 +97,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<ChatRoom>?> {
     }
   }
   
-  void addOptimisticMessage(ChatRoom message) {
+  void addOptimisticMessage(Message message) {
     state.whenData((messages) {
       state = AsyncData([message, ...messages!]);
     });

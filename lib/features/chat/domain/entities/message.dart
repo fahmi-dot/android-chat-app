@@ -1,13 +1,13 @@
 import 'package:equatable/equatable.dart';
 
-class ChatRoom extends Equatable {
+class Message extends Equatable {
   final String id;
   final String content;
   final DateTime sentAt;
   final String senderId;
   final bool isSentByMe;
 
-  const ChatRoom({
+  const Message({
     required this.id,
     required this.content,
     required this.sentAt,
@@ -15,10 +15,10 @@ class ChatRoom extends Equatable {
     required this.isSentByMe
   });
 
-  ChatRoom copyWith({
+  Message copyWith({
     String? content,
   }) {
-    return ChatRoom(
+    return Message(
       id: id, 
       content: content ?? this.content, 
       sentAt: sentAt, 

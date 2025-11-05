@@ -1,4 +1,4 @@
-import 'package:android_chat_app/features/chat/domain/entities/chat_room.dart';
+import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_room_repository.dart';
 
 class GetChatRoomUseCase {
@@ -6,7 +6,7 @@ class GetChatRoomUseCase {
 
   GetChatRoomUseCase(this._chatRoomRepository);
 
-  Future<List<ChatRoom>> execute(String roomId) {
-    return _chatRoomRepository.getMessages(roomId);
+  Future<List<Message>> execute(String roomId) {
+    return _chatRoomRepository.getChatMessages(roomId);
   }
 }

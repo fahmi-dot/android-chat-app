@@ -1,7 +1,7 @@
-import 'package:android_chat_app/features/chat/domain/entities/chat_room.dart';
+import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 
-class ChatRoomModel extends ChatRoom {
-  const ChatRoomModel({
+class MessageModel extends Message {
+  const MessageModel({
     required super.id,
     required super.content,
     required super.sentAt,
@@ -9,18 +9,18 @@ class ChatRoomModel extends ChatRoom {
     required super.isSentByMe,
   });
 
-  factory ChatRoomModel.fromEntity(ChatRoom chatRoom) {
-    return ChatRoomModel(
-      id: chatRoom.id,
-      content: chatRoom.content,
-      sentAt: chatRoom.sentAt,
-      senderId: chatRoom.senderId,
-      isSentByMe: chatRoom.isSentByMe,
+  factory MessageModel.fromEntity(Message message) {
+    return MessageModel(
+      id: message.id,
+      content: message.content,
+      sentAt: message.sentAt,
+      senderId: message.senderId,
+      isSentByMe: message.isSentByMe,
     );
   }
 
-  ChatRoom toEntity() {
-    return ChatRoom(
+  Message toEntity() {
+    return Message(
       id: id,
       content: content,
       sentAt: sentAt,
