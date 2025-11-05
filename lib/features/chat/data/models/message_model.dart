@@ -19,6 +19,18 @@ class MessageModel extends Message {
     );
   }
 
+  factory MessageModel.fromJson(Map<String, dynamic> json, String currentUsername) {
+    return MessageModel(
+      id: json['id'] ?? DateTime.now().toString(),
+      content: json['content'] ?? '',
+      sentAt: json['sentAt'] != null
+          ? DateTime.parse(json['sentAt'])
+          : DateTime.now(),
+      senderId: json['senderId'] ?? '',
+      isSentByMe: json['senderId'] == currentUsername,
+    );
+  }
+
   Message toEntity() {
     return Message(
       id: id,

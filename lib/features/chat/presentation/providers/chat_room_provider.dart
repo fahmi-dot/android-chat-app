@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/data/datasources/chat_room_remote_datasource.dart';
+import 'package:android_chat_app/features/chat/data/models/message_model.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_room_repository_impl.dart';
 import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_room_repository.dart';
@@ -46,11 +47,11 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
       wsMessageStreamProvider,
       (previous, next) {
         next.whenData((data) {
-          final type = data['type'] as String?;
-          final messageRoomId = data['roomId'] as String?;
+          final type = data['type'];
+          final messageRoomId = data['roomId'];
           
-          if (type == 'message' && messageRoomId == roomId) {
-            // _handleNewMessage(data);
+          if (type == 'new_message' && messageRoomId == roomId) {
+            _handleNewMessage(data);
           }
         });
       },
@@ -59,33 +60,23 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
     return messages;
   }
 
-  Future<void> getMessages() async {
-    state = const AsyncLoading();
+  void _handleNewMessage(dynamic data) {
     try {
-      final chatList = await _getChatRoomUseCase.execute(roomId);
-      state = AsyncData(chatList);
-    } catch (e, trace) {
-      state = AsyncError(e, trace);
+      final auth = ref.read(authProvider);
+      final currentUsername = auth.value?.username ?? '';
+      
+      final newMessage = MessageModel.fromJson(data, currentUsername);
+      
+      state.whenData((messages) {
+        final exists = messages!.any((msg) => msg.id == newMessage.id);
+        if (!exists) {
+          state = AsyncData([newMessage, ...messages]);
+        }
+      });
+    } catch (e) {
+      print('Failed to handle new message: $e');
     }
   }
-
-  // void _handleNewMessage(dynamic data) {
-  //   try {
-  //     final authState = ref.read(authProvider);
-  //     final currentUsername = authState.value?.username ?? '';
-      
-  //     final newMessage = ChatRoom.fromJson(data, currentUsername);
-      
-  //     state.whenData((messages) {
-  //       final exists = messages!.any((msg) => msg.id == newMessage.id);
-  //       if (!exists) {
-  //         state = AsyncData([newMessage, ...messages]);
-  //       }
-  //     });
-  //   } catch (e) {
-  //     print('Terjadi kesalahan: $e');
-  //   }
-  // }
   
   Future<void> refresh() async {
     state = const AsyncLoading();
