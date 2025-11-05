@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class ChatList extends Equatable {
+class Room extends Equatable {
   final String id;
   final String username;
   final String displayName;
@@ -9,7 +9,7 @@ class ChatList extends Equatable {
   final DateTime lastMessageSentAt;
   final int unreadMessagesCount;
 
-  const ChatList({
+  const Room({
     required this.id,
     required this.username,
     required this.displayName,
@@ -19,22 +19,16 @@ class ChatList extends Equatable {
     required this.unreadMessagesCount,
   });
 
-  ChatList copyWith({
-    String? id,
-    String? username,
-    String? displayName,
-    String? avatarUrl,
-    String? lastMessage,
-    DateTime? lastMessageSentAt,
+  Room copyWith({
     int? unreadMessagesCount,
   }) {
-    return ChatList(
-      id: id ?? this.id,
-      username: username ?? this.username,
-      displayName: displayName ?? this.displayName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      lastMessage: lastMessage ?? this.lastMessage,
-      lastMessageSentAt: lastMessageSentAt ?? this.lastMessageSentAt,
+    return Room(
+      id: id,
+      username: username,
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+      lastMessage: lastMessage,
+      lastMessageSentAt: lastMessageSentAt,
       unreadMessagesCount: unreadMessagesCount ?? this.unreadMessagesCount,
     );
   }
