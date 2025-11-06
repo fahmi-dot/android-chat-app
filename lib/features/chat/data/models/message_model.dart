@@ -19,7 +19,7 @@ class MessageModel extends Message {
     );
   }
 
-  factory MessageModel.fromJson(Map<String, dynamic> json, String currentUsername) {
+  factory MessageModel.fromJson(Map<String, dynamic> json, String userId) {
     return MessageModel(
       id: json['id'] ?? DateTime.now().toString(),
       content: json['content'] ?? '',
@@ -27,7 +27,7 @@ class MessageModel extends Message {
           ? DateTime.parse(json['sentAt'])
           : DateTime.now(),
       senderId: json['senderId'] ?? '',
-      isSentByMe: json['senderId'] == currentUsername,
+      isSentByMe: json['senderId'] == userId,
     );
   }
 

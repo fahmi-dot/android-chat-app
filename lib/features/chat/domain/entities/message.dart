@@ -1,14 +1,14 @@
 import 'package:equatable/equatable.dart';
 
 class Message extends Equatable {
-  final String id;
+  final String? id;
   final String content;
   final DateTime sentAt;
   final String senderId;
   final bool isSentByMe;
 
   const Message({
-    required this.id,
+    this.id,
     required this.content,
     required this.sentAt,
     required this.senderId,
