@@ -4,7 +4,7 @@ import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 import 'package:dio/dio.dart';
 
 abstract class ChatRoomRemoteDataSource {
-  Future<List<Message>> getChatMessages(String roomId);
+  Future<List<Message>> getChatMessages(String roomId, String userId);
 }
 
 class ChatRoomRemoteDataSourceImpl extends ChatRoomRemoteDataSource {
@@ -13,7 +13,7 @@ class ChatRoomRemoteDataSourceImpl extends ChatRoomRemoteDataSource {
   ChatRoomRemoteDataSourceImpl({required this.api});
 
   @override
-  Future<List<Message>> getChatMessages(String roomId) async {
+  Future<List<Message>> getChatMessages(String roomId, String userId) async {
     try {
       final response = await api.get('/chat/room/$roomId/messages');
       final data = response.data['data'] as List;
@@ -26,7 +26,7 @@ class ChatRoomRemoteDataSourceImpl extends ChatRoomRemoteDataSource {
               ? DateTime.parse(message['sentAt'])
               : DateTime.now(),
           senderId: message['senderId'],
-          isSentByMe: true,
+          isSentByMe: message['senderId'] == userId,
         ).toEntity();
       }).toList();
     } on DioException catch (e) {

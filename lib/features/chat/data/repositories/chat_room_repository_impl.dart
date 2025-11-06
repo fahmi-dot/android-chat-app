@@ -8,8 +8,8 @@ class ChatRoomRepositoryImpl implements ChatRoomRepository {
   ChatRoomRepositoryImpl({required this.chatRoomRemoteDataSource});
   
   @override
-  Future<List<Message>> getChatMessages(String roomId) async {
-    return await chatRoomRemoteDataSource.getChatMessages(roomId);
+  Future<List<Message>> getChatMessages(String roomId, String userId) async {
+    return await chatRoomRemoteDataSource.getChatMessages(roomId, userId);
   }
   
 }
