@@ -29,28 +29,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
     try {
       final auth = await ref.read(authProvider.future);
-      
+
       if (!mounted) return;
       _hasNavigated = true;
 
-      if (auth != null) {
-        context.go('/chats');
-      } else {
-        context.go('/login');
-      }
+      (auth != null) ? context.go('/chats') : context.go('/login');
     } catch (e) {
       if (!mounted) return;
       _hasNavigated = true;
+
       context.go('/login');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text("This is splash screen."),
-      ),
-    );
+    return Scaffold(body: Center(child: Text("This is splash screen.")));
   }
 }

@@ -25,25 +25,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Username dan kata sandi harus diisi')),
-      );
-      return;
-    }
-
-    await ref.read(authProvider.notifier).login(username, password);
+    final success = await ref
+        .read(authProvider.notifier)
+        .login(username, password);
 
     if (!mounted) return;
 
-    final authState = ref.read(authProvider);
-
-    if (authState.hasValue && authState.value != null) {
+    if (success) {
       context.go('/chats');
-    } else if (authState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login gagal: ${authState.error}')),
-      );
+    } else {
+      ScaffoldMessenger
+        .of(context)
+        .showSnackBar(const SnackBar(content: Text('Failed to login')));
     }
   }
 

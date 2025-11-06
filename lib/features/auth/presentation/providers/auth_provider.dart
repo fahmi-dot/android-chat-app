@@ -55,17 +55,24 @@ class AuthNotifier extends AsyncNotifier<User?> {
     return await _checkUsecase.execute();
   }
 
-  Future<void> login(String username, String password) async {
+  Future<bool> login(String username, String password) async {
+    if (username.isEmpty || password.isEmpty) {
+      throw Exception('Username and password must be filled in');
+    }
+
     state = const AsyncLoading();
+
     try {
       final user = await _loginUseCase.execute(username, password);
       state = AsyncData(user);
+      return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
+      return false;
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
     TokenHolder.deleteTokens();
     state = const AsyncData(null);
   }
