@@ -23,23 +23,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final response = await api.post(
         '/auth/login',
-        data: {'username': username, 'password': password}
+        data: {'username': username, 'password': password},
       );
       final data = response.data['data'];
 
       await TokenHolder.saveTokens(
         accessToken: data['tokens']['accessToken'],
-        refreshToken: data['tokens']['refreshToken']
+        refreshToken: data['tokens']['refreshToken'],
       );
 
       await connect();
-      
+
       return await getProfile();
     } on DioException catch (e) {
-      throw Exception('Login gagal: ${e.message}');
+      throw Exception('Failed to login: ${e.message}');
     }
   }
-  
+
   @override
   Future<User?> check() async {
     try {
@@ -48,11 +48,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return UserModel(
         id: data['id'],
-        username: data['username'], 
-        displayName: data['displayName'], 
-        phoneNumber: data['phoneNumber'], 
-        avatarUrl: data['avatarUrl'], 
-        bio: data['bio']
+        username: data['username'],
+        displayName: data['displayName'],
+        phoneNumber: data['phoneNumber'],
+        avatarUrl: data['avatarUrl'],
+        bio: data['bio'],
       ).toEntity();
     } on DioException {
       return await refresh();
@@ -70,19 +70,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       final response = await api.post(
         '/auth/refresh',
-        data: {'refreshToken': refreshToken}
+        data: {'refreshToken': refreshToken},
       );
       final data = response.data['data'];
 
       await TokenHolder.saveTokens(
         accessToken: data['accessToken'],
-        refreshToken: data['refreshToken']
+        refreshToken: data['refreshToken'],
       );
 
       return await getProfile();
     } on DioException catch (e) {
-      throw Exception('Refresh token gagal: ${e.message}');
-    } 
+      throw Exception('Failed to refresh token: ${e.message}');
+    }
   }
 
   Future<User> getProfile() async {
@@ -92,14 +92,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return UserModel(
         id: data['id'],
-        username: data['username'], 
-        displayName: data['displayName'], 
-        phoneNumber: data['phoneNumber'], 
-        avatarUrl: data['avatarUrl'], 
-        bio: data['bio']
+        username: data['username'],
+        displayName: data['displayName'],
+        phoneNumber: data['phoneNumber'],
+        avatarUrl: data['avatarUrl'],
+        bio: data['bio'],
       ).toEntity();
     } on DioException catch (e) {
-      throw Exception('Gagal mendapatkan profil: ${e.message}');
+      throw Exception('Failed to get profile: ${e.message}');
     }
   }
 }
