@@ -131,11 +131,11 @@ class WsClient {
     }
   }
 
-  void sendMessage(
+  void sendMessage({
     String? roomId,
-    String content,
+    required String content,
     String? receiver,
-  ) {
+  }) {
     if (!_isConnected) return;
 
     try {
