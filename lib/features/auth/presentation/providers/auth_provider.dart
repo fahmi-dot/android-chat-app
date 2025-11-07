@@ -74,6 +74,7 @@ class AuthNotifier extends AsyncNotifier<User?> {
 
   Future<void> logout() async {
     TokenHolder.deleteTokens();
+    WsClient().disconnect();
     state = const AsyncData(null);
   }
 }
