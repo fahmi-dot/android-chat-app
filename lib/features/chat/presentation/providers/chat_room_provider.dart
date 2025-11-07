@@ -31,6 +31,7 @@ final chatRoomProvider = AsyncNotifierProvider.family<ChatRoomNotifier, List<Mes
 
 class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
   late final GetChatMessageUseCase _getChatRoomUseCase;
+  late final String userId;
   final String roomId;
 
   ChatRoomNotifier(this.roomId);
@@ -38,8 +39,11 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
   @override
   FutureOr<List<Message>?> build() async {
     _getChatRoomUseCase = ref.read(getChatMessageUseCaseProvider);
+
+    final auth = await ref.read(authProvider.future);
+    userId = auth!.id;
     
-    final messages = await _getChatRoomUseCase.execute(roomId);
+    final messages = await _getChatRoomUseCase.execute(roomId, userId);
     
     ref.read(wsClientProvider).subscribeToRoom(roomId);
     
@@ -62,13 +66,11 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
 
   void _handleNewMessage(dynamic data) {
     try {
-      final auth = ref.read(authProvider);
-      final currentUsername = auth.value?.username ?? '';
-      
-      final newMessage = MessageModel.fromJson(data, currentUsername);
+      final newMessage = MessageModel.fromJson(data, userId);
       
       state.whenData((messages) {
-        final exists = messages!.any((msg) => msg.id == newMessage.id);
+        final exists = messages!.any((message) => message.id == newMessage.id);
+
         if (!exists) {
           state = AsyncData([newMessage, ...messages]);
         }
@@ -77,20 +79,25 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
       print('Failed to handle new message: $e');
     }
   }
+
+  Future<bool> sendMessage(String message, String? receiver) async {
+    try {
+      final ws = ref.read(wsClientProvider);
+      ws.sendMessage(roomId: roomId, content: message, receiver: receiver);
+      return true;
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
+      return false;
+    }
+  }
   
   Future<void> refresh() async {
     state = const AsyncLoading();
     try {
-      final messages = await _getChatRoomUseCase.execute(roomId);
+      final messages = await _getChatRoomUseCase.execute(roomId, userId);
       state = AsyncData(messages);
     } catch (e, trace) {
       state = AsyncError(e, trace);
     }
-  }
-  
-  void addOptimisticMessage(Message message) {
-    state.whenData((messages) {
-      state = AsyncData([message, ...messages!]);
-    });
   }
 }
