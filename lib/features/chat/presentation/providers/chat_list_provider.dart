@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:android_chat_app/core/network/ws_client.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/data/datasources/chat_list_remote_datasource.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_list_repository_impl.dart';
@@ -10,17 +11,13 @@ import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_det
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final wsMessageStreamProvider = StreamProvider<dynamic>((ref) {
-  final ws = ref.read(wsClientProvider);
-  return ws.messageStream;
+  return ref.read(wsClientProvider).messageStream;
 });
 
-final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((
-  ref,
-) {
+final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((ref) {
   final api = ref.read(apiClientProvider);
-  final authState = ref.read(authProvider);
-  final currentUsername = authState.value?.username ?? '';
-
+  final auth = ref.read(authProvider);
+  final currentUsername = auth.value?.username ?? '';
   return ChatListRemoteDataSourceImpl(
     api: api,
     currentUsername: currentUsername,
@@ -37,15 +34,16 @@ final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
   return GetChatRoomsUseCase(repository);
 });
 
-final getChatRoomDetailUseCaseProvider = Provider<GetChatRoomDetailUseCase>((ref) {
+final getChatRoomDetailUseCaseProvider = Provider<GetChatRoomDetailUseCase>((
+  ref,
+) {
   final repository = ref.read(chatListRepositoryProvider);
   return GetChatRoomDetailUseCase(repository);
 });
 
-final chatListProvider =
-    AsyncNotifierProvider<ChatListNotifier, List<Room>?>(
-      ChatListNotifier.new,
-    );
+final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
+  ChatListNotifier.new,
+);
 
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   late final GetChatRoomsUseCase _getChatRoomsUseCase;
@@ -53,11 +51,13 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
   @override
   FutureOr<List<Room>?> build() async {
+    await WsClient().initialize();
     _getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
     _getChatRoomDetailUseCase = ref.read(getChatRoomDetailUseCaseProvider);
 
-    final auth = ref.read(authProvider).value;
-    if (auth == null) return [];
+    final auth = await ref.read(authProvider.future);
+    
+    if (auth == null) return null;
 
     final ws = ref.read(wsClientProvider);
     final chatList = await _getChatRoomsUseCase.execute();
@@ -67,11 +67,11 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
       next.whenData((data) {
-        final type = data['type'] as String?;
+        final type = data['type'];
 
         if (type == 'new_chat') {
           _handleNewRoom(data);
-        } else if (type == 'message') {
+        } else if (type == 'new_message') {
           _handleNewMessage(data);
         }
       });
@@ -88,8 +88,8 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
       final senderId = data['senderId'];
 
       if (roomId == null || content == null || senderId == null) return;
-      final roomDetail = await _getChatRoomDetailUseCase.execute(roomId);
 
+      final roomDetail = await _getChatRoomDetailUseCase.execute(roomId);
       final sentAt = sentAtStr != null
           ? DateTime.parse(sentAtStr)
           : DateTime.now();
@@ -98,7 +98,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
         if (rooms == null) return;
 
         final exists = rooms.any((room) => room.id == roomId);
-
+        
         if (!exists) {
           final newRoom = Room(
             id: roomId,
@@ -124,11 +124,11 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
   void _handleNewMessage(dynamic data) {
     try {
-      final id = data['id'] as String?;
-      final content = data['content'] as String?;
+      final roomId = data['id'];
+      final content = data['content'];
       final sentAtStr = data['sentAt'] as String?;
 
-      if (id == null || content == null) return;
+      if (roomId == null || content == null) return;
 
       final sentAt = sentAtStr != null
           ? DateTime.parse(sentAtStr)
@@ -137,22 +137,23 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
       state.whenData((rooms) {
         if (rooms == null) return;
 
-        final updatedChats = rooms.map((room) {
-          if (room.id == id) {
+        final updatedRooms = rooms.map((room) {
+          if (room.id == roomId) {
             return room.copyWith(
               lastMessage: content,
               lastMessageSentAt: sentAt,
               unreadMessagesCount: room.unreadMessagesCount + 1,
             );
           }
+          
           return room;
         }).toList();
 
-        updatedChats.sort((a, b) => 
-          b.lastMessageSentAt.compareTo(a.lastMessageSentAt),
+        updatedRooms.sort(
+          (a, b) => b.lastMessageSentAt.compareTo(a.lastMessageSentAt),
         );
 
-        state = AsyncData(updatedChats);
+        state = AsyncData(updatedRooms);
       });
     } catch (e) {
       print('Failed to handle new message: $e');
@@ -163,7 +164,6 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     state = const AsyncLoading();
     try {
       final ws = ref.read(wsClientProvider);
-
       final chatList = await _getChatRoomsUseCase.execute();
       for (final room in chatList) {
         ws.subscribeToRoom(room.id);
@@ -179,14 +179,15 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     state.whenData((rooms) {
       if (rooms == null) return;
 
-      final updatedChats = rooms.map((room) {
+      final updatedRooms = rooms.map((room) {
         if (room.id == roomId) {
           return room.copyWith(unreadMessagesCount: 0);
         }
+
         return room;
       }).toList();
 
-      state = AsyncData(updatedChats);
+      state = AsyncData(updatedRooms);
     });
   }
 }
