@@ -160,6 +160,7 @@ class WsClient {
     _subscriptions.clear();
     _pendingSubscriptions.clear();
     _isConnected = false;
+    _isInitialized = false;
     _stompClient.deactivate();
   }
 
