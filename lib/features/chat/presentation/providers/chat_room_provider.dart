@@ -16,16 +16,16 @@ final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((ref
 });
 
 final chatRepositoryProvider = Provider<ChatRoomRepository>((ref) {
-  final datasource = ref.read(chatRoomRemoteDataSourceProvider);
+  final datasource = ref.watch(chatRoomRemoteDataSourceProvider);
   return ChatRoomRepositoryImpl(chatRoomRemoteDataSource: datasource);
 });
 
 final getChatMessageUseCaseProvider = Provider<GetChatMessageUseCase>((ref) {
-  final repository = ref.read(chatRepositoryProvider);
+  final repository = ref.watch(chatRepositoryProvider);
   return GetChatMessageUseCase(repository);
 });
 
-final chatRoomProvider = AsyncNotifierProvider.family<ChatRoomNotifier, List<Message>?, String>(
+final chatRoomProvider = AsyncNotifierProvider.family.autoDispose<ChatRoomNotifier, List<Message>?, String>(
   ChatRoomNotifier.new
 );
 
