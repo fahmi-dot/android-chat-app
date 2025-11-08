@@ -7,6 +7,7 @@ import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_list_repository.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_rooms_usecase.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_detail_usecase.dart';
+import 'package:android_chat_app/features/chat/domain/usecases/mark_as_read_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final wsMessageStreamProvider = StreamProvider.autoDispose<dynamic>((ref) {
@@ -40,6 +41,11 @@ final getChatRoomDetailUseCaseProvider = Provider<GetChatRoomDetailUseCase>((
   return GetChatRoomDetailUseCase(repository);
 });
 
+final markAsReadUseCaseProvider = Provider<MarkAsReadUseCase>((ref) {
+  final repository = ref.watch(chatListRepositoryProvider);
+  return MarkAsReadUseCase(repository);
+});
+
 final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
   ChatListNotifier.new,
 );
@@ -47,12 +53,14 @@ final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, Lis
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   late final GetChatRoomsUseCase _getChatRoomsUseCase;
   late final GetChatRoomDetailUseCase _getChatRoomDetailUseCase;
+  late final MarkAsReadUseCase _markAsReadUseCase;
 
   @override
   FutureOr<List<Room>?> build() async {
     await ref.read(wsClientProvider).initialize();
     _getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
     _getChatRoomDetailUseCase = ref.read(getChatRoomDetailUseCaseProvider);
+    _markAsReadUseCase = ref.read(markAsReadUseCaseProvider);
 
     final auth = await ref.read(authProvider.future);
     
@@ -178,6 +186,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
       final updatedRooms = rooms.map((room) {
         if (room.id == roomId) {
+          _markAsReadUseCase.execute(roomId);
           return room.copyWith(unreadMessagesCount: 0);
         }
 
