@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:android_chat_app/core/network/ws_client.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/data/datasources/chat_list_remote_datasource.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_list_repository_impl.dart';
@@ -10,14 +9,14 @@ import 'package:android_chat_app/features/chat/domain/usecases/get_chat_rooms_us
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_detail_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final wsMessageStreamProvider = StreamProvider<dynamic>((ref) {
+final wsMessageStreamProvider = StreamProvider.autoDispose<dynamic>((ref) {
   return ref.read(wsClientProvider).messageStream;
 });
 
 final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((ref) {
   final api = ref.read(apiClientProvider);
-  final auth = ref.read(authProvider);
-  final currentUsername = auth.value?.username ?? '';
+  final auth = ref.watch(authProvider).value;
+  final currentUsername = auth?.username ?? '';
   return ChatListRemoteDataSourceImpl(
     api: api,
     currentUsername: currentUsername,
@@ -25,19 +24,19 @@ final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((ref
 });
 
 final chatListRepositoryProvider = Provider<ChatListRepository>((ref) {
-  final datasource = ref.read(chatListRemoteDataSourceProvider);
+  final datasource = ref.watch(chatListRemoteDataSourceProvider);
   return ChatListRepositoryImpl(chatListRemoteDataSource: datasource);
 });
 
 final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
-  final repository = ref.read(chatListRepositoryProvider);
+  final repository = ref.watch(chatListRepositoryProvider);
   return GetChatRoomsUseCase(repository);
 });
 
 final getChatRoomDetailUseCaseProvider = Provider<GetChatRoomDetailUseCase>((
   ref,
 ) {
-  final repository = ref.read(chatListRepositoryProvider);
+  final repository = ref.watch(chatListRepositoryProvider);
   return GetChatRoomDetailUseCase(repository);
 });
 
@@ -51,7 +50,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
   @override
   FutureOr<List<Room>?> build() async {
-    await WsClient().initialize();
+    await ref.read(wsClientProvider).initialize();
     _getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
     _getChatRoomDetailUseCase = ref.read(getChatRoomDetailUseCaseProvider);
 
@@ -59,10 +58,9 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     
     if (auth == null) return null;
 
-    final ws = ref.read(wsClientProvider);
     final chatList = await _getChatRoomsUseCase.execute();
     for (final room in chatList) {
-      ws.subscribeToRoom(room.id);
+      ref.read(wsClientProvider).subscribeToRoom(room.id);
     }
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
@@ -163,10 +161,9 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   Future<void> getRooms() async {
     state = const AsyncLoading();
     try {
-      final ws = ref.read(wsClientProvider);
       final chatList = await _getChatRoomsUseCase.execute();
       for (final room in chatList) {
-        ws.subscribeToRoom(room.id);
+        ref.read(wsClientProvider).subscribeToRoom(room.id);
       }
 
       state = AsyncData(chatList);
