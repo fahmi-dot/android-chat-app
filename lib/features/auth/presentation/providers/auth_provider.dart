@@ -25,17 +25,17 @@ final authRemoteDatasourceProvider = Provider<AuthRemoteDataSource>((ref) {
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final datasource = ref.read(authRemoteDatasourceProvider);
+  final datasource = ref.watch(authRemoteDatasourceProvider);
   return AuthRepositoryImpl(authRemoteDataSource: datasource);
 });
 
 final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
-  final repository = ref.read(authRepositoryProvider);
+  final repository = ref.watch(authRepositoryProvider);
   return LoginUseCase(repository);
 });
 
 final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
-  final repository = ref.read(authRepositoryProvider);
+  final repository = ref.watch(authRepositoryProvider);
   return CheckUsecase(repository);
 });
 
@@ -74,7 +74,7 @@ class AuthNotifier extends AsyncNotifier<User?> {
 
   Future<void> logout() async {
     TokenHolder.deleteTokens();
-    WsClient().disconnect();
+    ref.read(wsClientProvider).disconnect();
     state = const AsyncData(null);
   }
 }
