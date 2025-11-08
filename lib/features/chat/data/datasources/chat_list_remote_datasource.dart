@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 abstract class ChatListRemoteDataSource {
   Future<List<Room>> getChatRooms();
   Future<Room> getChatRoomDetail(String roomId);
+  Future<void> markAsRead(String roomId);
 }
 
 class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
@@ -20,7 +21,7 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
   @override
   Future<List<Room>> getChatRooms() async {
     try {
-      final response = await api.get('/chat/room');
+      final response = await api.get('/chat/rooms');
       final data = response.data['data'] as List;
 
       return data.map((room) {
@@ -50,7 +51,7 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
   @override
   Future<Room> getChatRoomDetail(String roomId) async {
     try {
-      final response = await api.get('/chat/room/$roomId');
+      final response = await api.get('/chat/rooms/$roomId');
       final data = response.data['data'];
       final participants = data['participants'] as List;
       final target = participants.firstWhere(
@@ -71,6 +72,15 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
       ).toEntity();
     } on DioException catch (e) {
       throw Exception('Failed to get chat room detail: $e');
+    }
+  }
+  
+  @override
+  Future<void> markAsRead(String roomId) async {
+    try {
+      await api.patch('/chat/rooms/$roomId/messages');
+    } on DioException catch (e) {
+      throw Exception('Failed to mark as read: $e');
     }
   }
 }

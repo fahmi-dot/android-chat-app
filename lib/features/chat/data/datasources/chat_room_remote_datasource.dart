@@ -15,7 +15,7 @@ class ChatRoomRemoteDataSourceImpl extends ChatRoomRemoteDataSource {
   @override
   Future<List<Message>> getChatMessages(String roomId, String userId) async {
     try {
-      final response = await api.get('/chat/room/$roomId/messages');
+      final response = await api.get('/chat/rooms/$roomId/messages');
       final data = response.data['data'] as List;
 
       return data.map((message) {
