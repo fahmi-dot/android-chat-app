@@ -17,5 +17,8 @@ class ChatListRepositoryImpl implements ChatListRepository {
     return await chatListRemoteDataSource.getChatRoomDetail(roomId);
   }
   
-  
+  @override
+  Future<void> markAsRead(String roomId) async {
+    return await chatListRemoteDataSource.markAsRead(roomId);
+  }
 }
