@@ -51,22 +51,16 @@ final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, Lis
 );
 
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
-  late final GetChatRoomsUseCase _getChatRoomsUseCase;
-  late final GetChatRoomDetailUseCase _getChatRoomDetailUseCase;
-  late final MarkAsReadUseCase _markAsReadUseCase;
 
   @override
   FutureOr<List<Room>?> build() async {
     await ref.read(wsClientProvider).initialize();
-    _getChatRoomsUseCase = ref.read(getChatRoomsUseCaseProvider);
-    _getChatRoomDetailUseCase = ref.read(getChatRoomDetailUseCaseProvider);
-    _markAsReadUseCase = ref.read(markAsReadUseCaseProvider);
-
+    
     final auth = await ref.read(authProvider.future);
     
     if (auth == null) return null;
 
-    final chatList = await _getChatRoomsUseCase.execute();
+    final chatList = await ref.read(getChatRoomsUseCaseProvider).execute();
     for (final room in chatList) {
       ref.read(wsClientProvider).subscribeToRoom(room.id);
     }
@@ -95,7 +89,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
       if (roomId == null || content == null || senderId == null) return;
 
-      final roomDetail = await _getChatRoomDetailUseCase.execute(roomId);
+      final roomDetail = await ref.read(getChatRoomDetailUseCaseProvider).execute(roomId);
       final sentAt = sentAtStr != null
           ? DateTime.parse(sentAtStr)
           : DateTime.now();
@@ -169,7 +163,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   Future<void> getRooms() async {
     state = const AsyncLoading();
     try {
-      final chatList = await _getChatRoomsUseCase.execute();
+      final chatList = await ref.read(getChatRoomsUseCaseProvider).execute();
       for (final room in chatList) {
         ref.read(wsClientProvider).subscribeToRoom(room.id);
       }
@@ -180,13 +174,14 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     }
   }
 
-  void markAsRead(String roomId) {
+  void markAsRead(String roomId) async {
+    await ref.read(markAsReadUseCaseProvider).execute(roomId);
+    
     state.whenData((rooms) {
       if (rooms == null) return;
 
       final updatedRooms = rooms.map((room) {
         if (room.id == roomId) {
-          _markAsReadUseCase.execute(roomId);
           return room.copyWith(unreadMessagesCount: 0);
         }
 
