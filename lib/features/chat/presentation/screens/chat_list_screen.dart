@@ -13,7 +13,6 @@ class ChatListScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatListScreenState extends ConsumerState<ChatListScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -87,7 +86,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       )
                     : null,
                 onTap: () {
-                  context.push('/chats/${r.id}');
+                  context.push('/chats/${r.id}').then((_) {
+                    ref.invalidate(chatListProvider);
+                  });
                 },
               );
             },
