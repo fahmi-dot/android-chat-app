@@ -44,15 +44,9 @@ final authProvider = AsyncNotifierProvider<AuthNotifier, User?>(
 );
 
 class AuthNotifier extends AsyncNotifier<User?> {
-  late final LoginUseCase _loginUseCase;
-  late final CheckUsecase _checkUsecase;
-
   @override
   FutureOr<User?> build() async {
-    _loginUseCase = ref.read(loginUseCaseProvider);
-    _checkUsecase = ref.read(checkUseCaseProvider);
-
-    return await _checkUsecase.execute();
+    return await ref.read(checkUseCaseProvider).execute();
   }
 
   Future<bool> login(String username, String password) async {
@@ -63,7 +57,10 @@ class AuthNotifier extends AsyncNotifier<User?> {
     state = const AsyncLoading();
 
     try {
-      final user = await _loginUseCase.execute(username, password);
+      final user = await ref
+          .read(loginUseCaseProvider)
+          .execute(username, password);
+          
       state = AsyncData(user);
       return true;
     } catch (e, trace) {
