@@ -10,7 +10,9 @@ import 'package:android_chat_app/features/chat/domain/usecases/get_chat_messages
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((ref) {
+final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((
+  ref,
+) {
   final api = ref.read(apiClientProvider);
   return ChatRoomRemoteDataSourceImpl(api: api);
 });
@@ -25,49 +27,44 @@ final getChatMessageUseCaseProvider = Provider<GetChatMessageUseCase>((ref) {
   return GetChatMessageUseCase(repository);
 });
 
-final chatRoomProvider = AsyncNotifierProvider.family.autoDispose<ChatRoomNotifier, List<Message>?, String>(
-  ChatRoomNotifier.new
-);
+final chatRoomProvider = AsyncNotifierProvider.family
+    .autoDispose<ChatRoomNotifier, List<Message>?, String>(
+      ChatRoomNotifier.new,
+    );
 
 class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
-  late final GetChatMessageUseCase _getChatRoomUseCase;
-  late final String userId;
   final String roomId;
 
   ChatRoomNotifier(this.roomId);
 
   @override
   FutureOr<List<Message>?> build() async {
-    _getChatRoomUseCase = ref.read(getChatMessageUseCaseProvider);
-
     final auth = await ref.read(authProvider.future);
-    userId = auth!.id;
-    
-    final messages = await _getChatRoomUseCase.execute(roomId, userId);
-    
+    final userId = auth!.id;
+    final messages = await ref
+        .read(getChatMessageUseCaseProvider)
+        .execute(roomId, userId);
+
     ref.read(wsClientProvider).subscribeToRoom(roomId);
-    
-    ref.listen<AsyncValue<dynamic>>(
-      wsMessageStreamProvider,
-      (previous, next) {
-        next.whenData((data) {
-          final type = data['type'];
-          final messageRoomId = data['roomId'];
-          
-          if (type == 'new_message' && messageRoomId == roomId) {
-            _handleNewMessage(data);
-          }
-        });
-      },
-    );
+
+    ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
+      next.whenData((data) {
+        final type = data['type'];
+        final messageRoomId = data['roomId'];
+
+        if (type == 'new_message' && messageRoomId == roomId) {
+          _handleNewMessage(data, userId);
+        }
+      });
+    });
 
     return messages;
   }
 
-  void _handleNewMessage(dynamic data) {
+  void _handleNewMessage(dynamic data, String userId) {
     try {
       final newMessage = MessageModel.fromJson(data, userId);
-      
+
       state.whenData((messages) {
         final exists = messages!.any((message) => message.id == newMessage.id);
 
@@ -90,11 +87,16 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
       return false;
     }
   }
-  
+
   Future<void> refresh() async {
     state = const AsyncLoading();
     try {
-      final messages = await _getChatRoomUseCase.execute(roomId, userId);
+      final auth = await ref.read(authProvider.future);
+      final userId = auth!.id;
+      final messages = await ref
+          .read(getChatMessageUseCaseProvider)
+          .execute(roomId, userId);
+          
       state = AsyncData(messages);
     } catch (e, trace) {
       state = AsyncError(e, trace);
