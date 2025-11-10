@@ -16,8 +16,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
   @override
   void initState() {
     super.initState();
-
-    ref.read(chatListProvider);
   }
 
   void _logout() async {

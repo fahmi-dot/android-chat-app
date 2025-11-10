@@ -14,7 +14,9 @@ final wsMessageStreamProvider = StreamProvider.autoDispose<dynamic>((ref) {
   return ref.read(wsClientProvider).messageStream;
 });
 
-final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((ref) {
+final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((
+  ref,
+) {
   final api = ref.read(apiClientProvider);
   final auth = ref.watch(authProvider).value;
   final currentUsername = auth?.username ?? '';
@@ -46,30 +48,26 @@ final markAsReadUseCaseProvider = Provider<MarkAsReadUseCase>((ref) {
   return MarkAsReadUseCase(repository);
 });
 
-final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
-  ChatListNotifier.new,
-);
+final chatListProvider =
+    AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
+      ChatListNotifier.new,
+    );
 
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
-
   @override
   FutureOr<List<Room>?> build() async {
     await ref.read(wsClientProvider).initialize();
-    
+
     final auth = await ref.read(authProvider.future);
-    
     if (auth == null) return null;
 
-    final chatList = await ref.read(getChatRoomsUseCaseProvider).execute();
-    for (final room in chatList) {
-      ref.read(wsClientProvider).subscribeToRoom(room.id);
-    }
+    final rooms = await ref.read(getChatRoomsUseCaseProvider).execute();
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
       next.whenData((data) {
         final type = data['type'];
 
-        if (type == 'new_chat') {
+        if (type == 'new_room') {
           _handleNewRoom(data);
         } else if (type == 'new_message') {
           _handleNewMessage(data);
@@ -77,7 +75,8 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
       });
     });
 
-    return chatList;
+    rooms.sort((a, b) => b.lastMessageSentAt.compareTo(a.lastMessageSentAt));
+    return rooms;
   }
 
   void _handleNewRoom(dynamic data) async {
@@ -89,34 +88,34 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
       if (roomId == null || content == null || senderId == null) return;
 
-      final roomDetail = await ref.read(getChatRoomDetailUseCaseProvider).execute(roomId);
+      final roomDetail = await ref
+          .read(getChatRoomDetailUseCaseProvider)
+          .execute(roomId);
+
       final sentAt = sentAtStr != null
           ? DateTime.parse(sentAtStr)
           : DateTime.now();
 
-      state.whenData((rooms) {
-        if (rooms == null) return;
+      final rooms = state.value;
+      if (rooms == null) return;
 
-        final exists = rooms.any((room) => room.id == roomId);
-        
-        if (!exists) {
-          final newRoom = Room(
-            id: roomId,
-            username: roomDetail.username,
-            displayName: roomDetail.displayName,
-            avatarUrl: roomDetail.avatarUrl,
-            lastMessage: content,
-            lastMessageSentAt: sentAt,
-            unreadMessagesCount: 1,
-          );
+      final exists = rooms.any((room) => room.id == roomId);
 
-          ref.read(wsClientProvider).subscribeToRoom(roomId);
+      if (!exists) {
+        final newRoom = Room(
+          id: roomId,
+          username: roomDetail.username,
+          displayName: roomDetail.displayName,
+          avatarUrl: roomDetail.avatarUrl,
+          lastMessage: content,
+          lastMessageSentAt: sentAt,
+          unreadMessagesCount: 1,
+        );
 
-          state = AsyncData([newRoom, ...rooms]);
-        } else {
-          _handleNewMessage(data);
-        }
-      });
+        state = AsyncData([newRoom, ...rooms]);
+      } else {
+        _handleNewMessage(data);
+      }
     } catch (e) {
       print('Failed to handle new room: $e');
     }
@@ -124,7 +123,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
   void _handleNewMessage(dynamic data) {
     try {
-      final roomId = data['id'];
+      final roomId = data['roomId'];
       final content = data['content'];
       final sentAtStr = data['sentAt'] as String?;
 
@@ -134,27 +133,22 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
           ? DateTime.parse(sentAtStr)
           : DateTime.now();
 
-      state.whenData((rooms) {
-        if (rooms == null) return;
+      final rooms = state.value;
+      if (rooms == null) return;
 
-        final updatedRooms = rooms.map((room) {
-          if (room.id == roomId) {
-            return room.copyWith(
-              lastMessage: content,
-              lastMessageSentAt: sentAt,
-              unreadMessagesCount: room.unreadMessagesCount + 1,
-            );
-          }
-          
-          return room;
-        }).toList();
+      final updatedRooms = rooms.map((room) {
+        if (room.id == roomId) {
+          return room.copyWith(
+            lastMessage: content,
+            lastMessageSentAt: sentAt,
+            unreadMessagesCount: room.unreadMessagesCount + 1,
+          );
+        }
 
-        updatedRooms.sort(
-          (a, b) => b.lastMessageSentAt.compareTo(a.lastMessageSentAt),
-        );
+        return room;
+      }).toList();
 
-        state = AsyncData(updatedRooms);
-      });
+      state = AsyncData(updatedRooms);
     } catch (e) {
       print('Failed to handle new message: $e');
     }
@@ -164,9 +158,6 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     state = const AsyncLoading();
     try {
       final chatList = await ref.read(getChatRoomsUseCaseProvider).execute();
-      for (final room in chatList) {
-        ref.read(wsClientProvider).subscribeToRoom(room.id);
-      }
 
       state = AsyncData(chatList);
     } catch (e, trace) {
@@ -176,7 +167,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
   void markAsRead(String roomId) async {
     await ref.read(markAsReadUseCaseProvider).execute(roomId);
-    
+
     state.whenData((rooms) {
       if (rooms == null) return;
 
