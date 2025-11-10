@@ -40,14 +40,14 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
           lastMessageSentAt: room['lastMessageSentAt'] != null
               ? DateTime.parse(room['lastMessageSentAt'])
               : DateTime.now(),
-          unreadMessagesCount: room['unreadMessagesCount'],
+          unreadMessagesCount: room['unreadMessagesCount'] ?? 0,
         ).toEntity();
       }).toList();
     } on DioException catch (e) {
       throw Exception('Failed to get chat room list: $e');
     }
   }
-  
+
   @override
   Future<Room> getChatRoomDetail(String roomId) async {
     try {
@@ -61,20 +61,20 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
 
       return RoomModel(
         id: data['id'],
-        username: target?['username'],
-        displayName: target?['displayName'],
-        avatarUrl: target?['avatarUrl'],
-        lastMessage: data['lastMessage'],
+        username: target?['username'] ?? '',
+        displayName: target?['displayName'] ?? '',
+        avatarUrl: target?['avatarUrl'] ?? '',
+        lastMessage: data['lastMessage'] ?? '',
         lastMessageSentAt: data['lastMessageSentAt'] != null
-              ? DateTime.parse(data['lastMessageSentAt'])
-              : DateTime.now(),
-        unreadMessagesCount: data['unreadMessagesCount'],
+            ? DateTime.parse(data['lastMessageSentAt'])
+            : DateTime.now(),
+        unreadMessagesCount: data['unreadMessagesCount'] ?? 0,
       ).toEntity();
     } on DioException catch (e) {
       throw Exception('Failed to get chat room detail: $e');
     }
   }
-  
+
   @override
   Future<void> markAsRead(String roomId) async {
     try {
