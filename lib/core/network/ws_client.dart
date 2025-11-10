@@ -16,9 +16,6 @@ class WsClient {
 
   final _messageController = StreamController<Map<String, dynamic>>.broadcast();
 
-  final Map<String, Function> _subscriptions = {};
-  final Set<String> _pendingSubscriptions = {};
-
   bool _isConnected = false;
   bool _isInitialized = false;
 
@@ -73,61 +70,35 @@ class WsClient {
     print('Connected to STOMP');
     _isConnected = true;
 
-    if (_pendingSubscriptions.isNotEmpty) {
-      print('Processing ${_pendingSubscriptions.length} pending subscriptions');
-      final pending = List<String>.from(_pendingSubscriptions);
-
-      for (final roomId in pending) {
-        _performSubscription(roomId);
-      }
-      _pendingSubscriptions.clear();
-    }
+    _subscribeToUserQueue();
   }
 
-  void subscribeToRoom(String roomId) {
-    if (_subscriptions.containsKey(roomId)) {
-      print('Already subscribed to room: $roomId');
-      return;
-    }
-
-    if (!_isConnected) {
-      print('STOMP client not connected yet, adding room $roomId to pending');
-      _pendingSubscriptions.add(roomId);
-      return;
-    }
-
-    _performSubscription(roomId);
+  void subscribeToUserQueue() {
+    _subscribeToUserQueue();
   }
 
-  void _performSubscription(String roomId) {
+  void _subscribeToUserQueue() {
     try {
-      print('Subscribing to room: $roomId');
+      print('Subscribing to /user/queue/notifications');
 
-      final subscription = _stompClient.subscribe(
-        destination: '/topic/messages/$roomId',
+      _stompClient.subscribe(
+        destination: '/user/queue/notifications',
         callback: (StompFrame frame) {
-          print('Received frame for room $roomId: ${frame.body}');
+          print('Received notification: ${frame.body}');
 
           if (frame.body == null || frame.body!.isEmpty) return;
 
           try {
             final message = jsonDecode(frame.body!) as Map<String, dynamic>;
-            
+
             _messageController.add(message);
           } catch (e) {
-            print('Error: $e');
+            print('Error parsing message: $e');
           }
         },
       );
-
-      if (subscription != null) {
-        _subscriptions[roomId] = subscription;
-        print('Successfully subscribed to room: $roomId');
-      } else {
-        print('Failed to subscribe');
-      }
     } catch (e) {
-      print('Error subscribing to room $roomId: $e');
+      print('Failed to subscribe to user queue: $e');
     }
   }
 
@@ -157,8 +128,6 @@ class WsClient {
   }
 
   void disconnect() {
-    _subscriptions.clear();
-    _pendingSubscriptions.clear();
     _isConnected = false;
     _isInitialized = false;
     _stompClient.deactivate();
