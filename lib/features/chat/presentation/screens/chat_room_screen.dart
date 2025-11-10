@@ -35,7 +35,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
     await ref
         .read(chatRoomProvider(widget.roomId).notifier)
-        .sendMessage(message, null);
+        .sendMessage(message);
 
     _controller.clear();
   }

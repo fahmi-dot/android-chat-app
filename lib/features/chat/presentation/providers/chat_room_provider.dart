@@ -41,11 +41,12 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
   FutureOr<List<Message>?> build() async {
     final auth = await ref.read(authProvider.future);
     final userId = auth!.id;
+
     final messages = await ref
         .read(getChatMessageUseCaseProvider)
         .execute(roomId, userId);
 
-    ref.read(wsClientProvider).subscribeToRoom(roomId);
+    ref.read(wsClientProvider).subscribeToUserQueue();
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
       next.whenData((data) {
@@ -54,6 +55,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
 
         if (type == 'new_message' && messageRoomId == roomId) {
           _handleNewMessage(data, userId);
+          ref.read(chatListProvider.notifier).markAsRead(messageRoomId);
         }
       });
     });
@@ -65,22 +67,27 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
     try {
       final newMessage = MessageModel.fromJson(data, userId);
 
-      state.whenData((messages) {
-        final exists = messages!.any((message) => message.id == newMessage.id);
+      final messages = state.value;
+      if (messages == null) return;
 
-        if (!exists) {
-          state = AsyncData([newMessage, ...messages]);
-        }
-      });
+      final exists = messages.any((message) => message.id == newMessage.id);
+
+      if (!exists) {
+        state = AsyncData([newMessage, ...messages]);
+      }
     } catch (e) {
       print('Failed to handle new message: $e');
     }
   }
 
-  Future<bool> sendMessage(String message, String? receiver) async {
+  Future<bool> sendMessage(String message) async {
     try {
       final ws = ref.read(wsClientProvider);
-      ws.sendMessage(roomId: roomId, content: message, receiver: receiver);
+      final roomDetail = await ref
+          .read(getChatRoomDetailUseCaseProvider)
+          .execute(roomId);
+
+      ws.sendMessage(roomId: roomId, content: message, receiver: roomDetail.username);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
@@ -93,10 +100,11 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
     try {
       final auth = await ref.read(authProvider.future);
       final userId = auth!.id;
+      
       final messages = await ref
           .read(getChatMessageUseCaseProvider)
           .execute(roomId, userId);
-          
+
       state = AsyncData(messages);
     } catch (e, trace) {
       state = AsyncError(e, trace);
