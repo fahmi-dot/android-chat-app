@@ -1,9 +1,11 @@
 import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
+import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_room_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:heroicons/heroicons.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String roomId;
@@ -65,11 +67,11 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
         title: Row(
           children: [
             CircleAvatar(
-              radius: 18,
+              radius: AppSizes.radiusL + 2.0,
               backgroundImage: roomDetail?.avatarUrl != null
                   ? NetworkImage(roomDetail!.avatarUrl)
                   : null,
-              backgroundColor: Colors.grey[400],
+              backgroundColor: AppColors.background,
             ),
             const SizedBox(width: AppSizes.paddingM),
             Expanded(
@@ -79,6 +81,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   Text(
                     roomDetail?.displayName ?? 'User',
                     style: const TextStyle(
+                      color: Colors.white,
                       fontSize: AppSizes.fontL,
                       fontWeight: FontWeight.bold,
                     ),
@@ -89,8 +92,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   const Text(
                     'Online',
                     style: TextStyle(
-                      fontSize: AppSizes.fontS,
                       color: Colors.white,
+                      fontSize: AppSizes.fontS,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -125,24 +128,26 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           Expanded(
             child: chatRoomState.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error loading messages: $e')),
+              error: (e, _) =>
+                  Center(child: Text('Error loading messages: $e')),
               data: (messages) {
                 if (messages == null || messages.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.chat,
-                          size: AppSizes.iconXXL,
-                          color: Colors.grey[400],
+                        HeroIcon(
+                          HeroIcons.chatBubbleLeftEllipsis,
+                          style: HeroIconStyle.solid,
+                          color: AppColors.textPrimary.withValues(alpha: 0.2),
+                          size: 80.0,
                         ),
                         const SizedBox(height: AppSizes.paddingM),
                         Text(
-                          'No messages yet',
+                          AppStrings.noMessages,
                           style: TextStyle(
+                            color: AppColors.textPrimary.withValues(alpha: 0.4),
                             fontSize: AppSizes.fontL,
-                            color: Colors.grey[600],
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -159,69 +164,89 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                   itemBuilder: (context, index) {
                     final message = messages[index];
                     final isMe = message.isSentByMe;
+                    final isNotLast = index < messages.length - 1;
+                    final isLast = index != messages.length - 1;
+                    bool sameAsPrev = true;
+
+                    if (isNotLast) {
+                      sameAsPrev = isMe == messages[index + 1].isSentByMe
+                          ? true
+                          : false;
+                    }
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: AppSizes.paddingS),
+                      padding: EdgeInsets.only(bottom: AppSizes.paddingXS),
                       child: Align(
                         alignment: isMe
                             ? Alignment.centerRight
                             : Alignment.centerLeft,
-                        child: Flexible(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSizes.paddingM,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isMe
-                                  ? AppColors.primary
-                                  : Colors.grey[200],
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(AppSizes.radiusL),
-                                topRight: Radius.circular(AppSizes.radiusL),
-                                bottomLeft: Radius.circular(
-                                  isMe ? AppSizes.radiusL : 2,
-                                ),
-                                bottomRight: Radius.circular(
-                                  isMe ? 2 : AppSizes.radiusL,
-                                ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSizes.paddingM,
+                            vertical: AppSizes.paddingS,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isMe
+                                ? AppColors.primary
+                                : AppColors.secondary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(
+                                sameAsPrev && !isMe && isLast
+                                    ? 4
+                                    : AppSizes.radiusL,
+                              ),
+                              topRight: Radius.circular(
+                                sameAsPrev && isMe && isLast
+                                    ? 4
+                                    : AppSizes.radiusL,
+                              ),
+                              bottomLeft: Radius.circular(
+                                isMe ? AppSizes.radiusL : 4,
+                              ),
+                              bottomRight: Radius.circular(
+                                isMe ? 4 : AppSizes.radiusL,
                               ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Flexible(
+                                child: Text(
                                   message.content,
                                   style: TextStyle(
                                     color: isMe ? Colors.white : Colors.black,
-                                    fontSize: AppSizes.fontL,
+                                    fontSize: AppSizes.fontM,
                                   ),
                                 ),
-                                const SizedBox(height: AppSizes.paddingXS),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      _formatTime(message.sentAt),
-                                      style: TextStyle(
-                                        fontSize: AppSizes.fontS,
-                                        color: isMe
-                                            ? Colors.grey[300]
-                                            : Colors.grey[700],
-                                      ),
+                              ),
+                              const SizedBox(width: AppSizes.paddingS),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _formatTime(message.sentAt),
+                                    style: TextStyle(
+                                      fontSize: AppSizes.fontS,
+                                      color: isMe
+                                          ? Colors.grey[300]
+                                          : Colors.grey[700],
                                     ),
-                                    if (isMe) ...[
-                                      const SizedBox(width: 4),
-                                      Icon(
-                                        Icons.done_all,
-                                        size: AppSizes.iconS,
-                                        color: Colors.blue[200],
-                                      ),
-                                    ],
+                                  ),
+                                  if (isMe) ...[
+                                    const SizedBox(width: AppSizes.paddingXS),
+                                    Icon(
+                                      Icons.done_all,
+                                      size: AppSizes.iconS,
+                                      color: message.isRead
+                                          ? Colors.blue[200]
+                                          : Colors.grey[400],
+                                    ),
                                   ],
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -232,12 +257,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.all(AppSizes.paddingS),
             decoration: BoxDecoration(
               color: AppColors.surface,
               boxShadow: [
                 BoxShadow(
-                  color: const Color.fromRGBO(0, 0, 0, 0.05),
+                  color: Colors.black.withValues(alpha: 0.01),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),
@@ -248,16 +273,27 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 children: [
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.paddingM,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(
+                          AppSizes.radiusXL + 4,
+                        ),
                       ),
                       child: TextField(
                         controller: _controller,
                         decoration: const InputDecoration(
-                          hintText: 'Message',
+                          hintText: AppStrings.message,
+                          hintStyle: TextStyle(color: AppColors.textSecondary),
                           border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                        ),
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: AppSizes.fontL,
                         ),
                         maxLines: null,
                         textCapitalization: TextCapitalization.sentences,
@@ -265,16 +301,19 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppSizes.paddingS),
+                  const SizedBox(width: AppSizes.paddingM),
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.send),
+                      icon: const HeroIcon(
+                        HeroIcons.paperAirplane,
+                        style: HeroIconStyle.solid,
+                      ),
                       onPressed: _sendMessage,
-                      color: AppColors.surface,
+                      color: Colors.white,
                     ),
                   ),
                 ],
