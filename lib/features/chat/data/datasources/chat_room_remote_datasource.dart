@@ -25,6 +25,7 @@ class ChatRoomRemoteDataSourceImpl extends ChatRoomRemoteDataSource {
           sentAt: message['sentAt'] != null
               ? DateTime.parse(message['sentAt'])
               : DateTime.now(),
+          isRead: message['read'],
           senderId: message['senderId'],
           isSentByMe: message['senderId'] == userId,
         ).toEntity();

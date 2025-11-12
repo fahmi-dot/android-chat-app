@@ -5,6 +5,7 @@ class MessageModel extends Message {
     required super.id,
     required super.content,
     required super.sentAt,
+    required super.isRead,
     required super.senderId,
     required super.isSentByMe,
   });
@@ -14,6 +15,7 @@ class MessageModel extends Message {
       id: message.id,
       content: message.content,
       sentAt: message.sentAt,
+      isRead: message.isRead,
       senderId: message.senderId,
       isSentByMe: message.isSentByMe,
     );
@@ -26,6 +28,7 @@ class MessageModel extends Message {
       sentAt: json['sentAt'] != null
           ? DateTime.parse(json['sentAt'])
           : DateTime.now(),
+      isRead: json['isRead'] ?? false,
       senderId: json['senderId'] ?? '',
       isSentByMe: json['senderId'] == userId,
     );
@@ -36,6 +39,7 @@ class MessageModel extends Message {
       id: id,
       content: content,
       sentAt: sentAt,
+      isRead: isRead,
       senderId: senderId,
       isSentByMe: isSentByMe,
     );
