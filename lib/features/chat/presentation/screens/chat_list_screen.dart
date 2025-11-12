@@ -1,10 +1,12 @@
 import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
+import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:heroicons/heroicons.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -71,18 +73,21 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: HeroIcon(HeroIcons.bars3, style: HeroIconStyle.outline),
         title: _isSearching
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
                 decoration: const InputDecoration(
-                  hintText: 'Search',
+                  hintText: AppStrings.search,
+                  hintStyle: TextStyle(color: Colors.white70),
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: AppColors.surface),
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
                 ),
                 style: const TextStyle(
-                  color: AppColors.surface,
-                  fontSize: AppSizes.fontL,
+                  color: Colors.white,
+                  fontSize: AppSizes.fontXXL,
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -91,11 +96,20 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                 },
               )
             : const Text(
-                'Hello!',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                AppStrings.appName,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: _toggleSearch),
+          IconButton(
+            icon: HeroIcon(
+              HeroIcons.magnifyingGlass,
+              style: HeroIconStyle.outline,
+            ),
+            onPressed: _toggleSearch,
+          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
@@ -120,26 +134,27 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.chat,
-                    size: AppSizes.iconXXL,
-                    color: Colors.grey[400],
+                  HeroIcon(
+                    HeroIcons.chatBubbleBottomCenterText,
+                    style: HeroIconStyle.solid,
+                    color: AppColors.textPrimary.withValues(alpha: 0.2),
+                    size: 80.0,
                   ),
                   const SizedBox(height: AppSizes.paddingM),
                   Text(
-                    'No chats yet',
+                    AppStrings.noChats,
                     style: TextStyle(
+                      color: AppColors.textPrimary.withValues(alpha: 0.4),
                       fontSize: AppSizes.fontL,
-                      color: Colors.grey[600],
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: AppSizes.paddingS),
                   Text(
-                    'Start a new conversation',
+                    AppStrings.noChatsSub,
                     style: TextStyle(
+                      color: AppColors.textPrimary.withValues(alpha: 0.3),
                       fontSize: AppSizes.fontM,
-                      color: Colors.grey[600],
                     ),
                   ),
                 ],
@@ -159,17 +174,18 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.search_off,
-                    size: AppSizes.iconXXL,
-                    color: Colors.grey[400],
+                  HeroIcon(
+                    HeroIcons.chatBubbleLeftRight,
+                    style: HeroIconStyle.solid,
+                    color: AppColors.textPrimary.withValues(alpha: 0.2),
+                    size: 80.0,
                   ),
                   const SizedBox(height: AppSizes.paddingM),
                   Text(
-                    'No chats found',
+                    AppStrings.noChatsFound,
                     style: TextStyle(
+                      color: AppColors.textPrimary.withValues(alpha: 0.4),
                       fontSize: AppSizes.fontL,
-                      color: Colors.grey[600],
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -194,10 +210,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                 },
                 onLongPress: () {},
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingM,
-                    vertical: AppSizes.paddingS,
-                  ),
+                  padding: const EdgeInsets.all(AppSizes.paddingM),
                   child: Row(
                     children: [
                       Stack(
@@ -205,7 +218,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                           CircleAvatar(
                             radius: 28,
                             backgroundImage: NetworkImage(room.avatarUrl),
-                            backgroundColor: Colors.grey[400],
+                            backgroundColor: AppColors.background,
                           ),
                           if (true)
                             Positioned(
@@ -219,7 +232,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     width: 2,
-                                    color: AppColors.surface,
+                                    color: AppColors.background,
                                   ),
                                 ),
                               ),
@@ -238,6 +251,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                   child: Text(
                                     room.displayName,
                                     style: TextStyle(
+                                      color: AppColors.textPrimary,
                                       fontSize: AppSizes.fontL,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -245,12 +259,12 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const SizedBox(width: AppSizes.paddingS),
+                                const SizedBox(width: AppSizes.paddingXL),
                                 Text(
                                   room.lastMessageSentAt.toString(),
                                   style: TextStyle(
+                                    color: AppColors.textSecondary,
                                     fontSize: AppSizes.fontS,
-                                    color: Colors.grey[600],
                                   ),
                                 ),
                               ],
@@ -263,8 +277,8 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     room.lastMessage,
                                     style: TextStyle(
                                       color: hasUnread
-                                          ? Colors.black
-                                          : Colors.grey[600],
+                                          ? AppColors.textPrimary
+                                          : AppColors.textSecondary,
                                       fontSize: AppSizes.fontM,
                                       fontWeight: hasUnread
                                           ? FontWeight.bold
@@ -274,8 +288,8 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const SizedBox(width: AppSizes.paddingS),
-                                if (hasUnread)
+                                if (hasUnread) ...[
+                                  const SizedBox(width: AppSizes.paddingXL),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -283,7 +297,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppColors.primary,
-                                      borderRadius: BorderRadius.circular(AppSizes.radiusM),
+                                      shape: BoxShape.circle,
                                     ),
                                     child: Text(
                                       room.unreadMessagesCount > 99
@@ -292,10 +306,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: AppSizes.fontS,
-                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
+                                ],
                               ],
                             ),
                           ],
@@ -310,7 +324,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.chat),
+        child: const HeroIcon(
+          HeroIcons.chatBubbleBottomCenterText,
+          style: HeroIconStyle.solid,
+        ),
         onPressed: () {},
       ),
     );
