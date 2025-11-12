@@ -17,6 +17,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isObscure = true;
 
   @override
   void dispose() {
@@ -72,43 +73,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               padding: EdgeInsets.all(32.0),
                               child: HeroIcon(
                                 HeroIcons.user,
+                                style: HeroIconStyle.outline,
                                 color: AppColors.primary,
                                 size: 80.0,
                               ),
                             ),
                           ),
                           Positioned(
-                            right: 35,
+                            left: 35,
                             bottom: 10,
                             child: Container(
                               width: AppSizes.iconL * 2,
                               height: AppSizes.iconL * 2,
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
+                                color: AppColors.secondary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                             ),
                           ),
                           Positioned(
-                            right: 75,
+                            left: 75,
                             top: 0,
                             child: Container(
                               width: AppSizes.iconXS,
                               height: AppSizes.iconXS,
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
+                                color: AppColors.secondary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                             ),
                           ),
                           Positioned(
-                            left: 50,
+                            right: 50,
                             bottom: 50,
                             child: Container(
                               width: AppSizes.iconXL,
                               height: AppSizes.iconXL,
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
+                                color: AppColors.secondary.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -141,12 +143,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
                             hintText: AppStrings.username,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
                             hintStyle: TextStyle(
                               color: AppColors.textSecondary,
                             ),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                           ),
                           style: TextStyle(
                             color: AppColors.textPrimary,
@@ -158,8 +160,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: AppSizes.paddingM),
                       Container(
                         height: AppSizes.screenHeight(context) * 0.07,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.paddingM,
+                        padding: const EdgeInsets.only(
+                          left: AppSizes.paddingM,
+                          right: AppSizes.paddingS,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
@@ -167,24 +170,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             AppSizes.radiusXXL,
                           ),
                         ),
-                        child: TextField(
-                          controller: _passwordController,
-                          textAlignVertical: TextAlignVertical.center,
-                          decoration: InputDecoration(
-                            hintText: AppStrings.password,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            hintStyle: TextStyle(
-                              color: AppColors.textSecondary,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _passwordController,
+                                decoration: InputDecoration(
+                                  hintText: AppStrings.password,
+                                  hintStyle: TextStyle(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                ),
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: AppSizes.fontL,
+                                ),
+                                maxLines: 1,
+                                obscureText: _isObscure,
+                              ),
                             ),
-                          ),
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: AppSizes.fontL,
-                          ),
-                          maxLines: 1,
-                          obscureText: true,
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isObscure = !_isObscure;
+                                });
+                              },
+                              icon: HeroIcon(
+                                _isObscure ? HeroIcons.eyeSlash : HeroIcons.eye,
+                                style: HeroIconStyle.outline,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 32.0),
@@ -210,8 +229,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ),
                             ),
+                            SizedBox(height: AppSizes.paddingS),
                             Text(
-                              'Error: $e',
+                              '$e',
                               style: const TextStyle(color: AppColors.error),
                             ),
                           ],
