@@ -5,12 +5,22 @@ class AppStrings {
   static const String loginTitle = 'Login to your account';
   static const String register = 'Register';
   static const String registerTitle = 'Create an account';
-  static const String forgot = 'Forgot password?';
+  static const String verify = 'Verify';
+  static const String verifyTitle = 'Verify your account';
+  static const String verifySubtitle = 'Please enter the 4 digit code sent to ';
+
   static const String noAccount = "Don't have an account?";
+  static const String haveAccount = 'Have an account?';
+  static const String notReceive = "Didn't receive the code?";
+
+  static const String forgot = 'Forgot password?';
+  static const String resend = 'Resend';
 
   static const String phoneNumber = 'Phone number';
+  static const String email = 'Email';
   static const String username = 'Username';
   static const String password = 'Password';
+  static const String cPassword = 'Confirm password';
   static const String message = 'Message';
   static const String search = 'Search';
 
