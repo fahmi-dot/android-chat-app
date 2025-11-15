@@ -1,3 +1,5 @@
+import 'package:android_chat_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:android_chat_app/features/auth/presentation/screens/verify_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/splash_screen.dart';
@@ -8,6 +10,7 @@ class Routes {
   static const splash = '/';
   static const login = '/login';
   static const register = '/register';
+  static const verify = '/verify/:phoneNumber';
   static const chatList = '/chats';
   static const chatRoom = '/chats/:roomId';
 }
@@ -22,6 +25,18 @@ final appRouter = GoRouter(
     GoRoute(
       path: Routes.login,
       builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: Routes.register,
+      builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: Routes.verify,
+      builder: (context, state) {
+        final phoneNumber = state.pathParameters['phoneNumber']!;
+        final email = state.extra as String;
+        return VerifyScreen(phoneNumber: phoneNumber, email: email);
+      },
     ),
     GoRoute(
       path: Routes.chatList,
