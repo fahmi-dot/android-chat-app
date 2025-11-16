@@ -28,4 +28,11 @@ class AppStrings {
   static const String noChatsSub = 'Start a new conversation';
   static const String noChatsFound = 'No chats found';
   static const String noMessages = 'No messages yet';
+
+  static const String noAccountMessage = 'No account found. Please register first';
+  static const String invalidMessage = 'Invalid email or password';
+  static const String takenMessage = 'Username already taken';
+  static const String registeredMessage = 'Phone number already registered';
+  static const String expiredMessage = 'Verification code has expired';
+  static const String invalidCodeMessage = 'Invalid verification code'; 
 }
