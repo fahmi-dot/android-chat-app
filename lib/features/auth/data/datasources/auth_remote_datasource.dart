@@ -14,6 +14,7 @@ abstract class AuthRemoteDataSource {
     String username,
     String password,
   );
+  Future<void> verify(String phoneNumber, String verificationCode);
   Future<User?> check();
 }
 
@@ -73,6 +74,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         message == 'Username is already taken.'
             ? AppStrings.takenMessage
             : AppStrings.registeredMessage,
+      );
+    }
+  }
+
+  @override
+  Future<void> verify(String phoneNumber, String verificationCode) async {
+    try {
+      await api.post(
+        '/auth/verify',
+        data: {
+          'phoneNumber': phoneNumber,
+          'verificationCode': verificationCode,
+        },
+      );
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      throw Exception(
+        status == 401
+            ? AppStrings.invalidCodeMessage
+            : AppStrings.expiredMessage,
       );
     }
   }
