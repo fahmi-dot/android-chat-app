@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:android_chat_app/core/network/ws_client.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/register_usecase.dart';
+import 'package:android_chat_app/features/auth/domain/usecases/verify_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:android_chat_app/core/utils/token_holder.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/check_usecase.dart';
@@ -38,6 +39,11 @@ final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
 final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return RegisterUseCase(repository);
+});
+
+final verifyUseCaseProvider = Provider<VerifyUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return VerifyUseCase(repository);
 });
 
 final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
@@ -96,6 +102,22 @@ class AuthNotifier extends AsyncNotifier<User?> {
       await ref
           .read(registerUseCaseProvider)
           .execute(phoneNumber, email, username, password);
+
+      state = AsyncData(null);
+      return true;
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
+      return false;
+    }
+  }
+
+  Future<bool> verify(String phoneNumber, String verificationCode) async {
+    state = AsyncLoading();
+
+    try {
+      await ref
+          .read(verifyUseCaseProvider)
+          .execute(phoneNumber, verificationCode);
 
       state = AsyncData(null);
       return true;
