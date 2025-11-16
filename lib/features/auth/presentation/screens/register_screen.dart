@@ -5,6 +5,7 @@ import 'package:android_chat_app/features/auth/presentation/providers/auth_provi
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,9 +35,48 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  void _register() async {
+    final phoneNumber = _phoneNumberController.text.trim();
+    final email = _emailController.text.trim();
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+    final cPassword = _cPasswordController.text.trim();
+
+    final success = await ref
+        .read(authProvider.notifier)
+        .register(phoneNumber, email, username, password, cPassword);
+
+    if (!mounted) return;
+
+    if (success) {
+      context.go('/verify/$phoneNumber', extra:email );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+
+    ref.listen(authProvider, (previous, next) {
+      next.whenOrNull(
+        error: (e, _) {
+          final message = e.toString().replaceFirst("Exception: ", "");
+
+          Flushbar(
+            icon: Icon(Icons.error_outline, color: Colors.white),
+            message: message,
+            margin: EdgeInsets.symmetric(
+              vertical: AppSizes.paddingM,
+              horizontal: 32.0,
+            ),
+            backgroundColor: AppColors.error,
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
+            flushbarPosition: FlushbarPosition.TOP,
+            duration: Duration(seconds: 2),
+          ).show(context);
+        },
+      );
+    });
 
     return Scaffold(
       body: Column(
@@ -123,25 +163,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             CustomButton(
                               height: AppSizes.screenHeight(context) * 0.07,
                               text: AppStrings.register.toUpperCase(),
-                              onPressed: () => context.push(
-                                '/verify/${_emailController.text}',
-                              ),
+                              onPressed: _register,
                               theme: CustomButtonTheme.light,
-                            ),
-                            SizedBox(height: AppSizes.paddingS),
-                            Text(
-                              '$e',
-                              style: const TextStyle(color: AppColors.error),
                             ),
                           ],
                         ),
                         data: (user) => CustomButton(
                           height: AppSizes.screenHeight(context) * 0.07,
                           text: AppStrings.register.toUpperCase(),
-                          onPressed: () => context.push(
-                            '/verify/${_phoneNumberController.text}',
-                            extra: _emailController.text,
-                          ),
+                          onPressed: _register,
                           theme: CustomButtonTheme.light,
                         ),
                       ),

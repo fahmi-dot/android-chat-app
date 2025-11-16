@@ -4,6 +4,7 @@ import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
@@ -46,6 +47,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+
+    ref.listen(authProvider, (previous, next) {
+      next.whenOrNull(
+        error: (e, _) {
+          final message = e.toString().replaceFirst("Exception: ", "");
+
+          Flushbar(
+            icon: Icon(Icons.error_outline, color: Colors.white),
+            message: message,
+            margin: EdgeInsets.symmetric(
+              vertical: AppSizes.paddingM,
+              horizontal: 32.0,
+            ),
+            backgroundColor: AppColors.error,
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
+            flushbarPosition: FlushbarPosition.TOP,
+            duration: Duration(seconds: 2),
+          ).show(context);
+        },
+      );
+    });
 
     return Scaffold(
       body: Column(
@@ -101,11 +123,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               text: AppStrings.login.toUpperCase(),
                               onPressed: _login,
                               theme: CustomButtonTheme.light,
-                            ),
-                            SizedBox(height: AppSizes.paddingS),
-                            Text(
-                              '$e',
-                              style: const TextStyle(color: AppColors.error),
                             ),
                           ],
                         ),
