@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:android_chat_app/core/network/ws_client.dart';
+import 'package:android_chat_app/features/auth/domain/usecases/register_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:android_chat_app/core/utils/token_holder.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/check_usecase.dart';
@@ -34,6 +35,11 @@ final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
   return LoginUseCase(repository);
 });
 
+final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return RegisterUseCase(repository);
+});
+
 final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return CheckUsecase(repository);
@@ -50,18 +56,48 @@ class AuthNotifier extends AsyncNotifier<User?> {
   }
 
   Future<bool> login(String username, String password) async {
-    if (username.isEmpty || password.isEmpty) {
-      throw Exception('Username and password must be filled in');
-    }
-
     state = const AsyncLoading();
 
     try {
+      if (username.isEmpty || password.isEmpty) {
+        throw Exception('Please enter username and password');
+      }
+
       final user = await ref
           .read(loginUseCaseProvider)
           .execute(username, password);
-          
+
       state = AsyncData(user);
+      return true;
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
+      return false;
+    }
+  }
+
+  Future<bool> register(
+    String phoneNumber,
+    String email,
+    String username,
+    String password,
+    String cPassword,
+  ) async {
+    state = AsyncLoading();
+
+    try {
+      if (phoneNumber.isEmpty ||
+          email.isEmpty ||
+          username.isEmpty ||
+          password.isEmpty ||
+          cPassword.isEmpty) {
+        throw Exception('Please fill in all fields');
+      }
+
+      await ref
+          .read(registerUseCaseProvider)
+          .execute(phoneNumber, email, username, password);
+
+      state = AsyncData(null);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
