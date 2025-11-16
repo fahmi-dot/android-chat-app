@@ -1,3 +1,4 @@
+import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/core/network/ws_client.dart';
 import 'package:android_chat_app/core/utils/token_holder.dart';
@@ -7,6 +8,12 @@ import 'package:dio/dio.dart';
 
 abstract class AuthRemoteDataSource {
   Future<User> login(String username, String password);
+  Future<void> register(
+    String phoneNumber,
+    String email,
+    String username,
+    String password,
+  );
   Future<User?> check();
 }
 
@@ -36,7 +43,37 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return await getProfile();
     } on DioException catch (e) {
-      throw Exception('Failed to login: ${e.message}');
+      final status = e.response?.statusCode;
+      throw Exception(
+        status == 401 ? AppStrings.invalidMessage : AppStrings.noAccountMessage,
+      );
+    }
+  }
+
+  @override
+  Future<void> register(
+    String phoneNumber,
+    String email,
+    String username,
+    String password,
+  ) async {
+    try {
+      await api.post(
+        '/auth/register',
+        data: {
+          'username': username,
+          'phoneNumber': phoneNumber,
+          'email': email,
+          'password': password,
+        },
+      );
+    } on DioException catch (e) {
+      final message = e.response?.data?['message'] ?? e.message;
+      throw Exception(
+        message == 'Username is already taken.'
+            ? AppStrings.takenMessage
+            : AppStrings.registeredMessage,
+      );
     }
   }
 
@@ -81,7 +118,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return await getProfile();
     } on DioException catch (e) {
-      throw Exception('Failed to refresh token: ${e.message}');
+      final status = e.response?.statusCode;
+      final message = e.response?.data?['message'] ?? e.message;
+      throw Exception('HTTP $status: $message');
     }
   }
 
@@ -99,7 +138,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         bio: data['bio'],
       ).toEntity();
     } on DioException catch (e) {
-      throw Exception('Failed to get profile: ${e.message}');
+      final status = e.response?.statusCode;
+      final message = e.response?.data?['message'] ?? e.message;
+      throw Exception('HTTP $status: $message');
     }
   }
 }
