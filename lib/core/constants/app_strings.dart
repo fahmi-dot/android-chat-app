@@ -8,6 +8,8 @@ class AppStrings {
   static const String verify = 'Verify';
   static const String verifyTitle = 'Verify your account';
   static const String verifySubtitle = 'Please enter the 4 digit code sent to ';
+  static const String changeEmailTitle = 'Change your email';
+  static const String setUsernameTitle = 'Set your username';
 
   static const String noAccount = "Don't have an account?";
   static const String haveAccount = 'Have an account?';
@@ -15,6 +17,10 @@ class AppStrings {
 
   static const String forgot = 'Forgot password?';
   static const String resend = 'Resend';
+  static const String changeEmail = 'Change email';
+  static const String save = 'Save';
+  static const String cancel = 'Cancel';
+  static const String skip = 'Skip for now';
 
   static const String phoneNumber = 'Phone number';
   static const String email = 'Email';
