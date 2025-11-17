@@ -1,4 +1,6 @@
+import 'package:android_chat_app/features/auth/presentation/screens/change_email_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:android_chat_app/features/auth/presentation/screens/set_username_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/verify_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/login_screen.dart';
@@ -11,6 +13,8 @@ class Routes {
   static const login = '/login';
   static const register = '/register';
   static const verify = '/verify/:phoneNumber';
+  static const changeEmail = '/change/email';
+  static const setUsername = '/set/username';
   static const chatList = '/chats';
   static const chatRoom = '/chats/:roomId';
 }
@@ -34,9 +38,28 @@ final appRouter = GoRouter(
       path: Routes.verify,
       builder: (context, state) {
         final phoneNumber = state.pathParameters['phoneNumber']!;
-        final email = state.extra as String;
-        return VerifyScreen(phoneNumber: phoneNumber, email: email);
+        final extra = state.extra as Map<String, dynamic>;
+        return VerifyScreen(
+          phoneNumber: phoneNumber,
+          email: extra['email'],
+          password: extra['password'],
+        );
       },
+    ),
+    GoRoute(
+      path: Routes.changeEmail,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return ChangeEmailScreen(
+          phoneNumber: extra['phoneNumber'],
+          email: extra['email'],
+          password: extra['password'],
+        );
+      },
+    ),
+    GoRoute(
+      path: Routes.setUsername,
+      builder: (context, state) => const SetUsernameScreen(),
     ),
     GoRoute(
       path: Routes.chatList,
