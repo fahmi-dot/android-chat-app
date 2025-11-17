@@ -43,7 +43,16 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Center(
       child: TextField(
         controller: widget.controller,
-        focusNode: widget.type == CustomTextFieldType.otp ? widget.focusNode : null,
+        keyboardType: widget.type == CustomTextFieldType.phone
+            ? TextInputType.phone
+            : widget.type == CustomTextFieldType.email
+            ? TextInputType.emailAddress
+            : widget.type == CustomTextFieldType.otp
+            ? TextInputType.number
+            : TextInputType.text,
+        focusNode: widget.type == CustomTextFieldType.otp
+            ? widget.focusNode
+            : null,
         textAlign: widget.type != CustomTextFieldType.otp
             ? TextAlign.start
             : TextAlign.center,
@@ -96,9 +105,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             : Colors.grey[800],
         borderRadius: BorderRadius.circular(widget.radius),
       ),
-      child: widget.type != CustomTextFieldType.password
-          ? textField()
-          : Row(
+      child: widget.type == CustomTextFieldType.password
+          ? Row(
               children: [
                 Expanded(child: textField()),
                 IconButton(
@@ -113,11 +121,28 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   ),
                 ),
               ],
-            ),
+            )
+          : widget.type == CustomTextFieldType.phone
+          ? Row(
+              children: [
+                Text(
+                  '+62',
+                  style: TextStyle(
+                    color: widget.theme == CustomTextFieldTheme.light
+                        ? AppColors.textPrimary
+                        : AppColors.darkTextPrimary,
+                    fontSize: widget.fontSize,
+                  ),
+                ),
+                SizedBox(width: AppSizes.paddingM),
+                Expanded(child: textField()),
+              ],
+            )
+          : textField(),
     );
   }
 }
 
-enum CustomTextFieldType { text, password, otp }
+enum CustomTextFieldType { text, password, phone, email, otp }
 
 enum CustomTextFieldTheme { light, dark }
