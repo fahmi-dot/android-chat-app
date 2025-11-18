@@ -5,7 +5,7 @@ class RegisterUseCase {
 
   RegisterUseCase(this._authRepository);
 
-  Future<void> execute(String phoneNumber, String email, String username, String password) {
-    return _authRepository.register(phoneNumber, email, username, password);
+  Future<void> execute(String phoneNumber, String email, String password) {
+    return _authRepository.register(phoneNumber, email, password);
   }
 }
