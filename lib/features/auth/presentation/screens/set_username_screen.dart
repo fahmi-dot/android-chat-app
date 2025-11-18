@@ -26,6 +26,20 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
     super.dispose();
   }
 
+  void _setUsername() async {
+    final username = _controller.text.trim();
+
+    final success = await ref
+        .read(authProvider.notifier)
+        .setProfile(username, null, null);
+
+    if (!mounted) return;
+
+    if (success) {
+      context.go('/chats');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -71,7 +85,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                             CustomButton(
                               height: AppSizes.screenHeight(context) * 0.07,
                               text: AppStrings.save.toUpperCase(),
-                              onPressed: () {},
+                              onPressed: _setUsername,
                               theme: CustomButtonTheme.light,
                             ),
                           ],
@@ -79,7 +93,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                         data: (user) => CustomButton(
                           height: AppSizes.screenHeight(context) * 0.07,
                           text: AppStrings.save.toUpperCase(),
-                          onPressed: () {},
+                          onPressed: _setUsername,
                           theme: CustomButtonTheme.light,
                         ),
                       ),

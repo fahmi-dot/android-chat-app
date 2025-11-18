@@ -14,11 +14,13 @@ import 'package:heroicons/heroicons.dart';
 class VerifyScreen extends ConsumerStatefulWidget {
   final String phoneNumber;
   final String email;
+  final String password;
 
   const VerifyScreen({
     super.key,
     required this.phoneNumber,
     required this.email,
+    required this.password,
   });
 
   @override
@@ -30,8 +32,8 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
     4,
     (_) => TextEditingController(),
   );
-
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+  String? newEmail;
 
   @override
   void dispose() {
@@ -41,13 +43,53 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
   void _verify() async {
     final success = await ref
         .read(authProvider.notifier)
-        .verify(widget.phoneNumber, _controllers.map((c) => c.text).join());
+        .verify(
+          widget.phoneNumber,
+          _controllers.map((c) => c.text).join(),
+          widget.password,
+        );
 
     if (!mounted) return;
 
     if (success) {
-      context.go('/login');
+      context.go('/set/username');
     }
+  }
+
+  void _resendCode() async {
+    final success = await ref
+        .read(authProvider.notifier)
+        .resendCode(widget.phoneNumber);
+
+    if (!mounted) return;
+
+    final message = success
+        ? 'Verification code sent'
+        : 'Failed to send verification code. Please try again';
+
+    Flushbar(
+      icon: HeroIcon(HeroIcons.exclamationTriangle, color: Colors.white),
+      message: message,
+      margin: EdgeInsets.symmetric(
+        vertical: AppSizes.paddingM,
+        horizontal: 32.0,
+      ),
+      backgroundColor: AppColors.error,
+      borderRadius: BorderRadius.circular(AppSizes.radiusM),
+      flushbarPosition: FlushbarPosition.TOP,
+      duration: Duration(seconds: 2),
+    ).show(context);
+  }
+
+  void _changeEmail() async {
+    newEmail = await context.push<String>(
+      '/change/email',
+      extra: {
+        'phoneNumber': widget.phoneNumber,
+        'email': widget.email,
+        'password': widget.password,
+      },
+    );
   }
 
   @override
@@ -60,7 +102,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
           final message = e.toString().replaceFirst("Exception: ", "");
 
           Flushbar(
-            icon: Icon(Icons.error_outline, color: Colors.white),
+            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Colors.white),
             message: message,
             margin: EdgeInsets.symmetric(
               vertical: AppSizes.paddingM,
@@ -87,7 +129,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CustomBanner(icon: HeroIcons.key),
+                      CustomBanner(icon: HeroIcons.shieldExclamation),
                       const SizedBox(height: 32.0),
                       Text(
                         AppStrings.verifyTitle,
@@ -99,7 +141,9 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                       ),
                       const SizedBox(height: 32.0),
                       Text(
-                        AppStrings.verifySubtitle + widget.email,
+                        newEmail == null
+                            ? AppStrings.verifySubtitle + widget.email
+                            : AppStrings.verifySubtitle + newEmail!,
                         style: TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: AppSizes.fontL,
@@ -141,11 +185,11 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            AppStrings.notReceive,
+                            AppStrings.didntReceive,
                             style: TextStyle(color: AppColors.textPrimary),
                           ),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: _resendCode,
                             child: Text(
                               AppStrings.resend,
                               style: TextStyle(
@@ -174,6 +218,17 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                           text: AppStrings.verify.toUpperCase(),
                           onPressed: _verify,
                           theme: CustomButtonTheme.light,
+                        ),
+                      ),
+                      const SizedBox(height: AppSizes.paddingM),
+                      TextButton(
+                        onPressed: _changeEmail,
+                        child: Text(
+                          AppStrings.changeEmail,
+                          style: TextStyle(
+                            color: AppColors.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],

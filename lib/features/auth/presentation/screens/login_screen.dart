@@ -54,7 +54,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           final message = e.toString().replaceFirst("Exception: ", "");
 
           Flushbar(
-            icon: Icon(Icons.error_outline, color: Colors.white),
+            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Colors.white),
             message: message,
             margin: EdgeInsets.symmetric(
               vertical: AppSizes.paddingM,
@@ -137,7 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextButton(
                         onPressed: () {},
                         child: Text(
-                          AppStrings.forgot,
+                          AppStrings.forgotPassword,
                           style: TextStyle(color: AppColors.secondary),
                         ),
                       ),
@@ -153,7 +153,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  AppStrings.noAccount,
+                  AppStrings.dontHaveAccount,
                   style: TextStyle(color: AppColors.textPrimary),
                 ),
                 TextButton(

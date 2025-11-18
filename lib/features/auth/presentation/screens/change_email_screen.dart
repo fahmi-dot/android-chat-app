@@ -36,11 +36,13 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
   }
 
   void _changeEmail() async {
+    final email = _controller.text.trim();
+
     final success = await ref
         .read(authProvider.notifier)
         .register(
           widget.phoneNumber,
-          _controller.text,
+          email,
           widget.password,
           widget.password,
         );

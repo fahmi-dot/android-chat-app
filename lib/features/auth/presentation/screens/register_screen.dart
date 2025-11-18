@@ -21,7 +21,6 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _cPasswordController = TextEditingController();
 
@@ -29,7 +28,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void dispose() {
     _phoneNumberController.dispose();
     _emailController.dispose();
-    _usernameController.dispose();
     _passwordController.dispose();
     _cPasswordController.dispose();
     super.dispose();
@@ -38,18 +36,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void _register() async {
     final phoneNumber = _phoneNumberController.text.trim();
     final email = _emailController.text.trim();
-    final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
     final cPassword = _cPasswordController.text.trim();
 
     final success = await ref
         .read(authProvider.notifier)
-        .register(phoneNumber, email, username, password, cPassword);
+        .register(phoneNumber, email, password, cPassword);
 
     if (!mounted) return;
 
     if (success) {
-      context.go('/verify/$phoneNumber', extra:email );
+      context.go(
+        '/verify/$phoneNumber',
+        extra: {'email': email, 'password': password},
+      );
     }
   }
 
@@ -63,7 +63,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           final message = e.toString().replaceFirst("Exception: ", "");
 
           Flushbar(
-            icon: Icon(Icons.error_outline, color: Colors.white),
+            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Colors.white),
             message: message,
             margin: EdgeInsets.symmetric(
               vertical: AppSizes.paddingM,
@@ -108,7 +108,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         hintText: AppStrings.phoneNumber,
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
-                        type: CustomTextFieldType.text,
+                        type: CustomTextFieldType.phone,
                         theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: AppSizes.paddingM),
@@ -119,18 +119,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         hintText: AppStrings.email,
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
-                        type: CustomTextFieldType.text,
-                        theme: CustomTextFieldTheme.light,
-                      ),
-                      const SizedBox(height: AppSizes.paddingM),
-                      CustomTextField(
-                        height: AppSizes.screenHeight(context) * 0.07,
-                        radius: AppSizes.radiusXXL,
-                        controller: _usernameController,
-                        hintText: AppStrings.username,
-                        fontSize: AppSizes.fontL,
-                        maxLines: 1,
-                        type: CustomTextFieldType.text,
+                        type: CustomTextFieldType.email,
                         theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: AppSizes.paddingM),
