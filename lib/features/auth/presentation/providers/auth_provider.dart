@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:android_chat_app/core/network/ws_client.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/register_usecase.dart';
+import 'package:android_chat_app/features/auth/domain/usecases/resend_code_usecase.dart';
+import 'package:android_chat_app/features/auth/domain/usecases/set_username_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/verify_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:android_chat_app/core/utils/token_holder.dart';
@@ -41,9 +43,19 @@ final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
   return RegisterUseCase(repository);
 });
 
+final resendCodeUseCaseProvider = Provider<ResendCodeUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return ResendCodeUseCase(repository);
+});
+
 final verifyUseCaseProvider = Provider<VerifyUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return VerifyUseCase(repository);
+});
+
+final setUsernameUseCaseProvider = Provider<SetUsernameUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return SetUsernameUseCase(repository);
 });
 
 final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
@@ -84,7 +96,6 @@ class AuthNotifier extends AsyncNotifier<User?> {
   Future<bool> register(
     String phoneNumber,
     String email,
-    String username,
     String password,
     String cPassword,
   ) async {
@@ -93,15 +104,18 @@ class AuthNotifier extends AsyncNotifier<User?> {
     try {
       if (phoneNumber.isEmpty ||
           email.isEmpty ||
-          username.isEmpty ||
           password.isEmpty ||
           cPassword.isEmpty) {
         throw Exception('Please fill in all fields');
       }
 
+      if (password != cPassword) {
+        throw Exception('Confirm password must match the password');
+      }
+
       await ref
           .read(registerUseCaseProvider)
-          .execute(phoneNumber, email, username, password);
+          .execute(phoneNumber, email, password);
 
       state = AsyncData(null);
       return true;
@@ -111,15 +125,53 @@ class AuthNotifier extends AsyncNotifier<User?> {
     }
   }
 
-  Future<bool> verify(String phoneNumber, String verificationCode) async {
+  Future<bool> resendCode(String phoneNumber) async {
     state = AsyncLoading();
 
     try {
-      await ref
-          .read(verifyUseCaseProvider)
-          .execute(phoneNumber, verificationCode);
+      await ref.read(resendCodeUseCaseProvider).execute(phoneNumber);
 
       state = AsyncData(null);
+      return true;
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
+      return false;
+    }
+  }
+
+  Future<bool> verify(
+    String phoneNumber,
+    String verificationCode,
+    String password,
+  ) async {
+    state = AsyncLoading();
+
+    try {
+      final username = await ref
+          .read(verifyUseCaseProvider)
+          .execute(phoneNumber, verificationCode, password);
+
+      state = AsyncData(username);
+      return true;
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
+      return false;
+    }
+  }
+
+  Future<bool> setProfile(
+    String? username,
+    String? displayName,
+    String? password,
+  ) async {
+    state = AsyncLoading();
+
+    try {
+      final user = await ref
+          .read(setUsernameUseCaseProvider)
+          .execute(username, displayName, password);
+
+      state = AsyncData(user);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
