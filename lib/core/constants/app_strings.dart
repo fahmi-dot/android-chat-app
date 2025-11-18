@@ -11,11 +11,11 @@ class AppStrings {
   static const String changeEmailTitle = 'Change your email';
   static const String setUsernameTitle = 'Set your username';
 
-  static const String noAccount = "Don't have an account?";
+  static const String dontHaveAccount = "Don't have an account?";
   static const String haveAccount = 'Have an account?';
-  static const String notReceive = "Didn't receive the code?";
+  static const String didntReceive = "Didn't receive the code?";
 
-  static const String forgot = 'Forgot password?';
+  static const String forgotPassword = 'Forgot password?';
   static const String resend = 'Resend';
   static const String changeEmail = 'Change email';
   static const String save = 'Save';
@@ -36,9 +36,11 @@ class AppStrings {
   static const String noMessages = 'No messages yet';
 
   static const String noAccountMessage = 'No account found. Please register first';
-  static const String invalidMessage = 'Invalid email or password';
-  static const String takenMessage = 'Username already taken';
+  static const String invalidLoginMessage = 'Invalid email or password';
+  static const String usernameTakenMessage = 'Username already taken';
   static const String registeredMessage = 'Phone number already registered';
-  static const String expiredMessage = 'Verification code has expired';
+  static const String expiredCodeMessage = 'Verification code has expired';
   static const String invalidCodeMessage = 'Invalid verification code'; 
+  static const String successResendMessage = 'Verification code sent';
+  static const String failedResendMessage = 'Failed to send verification code. Please try again';
 }
