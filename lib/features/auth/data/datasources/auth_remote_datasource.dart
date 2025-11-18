@@ -8,13 +8,18 @@ import 'package:dio/dio.dart';
 
 abstract class AuthRemoteDataSource {
   Future<User> login(String username, String password);
-  Future<void> register(
+  Future<void> register(String phoneNumber, String email, String password);
+  Future<void> resendCode(String phoneNumber);
+  Future<User> verify(
     String phoneNumber,
-    String email,
-    String username,
+    String verificationCode,
     String password,
   );
-  Future<void> verify(String phoneNumber, String verificationCode);
+  Future<User> setProfile(
+    String? username,
+    String? displayName,
+    String? password,
+  );
   Future<User?> check();
 }
 
@@ -46,7 +51,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       throw Exception(
-        status == 401 ? AppStrings.invalidMessage : AppStrings.noAccountMessage,
+        status == 401
+            ? AppStrings.invalidLoginMessage
+            : AppStrings.noAccountMessage,
       );
     }
   }
@@ -55,45 +62,83 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> register(
     String phoneNumber,
     String email,
-    String username,
     String password,
   ) async {
     try {
       await api.post(
         '/auth/register',
         data: {
-          'username': username,
           'phoneNumber': phoneNumber,
           'email': email,
           'password': password,
         },
       );
-    } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? e.message;
-      throw Exception(
-        message == 'Username is already taken.'
-            ? AppStrings.takenMessage
-            : AppStrings.registeredMessage,
-      );
+    } on DioException {
+      throw Exception(AppStrings.registeredMessage);
     }
   }
 
   @override
-  Future<void> verify(String phoneNumber, String verificationCode) async {
+  Future<void> resendCode(String phoneNumber) async {
     try {
-      await api.post(
+      await api.post('/auth/resend', data: {'phoneNumber': phoneNumber});
+    } on DioException {
+      throw Exception(AppStrings.failedResendMessage);
+    }
+  }
+
+  @override
+  Future<User> verify(
+    String phoneNumber,
+    String verificationCode,
+    String password,
+  ) async {
+    try {
+      final response = await api.post(
         '/auth/verify',
         data: {
           'phoneNumber': phoneNumber,
           'verificationCode': verificationCode,
         },
       );
+      final data = response.data['data'];
+
+      return login(data['username'], password);
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       throw Exception(
         status == 401
             ? AppStrings.invalidCodeMessage
-            : AppStrings.expiredMessage,
+            : AppStrings.expiredCodeMessage,
+      );
+    }
+  }
+
+  @override
+  Future<User> setProfile(
+    String? username,
+    String? displayName,
+    String? password,
+  ) async {
+    final user = await getProfile();
+    final id = user.id;
+    try {
+      await api.patch(
+        '/user/$id/update',
+        data: {
+          'username': username,
+          'displayName': displayName,
+          'password': password,
+        },
+      );
+
+      return await getProfile();
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      throw Exception(
+        status == 409
+            ? AppStrings.usernameTakenMessage
+            : AppStrings.noAccountMessage,
       );
     }
   }
