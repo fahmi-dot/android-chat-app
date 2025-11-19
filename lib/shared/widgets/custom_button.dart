@@ -1,4 +1,3 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +6,6 @@ class CustomButton extends StatelessWidget {
   final double? height;
   final String text;
   final VoidCallback onPressed;
-  final CustomButtonTheme theme;
 
   const CustomButton({
     super.key,
@@ -15,7 +13,6 @@ class CustomButton extends StatelessWidget {
     required this.text,
     required this.height,
     required this.onPressed,
-    required this.theme,
   });
 
   @override
@@ -25,12 +22,12 @@ class CustomButton extends StatelessWidget {
       height: height ?? AppSizes.screenHeight(context),
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
         child: Text(
           text,
           style: TextStyle(
             fontSize: AppSizes.fontL,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             fontWeight: FontWeight.bold,
           ),
         ),

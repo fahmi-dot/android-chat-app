@@ -1,4 +1,3 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
@@ -20,13 +19,13 @@ class CustomBanner extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(80.0),
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
             ),
             padding: EdgeInsets.all(32.0),
             child: HeroIcon(
               icon,
               style: HeroIconStyle.outline,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               size: 80.0,
             ),
           ),
@@ -38,7 +37,7 @@ class CustomBanner extends StatelessWidget {
             width: AppSizes.iconL * 2,
             height: AppSizes.iconL * 2,
             decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
           ),
@@ -50,7 +49,7 @@ class CustomBanner extends StatelessWidget {
             width: AppSizes.iconXS,
             height: AppSizes.iconXS,
             decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
           ),
@@ -62,7 +61,7 @@ class CustomBanner extends StatelessWidget {
             width: AppSizes.iconXL,
             height: AppSizes.iconXL,
             decoration: BoxDecoration(
-              color: AppColors.secondary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
           ),

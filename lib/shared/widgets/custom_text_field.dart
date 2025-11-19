@@ -1,4 +1,3 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +14,6 @@ class CustomTextField extends StatefulWidget {
   final int maxLines;
   final Function(String value)? onChange;
   final CustomTextFieldType type;
-  final CustomTextFieldTheme theme;
 
   const CustomTextField({
     super.key,
@@ -29,7 +27,6 @@ class CustomTextField extends StatefulWidget {
     required this.maxLines,
     this.onChange,
     required this.type,
-    required this.theme,
   });
 
   @override
@@ -59,18 +56,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
         decoration: InputDecoration(
           hintText: widget.hintText,
           hintStyle: TextStyle(
-            color: widget.theme == CustomTextFieldTheme.light
-                ? AppColors.textSecondary
-                : AppColors.darkTextSecondary,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
         ),
         style: TextStyle(
-          color: widget.theme == CustomTextFieldTheme.light
-              ? AppColors.textPrimary
-              : AppColors.darkTextPrimary,
+          color: Theme.of(context).colorScheme.onSurface,
           fontSize: widget.fontSize,
         ),
         maxLines: widget.maxLines,
@@ -100,9 +93,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               right: AppSizes.paddingS,
             ),
       decoration: BoxDecoration(
-        color: widget.theme == CustomTextFieldTheme.light
-            ? Colors.grey[200]
-            : Colors.grey[800],
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(widget.radius),
       ),
       child: widget.type == CustomTextFieldType.password
@@ -117,6 +108,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   },
                   icon: HeroIcon(
                     _isObscure ? HeroIcons.eyeSlash : HeroIcons.eye,
+                    color: Theme.of(context).colorScheme.onSurface,
                     style: HeroIconStyle.outline,
                   ),
                 ),
@@ -128,9 +120,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 Text(
                   '+62',
                   style: TextStyle(
-                    color: widget.theme == CustomTextFieldTheme.light
-                        ? AppColors.textPrimary
-                        : AppColors.darkTextPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: widget.fontSize,
                   ),
                 ),
@@ -144,5 +134,3 @@ class _CustomTextFieldState extends State<CustomTextField> {
 }
 
 enum CustomTextFieldType { text, password, phone, email, otp }
-
-enum CustomTextFieldTheme { light, dark }
