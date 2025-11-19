@@ -1,4 +1,3 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
@@ -75,7 +74,7 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
                       Text(
                         AppStrings.changeEmailTitle,
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: AppSizes.fontXXL,
                           fontWeight: FontWeight.bold,
                         ),
@@ -89,7 +88,6 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
                         type: CustomTextFieldType.email,
-                        theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: 32.0),
                       authState.when(
@@ -100,7 +98,6 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
                               height: AppSizes.screenHeight(context) * 0.07,
                               text: AppStrings.save.toUpperCase(),
                               onPressed: _changeEmail,
-                              theme: CustomButtonTheme.light,
                             ),
                           ],
                         ),
@@ -108,7 +105,6 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
                           height: AppSizes.screenHeight(context) * 0.07,
                           text: AppStrings.save.toUpperCase(),
                           onPressed: _changeEmail,
-                          theme: CustomButtonTheme.light,
                         ),
                       ),
                       const SizedBox(height: AppSizes.paddingM),
@@ -117,7 +113,7 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
                         child: Text(
                           AppStrings.cancel,
                           style: TextStyle(
-                            color: AppColors.secondary,
+                            color: Theme.of(context).colorScheme.secondary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

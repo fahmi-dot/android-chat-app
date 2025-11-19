@@ -1,4 +1,3 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
@@ -63,13 +62,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           final message = e.toString().replaceFirst("Exception: ", "");
 
           Flushbar(
-            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Colors.white),
+            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Theme.of(context).colorScheme.onError),
             message: message,
             margin: EdgeInsets.symmetric(
               vertical: AppSizes.paddingM,
               horizontal: 32.0,
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
             borderRadius: BorderRadius.circular(AppSizes.radiusM),
             flushbarPosition: FlushbarPosition.TOP,
             duration: Duration(seconds: 2),
@@ -95,7 +94,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       Text(
                         AppStrings.registerTitle,
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: AppSizes.fontXXL,
                           fontWeight: FontWeight.bold,
                         ),
@@ -109,7 +108,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
                         type: CustomTextFieldType.phone,
-                        theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: AppSizes.paddingM),
                       CustomTextField(
@@ -120,7 +118,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
                         type: CustomTextFieldType.email,
-                        theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: AppSizes.paddingM),
                       CustomTextField(
@@ -131,7 +128,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
                         type: CustomTextFieldType.password,
-                        theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: AppSizes.paddingM),
                       CustomTextField(
@@ -142,7 +138,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
                         type: CustomTextFieldType.password,
-                        theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: 32.0),
                       authState.when(
@@ -153,7 +148,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               height: AppSizes.screenHeight(context) * 0.07,
                               text: AppStrings.register.toUpperCase(),
                               onPressed: _register,
-                              theme: CustomButtonTheme.light,
                             ),
                           ],
                         ),
@@ -161,7 +155,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           height: AppSizes.screenHeight(context) * 0.07,
                           text: AppStrings.register.toUpperCase(),
                           onPressed: _register,
-                          theme: CustomButtonTheme.light,
                         ),
                       ),
                     ],
@@ -177,14 +170,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 Text(
                   AppStrings.haveAccount,
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 ),
                 TextButton(
                   onPressed: () => context.pop(),
                   child: Text(
                     AppStrings.login,
                     style: TextStyle(
-                      color: AppColors.secondary,
+                      color: Theme.of(context).colorScheme.secondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

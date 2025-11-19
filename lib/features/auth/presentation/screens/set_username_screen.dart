@@ -1,4 +1,3 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
@@ -61,7 +60,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                       Text(
                         AppStrings.setUsernameTitle,
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: AppSizes.fontXXL,
                           fontWeight: FontWeight.bold,
                         ),
@@ -75,7 +74,6 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
                         type: CustomTextFieldType.text,
-                        theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: 32.0),
                       authState.when(
@@ -86,7 +84,6 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                               height: AppSizes.screenHeight(context) * 0.07,
                               text: AppStrings.save.toUpperCase(),
                               onPressed: _setUsername,
-                              theme: CustomButtonTheme.light,
                             ),
                           ],
                         ),
@@ -94,7 +91,6 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                           height: AppSizes.screenHeight(context) * 0.07,
                           text: AppStrings.save.toUpperCase(),
                           onPressed: _setUsername,
-                          theme: CustomButtonTheme.light,
                         ),
                       ),
                       const SizedBox(height: AppSizes.paddingM),
@@ -103,7 +99,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                         child: Text(
                           AppStrings.skip,
                           style: TextStyle(
-                            color: AppColors.secondary,
+                            color: Theme.of(context).colorScheme.secondary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

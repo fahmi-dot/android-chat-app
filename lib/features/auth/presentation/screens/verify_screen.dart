@@ -1,4 +1,3 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
@@ -68,13 +67,13 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
         : 'Failed to send verification code. Please try again';
 
     Flushbar(
-      icon: HeroIcon(HeroIcons.exclamationTriangle, color: Colors.white),
+      icon: HeroIcon(HeroIcons.exclamationTriangle, color: Theme.of(context).colorScheme.onError),
       message: message,
       margin: EdgeInsets.symmetric(
         vertical: AppSizes.paddingM,
         horizontal: 32.0,
       ),
-      backgroundColor: AppColors.error,
+      backgroundColor: Theme.of(context).colorScheme.error,
       borderRadius: BorderRadius.circular(AppSizes.radiusM),
       flushbarPosition: FlushbarPosition.TOP,
       duration: Duration(seconds: 2),
@@ -102,13 +101,13 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
           final message = e.toString().replaceFirst("Exception: ", "");
 
           Flushbar(
-            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Colors.white),
+            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Theme.of(context).colorScheme.onError),
             message: message,
             margin: EdgeInsets.symmetric(
               vertical: AppSizes.paddingM,
               horizontal: 32.0,
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
             borderRadius: BorderRadius.circular(AppSizes.radiusM),
             flushbarPosition: FlushbarPosition.TOP,
             duration: Duration(seconds: 2),
@@ -134,7 +133,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                       Text(
                         AppStrings.verifyTitle,
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: AppSizes.fontXXL,
                           fontWeight: FontWeight.bold,
                         ),
@@ -145,7 +144,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                             ? AppStrings.verifySubtitle + widget.email
                             : AppStrings.verifySubtitle + newEmail!,
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: AppSizes.fontL,
                         ),
                       ),
@@ -176,7 +175,6 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                               }
                             },
                             type: CustomTextFieldType.otp,
-                            theme: CustomTextFieldTheme.light,
                           ),
                         ),
                       ),
@@ -186,14 +184,14 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                         children: [
                           Text(
                             AppStrings.didntReceive,
-                            style: TextStyle(color: AppColors.textPrimary),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                           ),
                           TextButton(
                             onPressed: _resendCode,
                             child: Text(
                               AppStrings.resend,
                               style: TextStyle(
-                                color: AppColors.secondary,
+                                color: Theme.of(context).colorScheme.secondary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -209,7 +207,6 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                               height: AppSizes.screenHeight(context) * 0.07,
                               text: AppStrings.verify.toUpperCase(),
                               onPressed: _verify,
-                              theme: CustomButtonTheme.light,
                             ),
                           ],
                         ),
@@ -217,7 +214,6 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                           height: AppSizes.screenHeight(context) * 0.07,
                           text: AppStrings.verify.toUpperCase(),
                           onPressed: _verify,
-                          theme: CustomButtonTheme.light,
                         ),
                       ),
                       const SizedBox(height: AppSizes.paddingM),
@@ -226,7 +222,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                         child: Text(
                           AppStrings.changeEmail,
                           style: TextStyle(
-                            color: AppColors.secondary,
+                            color: Theme.of(context).colorScheme.secondary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

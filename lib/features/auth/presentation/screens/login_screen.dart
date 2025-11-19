@@ -1,4 +1,3 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
@@ -54,13 +53,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           final message = e.toString().replaceFirst("Exception: ", "");
 
           Flushbar(
-            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Colors.white),
+            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Theme.of(context).colorScheme.onError),
             message: message,
             margin: EdgeInsets.symmetric(
               vertical: AppSizes.paddingM,
               horizontal: 32.0,
             ),
-            backgroundColor: AppColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
             borderRadius: BorderRadius.circular(AppSizes.radiusM),
             flushbarPosition: FlushbarPosition.TOP,
             duration: Duration(seconds: 2),
@@ -86,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Text(
                         AppStrings.loginTitle,
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: AppSizes.fontXXL,
                           fontWeight: FontWeight.bold,
                         ),
@@ -100,7 +99,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
                         type: CustomTextFieldType.text,
-                        theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: AppSizes.paddingM),
                       CustomTextField(
@@ -111,7 +109,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         fontSize: AppSizes.fontL,
                         maxLines: 1,
                         type: CustomTextFieldType.password,
-                        theme: CustomTextFieldTheme.light,
                       ),
                       const SizedBox(height: 32.0),
                       authState.when(
@@ -122,7 +119,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               height: AppSizes.screenHeight(context) * 0.07,
                               text: AppStrings.login.toUpperCase(),
                               onPressed: _login,
-                              theme: CustomButtonTheme.light,
                             ),
                           ],
                         ),
@@ -130,7 +126,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           height: AppSizes.screenHeight(context) * 0.07,
                           text: AppStrings.login.toUpperCase(),
                           onPressed: _login,
-                          theme: CustomButtonTheme.light,
                         ),
                       ),
                       const SizedBox(height: AppSizes.paddingM),
@@ -138,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed: () {},
                         child: Text(
                           AppStrings.forgotPassword,
-                          style: TextStyle(color: AppColors.secondary),
+                          style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                         ),
                       ),
                     ],
@@ -154,14 +149,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 Text(
                   AppStrings.dontHaveAccount,
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 ),
                 TextButton(
                   onPressed: () => context.push('/register'),
                   child: Text(
                     AppStrings.register,
                     style: TextStyle(
-                      color: AppColors.secondary,
+                      color: Theme.of(context).colorScheme.secondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
