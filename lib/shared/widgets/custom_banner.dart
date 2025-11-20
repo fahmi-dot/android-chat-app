@@ -18,8 +18,10 @@ class CustomBanner extends StatelessWidget {
           alignment: Alignment.center,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(80.0),
-              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.secondary.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.1
+              ),
+              shape: BoxShape.circle,
             ),
             padding: EdgeInsets.all(32.0),
             child: HeroIcon(
@@ -37,7 +39,9 @@ class CustomBanner extends StatelessWidget {
             width: AppSizes.iconL * 2,
             height: AppSizes.iconL * 2,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.secondary.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.1
+              ),
               shape: BoxShape.circle,
             ),
           ),
@@ -49,7 +53,9 @@ class CustomBanner extends StatelessWidget {
             width: AppSizes.iconXS,
             height: AppSizes.iconXS,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.secondary.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.1
+              ),
               shape: BoxShape.circle,
             ),
           ),
@@ -61,7 +67,9 @@ class CustomBanner extends StatelessWidget {
             width: AppSizes.iconXL,
             height: AppSizes.iconXL,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+              color: Theme.of(context).colorScheme.secondary.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.1
+              ),
               shape: BoxShape.circle,
             ),
           ),
