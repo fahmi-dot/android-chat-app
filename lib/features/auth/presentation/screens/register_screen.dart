@@ -3,8 +3,8 @@ import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
+import 'package:android_chat_app/shared/widgets/custom_notification.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
-import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,18 +61,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         error: (e, _) {
           final message = e.toString().replaceFirst("Exception: ", "");
 
-          Flushbar(
-            icon: HeroIcon(HeroIcons.exclamationTriangle, color: Theme.of(context).colorScheme.onError),
-            message: message,
-            margin: EdgeInsets.symmetric(
-              vertical: AppSizes.paddingM,
-              horizontal: 32.0,
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            borderRadius: BorderRadius.circular(AppSizes.radiusM),
-            flushbarPosition: FlushbarPosition.TOP,
-            duration: Duration(seconds: 2),
-          ).show(context);
+          showCustomNotification(
+            context,
+            HeroIcons.exclamationTriangle,
+            message,
+          );
         },
       );
     });
