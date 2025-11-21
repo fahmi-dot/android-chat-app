@@ -11,6 +11,11 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User> login(String username, String password) async {
     return await authRemoteDataSource.login(username, password);
   }
+
+  @override
+  Future<void> forgotPassword(String email) async {
+    return await authRemoteDataSource.forgotPassword(email);
+  }
   
   @override
   Future<void> register(String phoneNumber, String email, String password) async {

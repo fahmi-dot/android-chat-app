@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:android_chat_app/core/network/ws_client.dart';
+import 'package:android_chat_app/core/utils/token_holder.dart';
+import 'package:android_chat_app/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/register_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/resend_code_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/set_username_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/verify_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:android_chat_app/core/utils/token_holder.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/check_usecase.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
@@ -36,6 +37,11 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return LoginUseCase(repository);
+});
+
+final forgotPasswordUseCaseProvide = Provider<ForgotPasswordUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return ForgotPasswordUseCase(repository);
 });
 
 final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
@@ -86,6 +92,22 @@ class AuthNotifier extends AsyncNotifier<User?> {
           .execute(username, password);
 
       state = AsyncData(user);
+      return true;
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
+      return false;
+    }
+  }
+
+  Future<bool> forgotPassword(String email) async {
+    state = const AsyncLoading();
+
+    try {
+      if (email.isEmpty) throw Exception('Please enter email');
+
+      await ref.read(forgotPasswordUseCaseProvide).execute(email);
+
+      state = AsyncData(null);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
@@ -180,8 +202,13 @@ class AuthNotifier extends AsyncNotifier<User?> {
   }
 
   Future<void> logout() async {
-    TokenHolder.deleteTokens();
-    ref.read(wsClientProvider).disconnect();
-    state = const AsyncData(null);
+    try {
+      await TokenHolder.deleteTokens();
+      ref.read(wsClientProvider).disconnect();
+
+      state = AsyncData(null);
+    } catch (e, trace) {
+      state = AsyncError(e, trace); 
+    }
   }
 }

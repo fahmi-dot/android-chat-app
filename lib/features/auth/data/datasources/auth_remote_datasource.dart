@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 
 abstract class AuthRemoteDataSource {
   Future<User> login(String username, String password);
+  Future<void> forgotPassword(String email);
   Future<void> register(String phoneNumber, String email, String password);
   Future<void> resendCode(String phoneNumber);
   Future<User> verify(
@@ -55,6 +56,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             ? AppStrings.invalidLoginMessage
             : AppStrings.noAccountMessage,
       );
+    }
+  }
+
+  @override
+  Future<void> forgotPassword(String email) async {
+    try {
+      await api.post('/auth/forgot', data: {'email': email});
+    } on DioException {
+      throw Exception();
     }
   }
 
