@@ -1,4 +1,5 @@
 import 'package:android_chat_app/features/auth/presentation/screens/change_email_screen.dart';
+import 'package:android_chat_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/set_username_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/verify_screen.dart';
@@ -12,6 +13,7 @@ class Routes {
   static const splash = '/';
   static const login = '/login';
   static const register = '/register';
+  static const forgot = '/forgot';
   static const verify = '/verify/:phoneNumber';
   static const changeEmail = '/change/email';
   static const setUsername = '/set/username';
@@ -33,6 +35,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: Routes.register,
       builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: Routes.forgot,
+      builder: (context, state) => const ForgotPasswordScreen(),
     ),
     GoRoute(
       path: Routes.verify,
