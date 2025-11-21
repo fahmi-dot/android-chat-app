@@ -1,26 +1,33 @@
 class AppStrings {
   static const String appName = 'Hello!';
 
-  static const String login = 'Login';
-  static const String loginTitle = 'Login to your account';
-  static const String register = 'Register';
+  static const String loginTitle = 'Sign in to your account';
+  static const String loginSubtitle = 'Enter your username and password to sign in';
   static const String registerTitle = 'Create an account';
-  static const String verify = 'Verify';
-  static const String verifyTitle = 'Verify your account';
-  static const String verifySubtitle = 'Please enter the 4 digit code sent to ';
+  static const String registerSubtitle = 'Sign up to get started';
+  static const String forgotPasswordTitle = "Forgot password";
+  static const String forgotPasswordSubtitle = "Please enter your email";
+  static const String verifyTitle = 'Check your email';
+  static const String verifySubtitle = 'Please enter the 4 digit code we sent to ';
   static const String changeEmailTitle = 'Change your email';
+  static const String changeEmailSubtitle = 'Please enter your new email';
   static const String setUsernameTitle = 'Set your username';
+  static const String setUsernameSubtitle = 'Create a new username to sign in later';
 
   static const String dontHaveAccount = "Don't have an account?";
   static const String haveAccount = 'Have an account?';
   static const String didntReceive = "Didn't receive the code?";
 
+  static const String login = 'Sign in';
+  static const String register = 'Sign up';
   static const String forgotPassword = 'Forgot password?';
-  static const String resend = 'Resend';
+  static const String verify = 'Verify';
   static const String changeEmail = 'Change email';
+  static const String resend = 'Resend';
+  static const String skip = 'Skip for now';
+  static const String confirm = 'Confirm';
   static const String save = 'Save';
   static const String cancel = 'Cancel';
-  static const String skip = 'Skip for now';
 
   static const String phoneNumber = 'Phone number';
   static const String email = 'Email';
