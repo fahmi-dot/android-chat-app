@@ -10,8 +10,8 @@ class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
     this.width,
+    this.height,
     required this.text,
-    required this.height,
     required this.onPressed,
   });
 
@@ -19,16 +19,19 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? AppSizes.screenWidth(context),
-      height: height ?? AppSizes.screenHeight(context),
+      height: height ?? AppSizes.screenHeight(context) * 0.06,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        ),
         child: Text(
           text,
-          style: TextStyle(
-            fontSize: AppSizes.fontL,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
             color: Theme.of(context).colorScheme.onPrimary,
-            fontWeight: FontWeight.bold,
           ),
         ),
       ),
