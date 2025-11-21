@@ -4,12 +4,14 @@ class AppSizes {
   static double screenWidth(BuildContext context) => MediaQuery.of(context).size.width;
   static double screenHeight(BuildContext context) => MediaQuery.of(context).size.height;
 
-  static const double fontXS = 9.0;
+  static const double fontXS = 11.0;
   static const double fontS = 12.0;
   static const double fontM = 14.0;
   static const double fontL = 16.0;
-  static const double fontXL = 18.0;
-  static const double fontXXL = 20.0;
+  static const double fontXL = 20.0;
+  static const double font2XL = 24.0;
+  static const double font3XL = 28.0;
+  static const double font4XL = 32.0;
 
   static const double iconXS = 16.0;
   static const double iconS = 20.0;
