@@ -1,3 +1,4 @@
+import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:android_chat_app/core/constants/app_colors.dart';
@@ -5,8 +6,56 @@ import 'package:android_chat_app/core/constants/app_colors.dart';
 class AppTheme {
   static final ThemeData _base = ThemeData(
     useMaterial3: true,
-    fontFamily: GoogleFonts.montserrat().fontFamily,
-    textTheme: GoogleFonts.montserratTextTheme(ThemeData().textTheme),
+    textTheme: GoogleFonts.montserratTextTheme().copyWith(
+      headlineLarge: GoogleFonts.montserrat(
+        fontSize: AppSizes.font4XL,
+        fontWeight: FontWeight.w700,
+      ),
+      headlineMedium: GoogleFonts.montserrat(
+        fontSize: AppSizes.font3XL,
+        fontWeight: FontWeight.w700,
+      ),
+      headlineSmall: GoogleFonts.montserrat(
+        fontSize: AppSizes.font2XL,
+        fontWeight: FontWeight.w700,
+      ),
+      titleLarge: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontXL,
+        fontWeight: FontWeight.w700,
+      ),
+      titleMedium: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontL,
+        fontWeight: FontWeight.w700,
+      ),
+      titleSmall: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontM,
+        fontWeight: FontWeight.w700,
+      ),
+      bodyLarge: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontL,
+        fontWeight: FontWeight.w400,
+      ),
+      bodyMedium: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontM,
+        fontWeight: FontWeight.w400,
+      ),
+      bodySmall: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontS,
+        fontWeight: FontWeight.w400,
+      ),
+      labelLarge: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontM,
+        fontWeight: FontWeight.w500,
+      ),
+      labelMedium: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontS,
+        fontWeight: FontWeight.w500,
+      ),
+      labelSmall: GoogleFonts.montserrat(
+        fontSize: AppSizes.fontXS,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
     appBarTheme: const AppBarTheme(
       centerTitle: false,
       elevation: 0,
