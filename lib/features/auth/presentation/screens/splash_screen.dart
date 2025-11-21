@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,6 +45,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text("This is splash screen.")));
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Image.asset(
+            'assets/icons/icon_hello.png',
+            width: AppSizes.screenWidth(context) * 0.5,
+          ),
+        ),
+      ),
+    );
   }
 }
