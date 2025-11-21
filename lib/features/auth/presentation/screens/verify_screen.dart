@@ -4,6 +4,7 @@ import 'package:android_chat_app/features/auth/presentation/providers/auth_provi
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_notification.dart';
+import 'package:android_chat_app/shared/widgets/custom_text_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,125 +104,111 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
     });
 
     return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Expanded(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CustomBanner(icon: HeroIcons.shieldExclamation),
-                      const SizedBox(height: 32.0),
-                      Text(
-                        AppStrings.verifyTitle,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: AppSizes.fontXXL,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 32.0),
-                      Text(
-                        newEmail == null
-                            ? AppStrings.verifySubtitle + widget.email
-                            : AppStrings.verifySubtitle + newEmail!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: AppSizes.fontL,
-                        ),
-                      ),
-                      const SizedBox(height: AppSizes.paddingXL),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(
-                          4,
-                          (index) => CustomTextField(
-                            width: AppSizes.screenHeight(context) * 0.07,
-                            height: AppSizes.screenHeight(context) * 0.07,
-                            radius: AppSizes.radiusL,
-                            controller: _controllers[index],
-                            focusNode: _focusNodes[index],
-                            fontSize: AppSizes.fontXXL,
-                            maxLines: 1,
-                            onChange: (value) {
-                              if (value.isNotEmpty) {
-                                if (index < 3) {
-                                  _focusNodes[index + 1].requestFocus();
-                                } else {
-                                  _focusNodes[index].unfocus();
-                                }
-                              } else {
-                                if (index > 0) {
-                                  _focusNodes[index - 1].requestFocus();
-                                }
-                              }
-                            },
-                            type: CustomTextFieldType.otp,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppSizes.paddingM),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            AppStrings.didntReceive,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: _resendCode,
-                            child: Text(
-                              AppStrings.resend,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.secondary,
-                                fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomBanner(icon: HeroIcons.shieldExclamation),
+                        const SizedBox(height: 32.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              AppStrings.verifyTitle,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                color: Theme.of(context,).colorScheme.onSurface,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSizes.paddingM),
-                      authState.when(
-                        loading: () => const CircularProgressIndicator(),
-                        error: (e, _) => Column(
-                          children: [
-                            CustomButton(
-                              height: AppSizes.screenHeight(context) * 0.07,
-                              text: AppStrings.verify.toUpperCase(),
-                              onPressed: _verify,
+                            const SizedBox(height: AppSizes.paddingL),
+                            Text(
+                              newEmail == null
+                                  ? AppStrings.verifySubtitle + widget.email
+                                  : AppStrings.verifySubtitle + newEmail!,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context,).colorScheme.onSurface,
+                              ),
                             ),
                           ],
                         ),
-                        data: (user) => CustomButton(
-                          height: AppSizes.screenHeight(context) * 0.07,
-                          text: AppStrings.verify.toUpperCase(),
-                          onPressed: _verify,
-                        ),
-                      ),
-                      const SizedBox(height: AppSizes.paddingM),
-                      TextButton(
-                        onPressed: _changeEmail,
-                        child: Text(
-                          AppStrings.changeEmail,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(height: 32.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(
+                            4,
+                            (index) => CustomTextField(
+                              width: AppSizes.screenHeight(context) * 0.06,
+                              controller: _controllers[index],
+                              focusNode: _focusNodes[index],
+                              showHint: false,
+                              maxLines: 1,
+                              onChange: (value) {
+                                if (value.isNotEmpty) {
+                                  if (index < 3) {
+                                    _focusNodes[index + 1].requestFocus();
+                                  } else {
+                                    _focusNodes[index].unfocus();
+                                  }
+                                } else {
+                                  if (index > 0) {
+                                    _focusNodes[index - 1].requestFocus();
+                                  }
+                                }
+                              },
+                              type: CustomTextFieldType.otp,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: AppSizes.paddingM),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              AppStrings.didntReceive,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            CustomTextButton(
+                              text: AppStrings.resend,
+                              onPressed: () => _resendCode(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSizes.paddingM),
+                        authState.when(
+                          loading: () => const CircularProgressIndicator(),
+                          error: (e, _) => CustomButton(
+                            text: AppStrings.verify.toUpperCase(),
+                            onPressed: _verify,
+                          ),
+                          data: (user) => CustomButton(
+                            text: AppStrings.verify.toUpperCase(),
+                            onPressed: _verify,
+                          ),
+                        ),
+                        const SizedBox(height: AppSizes.paddingM),
+                        CustomTextButton(
+                          text: AppStrings.changeEmail,
+                          onPressed: () => _changeEmail(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

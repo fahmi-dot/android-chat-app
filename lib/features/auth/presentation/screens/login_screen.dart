@@ -4,6 +4,7 @@ import 'package:android_chat_app/core/theme/theme_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_notification.dart';
+import 'package:android_chat_app/shared/widgets/custom_text_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,140 +64,120 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Expanded(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: SizedBox(
-                        width: AppSizes.screenWidth(context),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+      body: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () => ref.read(themeProvider.notifier).toggle(),
+                            child: Image.asset(
+                              Theme.of(context).brightness != Brightness.dark 
+                                  ? 'assets/icons/icon_hello_light.png'
+                                  : 'assets/icons/icon_hello_dark.png', 
+                              width: AppSizes.screenWidth(context) * 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface,
-                                shape: BoxShape.circle,
+                            CustomBanner(icon: HeroIcons.user),
+                            const SizedBox(height: 32.0),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  AppStrings.loginTitle,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                    color: Theme.of(context,).colorScheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSizes.paddingL),
+                                Text(
+                                  AppStrings.loginSubtitle,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color:Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 32.0),
+                            CustomTextField(
+                              controller: _usernameController,
+                              hintText: AppStrings.username,
+                              maxLines: 1,
+                              type: CustomTextFieldType.text,
+                            ),
+                            const SizedBox(height: AppSizes.paddingM),
+                            CustomTextField(
+                              controller: _passwordController,
+                              hintText: AppStrings.password,
+                              maxLines: 1,
+                              type: CustomTextFieldType.password,
+                            ),
+                            const SizedBox(height: 32.0),
+                            authState.when(
+                              loading: () => const CircularProgressIndicator(),
+                              error: (e, _) => CustomButton(
+                                text: AppStrings.login.toUpperCase(),
+                                onPressed: _login,
                               ),
-                              child: IconButton(
-                                onPressed: () =>
-                                    ref.read(themeProvider.notifier).toggle(),
-                                icon: HeroIcon(
-                                  Theme.of(context).brightness !=
-                                          Brightness.dark
-                                      ? HeroIcons.moon
-                                      : HeroIcons.sun,
-                                  color: Theme.of(context).colorScheme.onSurface,
-                                  style: HeroIconStyle.solid,
+                              data: (user) => CustomButton(
+                                text: AppStrings.login.toUpperCase(),
+                                onPressed: _login,
+                              ),
+                            ),
+                            const SizedBox(height: AppSizes.paddingM),
+                            TextButton(
+                              onPressed: () => context.push('/forgot'),
+                              child: Text(
+                                AppStrings.forgotPassword,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.secondary,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    SizedBox(height: 32.0),
-                    Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomBanner(icon: HeroIcons.user),
-                          const SizedBox(height: 32.0),
-                          Text(
-                            AppStrings.loginTitle,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              fontSize: AppSizes.fontXXL,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 32.0),
-                          CustomTextField(
-                            height: AppSizes.screenHeight(context) * 0.07,
-                            radius: AppSizes.radiusXXL,
-                            controller: _usernameController,
-                            hintText: AppStrings.username,
-                            fontSize: AppSizes.fontL,
-                            maxLines: 1,
-                            type: CustomTextFieldType.text,
-                          ),
-                          const SizedBox(height: AppSizes.paddingM),
-                          CustomTextField(
-                            height: AppSizes.screenHeight(context) * 0.07,
-                            radius: AppSizes.radiusXXL,
-                            controller: _passwordController,
-                            hintText: AppStrings.password,
-                            fontSize: AppSizes.fontL,
-                            maxLines: 1,
-                            type: CustomTextFieldType.password,
-                          ),
-                          const SizedBox(height: 32.0),
-                          authState.when(
-                            loading: () => const CircularProgressIndicator(),
-                            error: (e, _) => Column(
-                              children: [
-                                CustomButton(
-                                  height: AppSizes.screenHeight(context) * 0.07,
-                                  text: AppStrings.login.toUpperCase(),
-                                  onPressed: _login,
-                                ),
-                              ],
-                            ),
-                            data: (user) => CustomButton(
-                              height: AppSizes.screenHeight(context) * 0.07,
-                              text: AppStrings.login.toUpperCase(),
-                              onPressed: _login,
-                            ),
-                          ),
-                          const SizedBox(height: AppSizes.paddingM),
-                          TextButton(
-                            onPressed: () => context.push('/forgot'),
-                            child: Text(
-                              AppStrings.forgotPassword,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSizes.fontS),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  AppStrings.dontHaveAccount,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/register'),
-                  child: Text(
-                    AppStrings.register,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary,
-                      fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.paddingXS),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    AppStrings.dontHaveAccount,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                ),
-              ],
+                  CustomTextButton(
+                    text: AppStrings.register,
+                    onPressed: () => context.push('/register'),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

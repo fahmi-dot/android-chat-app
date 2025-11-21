@@ -4,6 +4,7 @@ import 'package:android_chat_app/features/auth/presentation/providers/auth_provi
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_notification.dart';
+import 'package:android_chat_app/shared/widgets/custom_text_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,114 +72,106 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Expanded(
-            child: Center(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CustomBanner(icon: HeroIcons.identification),
-                      const SizedBox(height: 32.0),
-                      Text(
-                        AppStrings.registerTitle,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: AppSizes.fontXXL,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 32.0),
-                      CustomTextField(
-                        height: AppSizes.screenHeight(context) * 0.07,
-                        radius: AppSizes.radiusXXL,
-                        controller: _phoneNumberController,
-                        hintText: AppStrings.phoneNumber,
-                        fontSize: AppSizes.fontL,
-                        maxLines: 1,
-                        type: CustomTextFieldType.phone,
-                      ),
-                      const SizedBox(height: AppSizes.paddingM),
-                      CustomTextField(
-                        height: AppSizes.screenHeight(context) * 0.07,
-                        radius: AppSizes.radiusXXL,
-                        controller: _emailController,
-                        hintText: AppStrings.email,
-                        fontSize: AppSizes.fontL,
-                        maxLines: 1,
-                        type: CustomTextFieldType.email,
-                      ),
-                      const SizedBox(height: AppSizes.paddingM),
-                      CustomTextField(
-                        height: AppSizes.screenHeight(context) * 0.07,
-                        radius: AppSizes.radiusXXL,
-                        controller: _passwordController,
-                        hintText: AppStrings.password,
-                        fontSize: AppSizes.fontL,
-                        maxLines: 1,
-                        type: CustomTextFieldType.password,
-                      ),
-                      const SizedBox(height: AppSizes.paddingM),
-                      CustomTextField(
-                        height: AppSizes.screenHeight(context) * 0.07,
-                        radius: AppSizes.radiusXXL,
-                        controller: _cPasswordController,
-                        hintText: AppStrings.cPassword,
-                        fontSize: AppSizes.fontL,
-                        maxLines: 1,
-                        type: CustomTextFieldType.password,
-                      ),
-                      const SizedBox(height: 32.0),
-                      authState.when(
-                        loading: () => const CircularProgressIndicator(),
-                        error: (e, _) => Column(
+      body: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CustomBanner(icon: HeroIcons.identification),
+                        const SizedBox(height: 32.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            CustomButton(
-                              height: AppSizes.screenHeight(context) * 0.07,
-                              text: AppStrings.register.toUpperCase(),
-                              onPressed: _register,
+                            Text(
+                              AppStrings.registerTitle,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                color: Theme.of(context,).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: AppSizes.paddingL),
+                            Text(
+                              AppStrings.registerSubtitle,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context,).colorScheme.onSurface,
+                              ),
                             ),
                           ],
                         ),
-                        data: (user) => CustomButton(
-                          height: AppSizes.screenHeight(context) * 0.07,
-                          text: AppStrings.register.toUpperCase(),
-                          onPressed: _register,
+                        const SizedBox(height: 32.0),
+                        CustomTextField(
+                          controller: _phoneNumberController,
+                          hintText: AppStrings.phoneNumber,
+                          maxLines: 1,
+                          type: CustomTextFieldType.phone,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: AppSizes.paddingM),
+                        CustomTextField(
+                          controller: _emailController,
+                          hintText: AppStrings.email,
+                          maxLines: 1,
+                          type: CustomTextFieldType.email,
+                        ),
+                        const SizedBox(height: AppSizes.paddingM),
+                        CustomTextField(
+                          controller: _passwordController,
+                          hintText: AppStrings.password,
+                          maxLines: 1,
+                          type: CustomTextFieldType.password,
+                        ),
+                        const SizedBox(height: AppSizes.paddingM),
+                        CustomTextField(
+                          controller: _cPasswordController,
+                          hintText: AppStrings.cPassword,
+                          maxLines: 1,
+                          type: CustomTextFieldType.password,
+                        ),
+                        const SizedBox(height: 32.0),
+                        authState.when(
+                          loading: () => const CircularProgressIndicator(),
+                          error: (e, _) => CustomButton(
+                            text: AppStrings.register.toUpperCase(),
+                            onPressed: _register,
+                          ),
+                          data: (user) => CustomButton(
+                            text: AppStrings.register.toUpperCase(),
+                            onPressed: _register,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSizes.fontS),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  AppStrings.haveAccount,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                ),
-                TextButton(
-                  onPressed: () => context.pop(),
-                  child: Text(
-                    AppStrings.login,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.secondary,
-                      fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.fontS),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    AppStrings.haveAccount,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                ),
-              ],
+                  CustomTextButton(
+                    text: AppStrings.login,
+                    onPressed: () => context.push('/login'),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
