@@ -82,8 +82,8 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
                         const SizedBox(height: 32.0),
                         CustomTextField(
                           controller: _controller,
-                          hintText: AppStrings.username,
-                          maxLines: 1,
+                          text: AppStrings.username,
+                          showLabel: true,
                           type: CustomTextFieldType.text,
                         ),
                         const SizedBox(height: 32.0),

@@ -149,8 +149,6 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                               width: AppSizes.screenHeight(context) * 0.06,
                               controller: _controllers[index],
                               focusNode: _focusNodes[index],
-                              showHint: false,
-                              maxLines: 1,
                               onChange: (value) {
                                 if (value.isNotEmpty) {
                                   if (index < 3) {

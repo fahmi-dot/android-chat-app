@@ -81,8 +81,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         const SizedBox(height: 32.0),
                         CustomTextField(
                           controller: _controller,
-                          hintText: AppStrings.email,
-                          maxLines: 1,
+                          text: AppStrings.email,
+                          showLabel: true,
                           type: CustomTextFieldType.email,
                         ),
                         const SizedBox(height: 32.0),
