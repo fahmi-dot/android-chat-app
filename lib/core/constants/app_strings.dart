@@ -3,6 +3,7 @@ class AppStrings {
 
   static const String loginTitle = 'Sign in to your account';
   static const String loginSubtitle = 'Enter your username and password to sign in';
+  static const String logoutTitle = 'Are you sure want to sign out?';
   static const String registerTitle = 'Create an account';
   static const String registerSubtitle = 'Sign up to get started';
   static const String forgotPasswordTitle = "Forgot password";
@@ -19,15 +20,17 @@ class AppStrings {
   static const String didntReceive = "Didn't receive the code?";
 
   static const String login = 'Sign in';
+  static const String logout = 'Sign out';
   static const String register = 'Sign up';
-  static const String forgotPassword = 'Forgot password?';
   static const String verify = 'Verify';
-  static const String changeEmail = 'Change email';
-  static const String resend = 'Resend';
-  static const String skip = 'Skip for now';
   static const String confirm = 'Confirm';
   static const String save = 'Save';
   static const String cancel = 'Cancel';
+
+  static const String forgotPassword = 'Forgot password?';
+  static const String changeEmail = 'Change email';
+  static const String resend = 'Resend';
+  static const String skip = 'Skip for now';
 
   static const String phoneNumber = 'Phone number';
   static const String email = 'Email';
