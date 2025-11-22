@@ -1,8 +1,8 @@
-import 'package:android_chat_app/core/constants/app_colors.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_room_provider.dart';
+import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
@@ -71,7 +71,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
               backgroundImage: roomDetail?.avatarUrl != null
                   ? NetworkImage(roomDetail!.avatarUrl)
                   : null,
-              backgroundColor: AppColors.background,
+              backgroundColor: Theme.of(context).colorScheme.surface,
             ),
             const SizedBox(width: AppSizes.paddingM),
             Expanded(
@@ -80,23 +80,18 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 children: [
                   Text(
                     roomDetail?.displayName ?? 'User',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: AppSizes.fontL,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: AppSizes.paddingXS),
-                  const Text(
+                  Text(
                     'Online',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: AppSizes.fontS,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -128,8 +123,13 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           Expanded(
             child: chatRoomState.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) =>
-                  Center(child: Text('Error loading messages: $e')),
+              error: (e, _) => Center(
+                child: Text('Error loading messages: $e',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                )
+              ),
               data: (messages) {
                 if (messages == null || messages.isEmpty) {
                   return Center(
@@ -139,16 +139,14 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                         HeroIcon(
                           HeroIcons.chatBubbleLeftEllipsis,
                           style: HeroIconStyle.solid,
-                          color: AppColors.textPrimary.withValues(alpha: 0.2),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                           size: 80.0,
                         ),
                         const SizedBox(height: AppSizes.paddingM),
                         Text(
                           AppStrings.noMessages,
-                          style: TextStyle(
-                            color: AppColors.textPrimary.withValues(alpha: 0.4),
-                            fontSize: AppSizes.fontL,
-                            fontWeight: FontWeight.bold,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                           ),
                         ),
                       ],
@@ -187,24 +185,24 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                           ),
                           decoration: BoxDecoration(
                             color: isMe
-                                ? AppColors.primary
-                                : AppColors.secondary.withValues(alpha: 0.1),
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(
                                 sameAsPrev && !isMe && isLast
                                     ? 4
-                                    : AppSizes.radiusL,
+                                    : AppSizes.radiusM,
                               ),
                               topRight: Radius.circular(
                                 sameAsPrev && isMe && isLast
                                     ? 4
-                                    : AppSizes.radiusL,
+                                    : AppSizes.radiusM,
                               ),
                               bottomLeft: Radius.circular(
-                                isMe ? AppSizes.radiusL : 4,
+                                isMe ? AppSizes.radiusM : 4,
                               ),
                               bottomRight: Radius.circular(
-                                isMe ? 4 : AppSizes.radiusL,
+                                isMe ? 4 : AppSizes.radiusM,
                               ),
                             ),
                           ),
@@ -216,7 +214,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                                 child: Text(
                                   message.content,
                                   style: TextStyle(
-                                    color: isMe ? Colors.white : Colors.black,
+                                    color: isMe 
+                                        ? Theme.of(context).colorScheme.onPrimary 
+                                        : Theme.of(context).colorScheme.onSurface,
                                     fontSize: AppSizes.fontM,
                                   ),
                                 ),
@@ -230,12 +230,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                                     style: TextStyle(
                                       fontSize: AppSizes.fontS,
                                       color: isMe
-                                          ? Colors.grey[300]
-                                          : Colors.grey[700],
+                                          ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)
+                                          : Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                   if (isMe) ...[
-                                    const SizedBox(width: AppSizes.paddingXS),
+                                    const SizedBox(width: AppSizes.paddingS),
                                     Icon(
                                       Icons.done_all,
                                       size: AppSizes.iconS,
@@ -258,62 +258,42 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           ),
           Container(
             padding: const EdgeInsets.all(AppSizes.paddingS),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.01),
-                  blurRadius: 4,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-            ),
             child: SafeArea(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.paddingM,
+                      padding: const EdgeInsets.only(
+                        left: AppSizes.paddingM,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.radiusXL + 4,
-                        ),
-                      ),
-                      child: TextField(
-                        controller: _controller,
-                        decoration: const InputDecoration(
-                          hintText: AppStrings.message,
-                          hintStyle: TextStyle(color: AppColors.textSecondary),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                        ),
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: AppSizes.fontL,
-                        ),
-                        maxLines: null,
-                        textCapitalization: TextCapitalization.sentences,
-                        onSubmitted: (_) => _sendMessage(),
+                      child: CustomTextField(
+                        controller: _controller, 
+                        text: AppStrings.message,
+                        maxLines: 5,
+                        showHint: true,
+                        onSubmitted: (value) => _sendMessage(),
+                        type: CustomTextFieldType.text
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppSizes.paddingM),
+                  SizedBox(width: AppSizes.paddingM),
                   Container(
+                    margin: const EdgeInsets.only(
+                      right: AppSizes.paddingM,
+                    ),
+                    height: AppSizes.screenHeight(context) * 0.06,
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const HeroIcon(
+                      icon: HeroIcon(
                         HeroIcons.paperAirplane,
                         style: HeroIconStyle.solid,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                       onPressed: _sendMessage,
-                      color: Colors.white,
                     ),
                   ),
                 ],
