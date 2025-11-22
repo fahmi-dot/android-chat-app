@@ -1,13 +1,13 @@
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
-import 'package:android_chat_app/core/theme/theme_provider.dart';
-import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
+import 'package:android_chat_app/features/chat/presentation/widgets/drawer_widget.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:intl/intl.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -32,52 +32,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     super.dispose();
   }
 
-  void _logout() async {
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          AppStrings.logout.toUpperCase(),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          )
-        ),
-        content: Text(
-          AppStrings.logoutTitle,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              AppStrings.cancel, 
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              AppStrings.logout, 
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldLogout == true) {
-      await ref.read(authProvider.notifier).logout();
-
-      if (mounted) context.go('/');
-    }
-  }
-
   void _toggleSearch() {
     setState(() {
       _isSearching = !_isSearching;
@@ -88,16 +42,39 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     });
   }
 
+  String formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    final messageDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    if (messageDate == today) {
+      return DateFormat.Hm().format(dateTime);
+    } else if (messageDate == yesterday) {
+      return 'Kemarin';
+    } else {
+      return DateFormat('dd/MM/yyyy').format(dateTime);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatListState = ref.watch(chatListProvider);
 
     return Scaffold(
       appBar: AppBar(
-        leading: HeroIcon(
-          HeroIcons.bars3, 
-          style: HeroIconStyle.outline,
-          color: Theme.of(context).colorScheme.onPrimary,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: HeroIcon(
+              HeroIcons.bars3, 
+              style: HeroIconStyle.outline,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
         title: _isSearching
             ? CustomTextField(
@@ -126,24 +103,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             ),
             onPressed: _toggleSearch,
           ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'logout') {
-                _logout();
-              } else if (value == 'settings') {
-                context.push('/settings');
-              } else if (value == 'themes') {
-                ref.read(themeProvider.notifier).toggle();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(value: 'themes', child: Text('Theme')),
-              const PopupMenuItem(value: 'settings', child: Text('Settings')),
-              const PopupMenuItem(value: 'logout', child: Text('Logout')),
-            ],
-          ),
         ],
       ),
+      drawer: DrawerWidget(),
       body: chatListState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -280,7 +242,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                 ),
                                 const SizedBox(width: AppSizes.paddingXL),
                                 Text(
-                                  room.lastMessageSentAt.toString(),
+                                  formatTime(room.lastMessageSentAt),
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
