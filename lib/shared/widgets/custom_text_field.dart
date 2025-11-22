@@ -9,10 +9,12 @@ class CustomTextField extends StatefulWidget {
   final double? radius;
   final TextEditingController controller;
   final FocusNode? focusNode;
-  final String? hintText;
+  final String? text;
   final bool? showHint;
-  final int maxLines;
+  final bool? showLabel;
+  final int? maxLines;
   final Function(String value)? onChange;
+  final Function(String value)? onSubmitted;
   final CustomTextFieldType type;
 
   const CustomTextField({
@@ -22,10 +24,12 @@ class CustomTextField extends StatefulWidget {
     this.radius,
     required this.controller,
     this.focusNode,
-    this.hintText,
-    this.showHint = true,
-    required this.maxLines,
+    this.text,
+    this.showHint = false,
+    this.showLabel = false,
+    this.maxLines,
     this.onChange,
+    this.onSubmitted,
     required this.type,
   });
 
@@ -56,49 +60,52 @@ class _CustomTextFieldState extends State<CustomTextField> {
     super.dispose();
   }
 
-  Center textField() {
-    return Center(
-      child: TextField(
-        controller: widget.controller,
-        keyboardType: widget.type == CustomTextFieldType.phone
-            ? TextInputType.phone
-            : widget.type == CustomTextFieldType.email
-            ? TextInputType.emailAddress
-            : widget.type == CustomTextFieldType.otp
-            ? TextInputType.number
-            : TextInputType.text,
-        focusNode: _focusNode,
-        textAlign: widget.type == CustomTextFieldType.otp
-            ? TextAlign.center
-            : TextAlign.start,
-        decoration: InputDecoration(
-          label: widget.showHint! ? Text(widget.hintText!) : null,
-          labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
+  TextField textField() {
+    return TextField(
+      controller: widget.controller,
+      keyboardType: widget.type == CustomTextFieldType.phone
+          ? TextInputType.phone
+          : widget.type == CustomTextFieldType.email
+          ? TextInputType.emailAddress
+          : widget.type == CustomTextFieldType.otp
+          ? TextInputType.number
+          : TextInputType.text,
+      focusNode: _focusNode,
+      textAlign: widget.type == CustomTextFieldType.otp
+          ? TextAlign.center
+          : TextAlign.start,
+      decoration: InputDecoration(
+        hintText: widget.showHint! ? widget.text : null,
+        hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        style: widget.type == CustomTextFieldType.otp
-            ? Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              )
-            : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-        maxLines: widget.maxLines,
-        onChanged: widget.onChange,
-        obscureText: widget.type == CustomTextFieldType.password
-            ? _isObscure
-            : false,
-        inputFormatters: [
-          if (widget.type == CustomTextFieldType.otp) ...[
-            LengthLimitingTextInputFormatter(1),
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-        ],
+        label: widget.showLabel! ? Text(widget.text!) : null,
+        labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
       ),
+      style: widget.type == CustomTextFieldType.otp
+          ? Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            )
+          : Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+      minLines: 1,
+      maxLines: widget.maxLines ?? 1,
+      onChanged: widget.onChange,
+      obscureText: widget.type == CustomTextFieldType.password
+          ? _isObscure
+          : false,
+      inputFormatters: [
+        if (widget.type == CustomTextFieldType.otp) ...[
+          LengthLimitingTextInputFormatter(1),
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+      ],
     );
   }
 
@@ -106,13 +113,18 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     return Container(
       width: widget.width ?? AppSizes.screenWidth(context),
-      height: widget.height ?? AppSizes.screenHeight(context) * 0.06,
       padding: widget.type != CustomTextFieldType.password
           ? const EdgeInsets.symmetric(horizontal: AppSizes.paddingM)
           : const EdgeInsets.only(
               left: AppSizes.paddingM,
               right: AppSizes.paddingS,
             ),
+      constraints: BoxConstraints(
+        minHeight: AppSizes.screenHeight(context) * 0.06,
+        maxHeight: widget.maxLines == 1
+          ? AppSizes.screenHeight(context) * 0.06
+          : AppSizes.screenHeight(context) * 0.2,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(widget.radius ?? AppSizes.radiusM),
