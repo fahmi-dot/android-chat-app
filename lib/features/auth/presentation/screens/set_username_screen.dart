@@ -31,7 +31,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
 
     final success = await ref
         .read(authProvider.notifier)
-        .setProfile(username, null, null);
+        .setUsername(username);
 
     if (!mounted) return;
 

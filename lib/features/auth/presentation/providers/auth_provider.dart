@@ -6,12 +6,13 @@ import 'package:android_chat_app/features/auth/domain/usecases/register_usecase.
 import 'package:android_chat_app/features/auth/domain/usecases/resend_code_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/set_username_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/verify_usecase.dart';
+import 'package:android_chat_app/features/user/domain/entities/user.dart';
+import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/check_usecase.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:android_chat_app/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:android_chat_app/features/auth/domain/entities/user.dart';
 import 'package:android_chat_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/login_usecase.dart';
 
@@ -26,17 +27,21 @@ final wsClientProvider = Provider<WsClient>((ref) {
 final authRemoteDatasourceProvider = Provider<AuthRemoteDataSource>((ref) {
   final api = ref.read(apiClientProvider);
   final ws = ref.read(wsClientProvider);
+
   return AuthRemoteDataSourceImpl(api: api, ws: ws);
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final datasource = ref.watch(authRemoteDatasourceProvider);
+
   return AuthRepositoryImpl(authRemoteDataSource: datasource);
 });
 
 final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return LoginUseCase(repository);
+  final authRepository = ref.watch(authRepositoryProvider);
+  final userResitory = ref.watch(userRepositoryProvider);
+
+  return LoginUseCase(authRepository, userResitory);
 });
 
 final forgotPasswordUseCaseProvide = Provider<ForgotPasswordUseCase>((ref) {
@@ -55,18 +60,23 @@ final resendCodeUseCaseProvider = Provider<ResendCodeUseCase>((ref) {
 });
 
 final verifyUseCaseProvider = Provider<VerifyUseCase>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return VerifyUseCase(repository);
+  final authRepository = ref.watch(authRepositoryProvider);
+  final userResitory = ref.watch(userRepositoryProvider);
+
+  return VerifyUseCase(authRepository, userResitory);
 });
 
 final setUsernameUseCaseProvider = Provider<SetUsernameUseCase>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return SetUsernameUseCase(repository);
+  final userRepository = ref.watch(userRepositoryProvider);
+
+  return SetUsernameUseCase(userRepository);
 });
 
 final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return CheckUsecase(repository);
+  final authRepository = ref.watch(authRepositoryProvider);
+  final userResitory = ref.watch(userRepositoryProvider);
+
+  return CheckUsecase(authRepository, userResitory);
 });
 
 final authProvider = AsyncNotifierProvider<AuthNotifier, User?>(
@@ -169,11 +179,11 @@ class AuthNotifier extends AsyncNotifier<User?> {
     state = AsyncLoading();
 
     try {
-      final username = await ref
+      final user = await ref
           .read(verifyUseCaseProvider)
           .execute(phoneNumber, verificationCode, password);
 
-      state = AsyncData(username);
+      state = AsyncData(user);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
@@ -181,17 +191,15 @@ class AuthNotifier extends AsyncNotifier<User?> {
     }
   }
 
-  Future<bool> setProfile(
+  Future<bool> setUsername(
     String? username,
-    String? displayName,
-    String? password,
   ) async {
     state = AsyncLoading();
 
     try {
       final user = await ref
           .read(setUsernameUseCaseProvider)
-          .execute(username, displayName, password);
+          .execute(username, null, null);
 
       state = AsyncData(user);
       return true;

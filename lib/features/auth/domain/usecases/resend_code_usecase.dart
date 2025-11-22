@@ -5,7 +5,7 @@ class ResendCodeUseCase {
 
   ResendCodeUseCase(this._authRepository);
 
-  Future<void> execute(String phoneNumber) async {
+  Future<void> execute(String phoneNumber) {
     return _authRepository.resendCode(phoneNumber);
   }
 }

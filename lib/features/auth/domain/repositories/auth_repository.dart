@@ -1,11 +1,10 @@
-import 'package:android_chat_app/features/auth/domain/entities/user.dart';
+import 'package:android_chat_app/features/auth/domain/entities/token.dart';
 
 abstract class AuthRepository {
-  Future<User> login(String username, String password);
+  Future<Token> login(String username, String password);
   Future<void> forgotPassword(String email);
   Future<void> register(String phoneNumber, String email, String password);
   Future<void> resendCode(String phoneNumber);
-  Future<User> verify(String phoneNumber, String verificationCode, String password);
-  Future<User> setProfile(String? username, String? displayName, String? password);
-  Future<User?> check();
+  Future<Token> verify(String phoneNumber, String verificationCode, String password);
+  Future<Token?> refresh();
 }
