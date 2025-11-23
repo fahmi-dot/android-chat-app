@@ -1,5 +1,6 @@
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
+import 'package:android_chat_app/core/router/app_router.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
@@ -36,7 +37,7 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
     if (!mounted) return;
 
     if (success) {
-      context.go('/chats');
+      context.go(Routes.chatList);
     }
   }
 

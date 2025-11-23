@@ -1,5 +1,6 @@
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
+import 'package:android_chat_app/core/router/app_router.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
@@ -47,7 +48,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     if (success) {
       context.go(
-        '/verify/$phoneNumber',
+        Routes.verifyWithPhone(phoneNumber),
         extra: {'email': email, 'password': password},
       );
     }
@@ -165,7 +166,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   CustomTextButton(
                     text: AppStrings.login,
-                    onPressed: () => context.push('/login'),
+                    onPressed: () => context.pop(),
                   ),
                 ],
               ),

@@ -1,5 +1,6 @@
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
+import 'package:android_chat_app/core/router/app_router.dart';
 import 'package:android_chat_app/core/theme/theme_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
@@ -41,7 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      context.go('/chats');
+      context.go(Routes.chatList);
     }
   }
 
@@ -142,7 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             const SizedBox(height: AppSizes.paddingM),
                             TextButton(
-                              onPressed: () => context.push('/forgot'),
+                              onPressed: () => context.push(Routes.forgot),
                               child: Text(
                                 AppStrings.forgotPassword,
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -171,7 +172,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   CustomTextButton(
                     text: AppStrings.register,
-                    onPressed: () => context.push('/register'),
+                    onPressed: () => context.push(Routes.register),
                   ),
                 ],
               ),

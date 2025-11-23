@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
+import 'package:android_chat_app/core/router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,12 +35,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       if (!mounted) return;
       _hasNavigated = true;
 
-      (auth != null) ? context.go('/chats') : context.go('/login');
+      (auth != null) ? context.go(Routes.chatList) : context.go(Routes.login);
     } catch (e) {
       if (!mounted) return;
       _hasNavigated = true;
 
-      context.go('/login');
+      context.go(Routes.login);
     }
   }
 

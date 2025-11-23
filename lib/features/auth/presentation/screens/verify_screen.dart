@@ -1,5 +1,6 @@
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
+import 'package:android_chat_app/core/router/app_router.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
@@ -52,7 +53,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
     if (!mounted) return;
 
     if (success) {
-      context.go('/set/username');
+      context.go(Routes.setUsername);
     }
   }
 
@@ -76,7 +77,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
 
   void _changeEmail() async {
     newEmail = await context.push<String>(
-      '/change/email',
+      Routes.changeEmail,
       extra: {
         'phoneNumber': widget.phoneNumber,
         'email': widget.email,
@@ -178,7 +179,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                             ),
                             CustomTextButton(
                               text: AppStrings.resend,
-                              onPressed: () => _resendCode(),
+                              onPressed: _resendCode,
                             ),
                           ],
                         ),
@@ -197,7 +198,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                         const SizedBox(height: AppSizes.paddingM),
                         CustomTextButton(
                           text: AppStrings.changeEmail,
-                          onPressed: () => _changeEmail(),
+                          onPressed: _changeEmail,
                         ),
                       ],
                     ),
