@@ -3,6 +3,8 @@ import 'package:android_chat_app/features/auth/presentation/screens/forgot_passw
 import 'package:android_chat_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/set_username_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/verify_screen.dart';
+import 'package:android_chat_app/features/user/presentation/screens/search_user_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/splash_screen.dart';
@@ -19,6 +21,10 @@ class Routes {
   static const setUsername = '/set/username';
   static const chatList = '/chats';
   static const chatRoom = '/chats/:roomId';
+  static const searchUser = '/user/search';
+
+  static String verifyWithPhone(String phoneNumber) => '/verify/$phoneNumber';
+  static String chatWithRoom(String roomId) => '/chats/$roomId';
 }
 
 final appRouter = GoRouter(
@@ -30,52 +36,166 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: Routes.login,
-      builder: (context, state) => const LoginScreen(),
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          child: LoginScreen(),
+          transitionsBuilder: (context, animation, secondary, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: Duration(milliseconds: 250),
+        );
+      },
     ),
     GoRoute(
       path: Routes.register,
-      builder: (context, state) => const RegisterScreen(),
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          child: RegisterScreen(),
+          transitionsBuilder: (context, animation, secondary, child) {
+            final slide =
+                Tween<Offset>(
+                  begin: Offset(1, 0), // mulai dari kanan
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                );
+
+            return SlideTransition(position: slide, child: child);
+          },
+          transitionDuration: Duration(milliseconds: 250),
+        );
+      },
     ),
     GoRoute(
       path: Routes.forgot,
-      builder: (context, state) => const ForgotPasswordScreen(),
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          child: ForgotPasswordScreen(),
+          transitionsBuilder: (context, animation, secondary, child) {
+            final slide = Tween<Offset>(begin: Offset(0, 1), end: Offset.zero)
+                .animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                );
+
+            return SlideTransition(position: slide, child: child);
+          },
+          transitionDuration: Duration(milliseconds: 250),
+        );
+      },
     ),
     GoRoute(
       path: Routes.verify,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final phoneNumber = state.pathParameters['phoneNumber']!;
         final extra = state.extra as Map<String, dynamic>;
-        return VerifyScreen(
-          phoneNumber: phoneNumber,
-          email: extra['email'],
-          password: extra['password'],
+        return CustomTransitionPage(
+          child: VerifyScreen(
+            phoneNumber: phoneNumber,
+            email: extra['email'],
+            password: extra['password'],
+          ),
+          transitionsBuilder: (context, animation, secondary, child) {
+            final slide = Tween<Offset>(begin: Offset(0, 1), end: Offset.zero)
+                .animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                );
+
+            return SlideTransition(position: slide, child: child);
+          },
+          transitionDuration: Duration(milliseconds: 250),
         );
       },
     ),
     GoRoute(
       path: Routes.changeEmail,
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final extra = state.extra as Map<String, dynamic>;
-        return ChangeEmailScreen(
-          phoneNumber: extra['phoneNumber'],
-          email: extra['email'],
-          password: extra['password'],
+        return CustomTransitionPage(
+          child: ChangeEmailScreen(
+            phoneNumber: extra['phoneNumber'],
+            email: extra['email'],
+            password: extra['password'],
+          ),
+          transitionsBuilder: (context, animation, secondary, child) {
+            final slide = Tween<Offset>(begin: Offset(0, 1), end: Offset.zero)
+                .animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                );
+
+            return SlideTransition(position: slide, child: child);
+          },
+          transitionDuration: Duration(milliseconds: 250),
         );
       },
     ),
     GoRoute(
       path: Routes.setUsername,
-      builder: (context, state) => const SetUsernameScreen(),
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          child: SetUsernameScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: Duration(milliseconds: 250),
+        );
+      },
+    ),
+    ShellRoute(
+      builder: (context, state, child) {
+        return child;
+      },
+      routes: [
+        GoRoute(
+          path: Routes.chatList,
+          pageBuilder: (context, state) {
+            return CustomTransitionPage(
+              child: ChatListScreen(),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              transitionDuration: Duration(milliseconds: 250),
+            );
+          },
+        ),
+        GoRoute(
+          path: Routes.chatRoom,
+          pageBuilder: (context, state) {
+            final roomId = state.pathParameters['roomId']!;
+            return CustomTransitionPage(
+              child: ChatRoomScreen(roomId: roomId),
+              transitionsBuilder: (context, animation, secondary, child) {
+                final slide = Tween<Offset>(begin: Offset(0.1, 0), end: Offset.zero)
+                    .animate(
+                      CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                    );
+
+                return SlideTransition(position: slide, child: child);
+              },
+              transitionDuration: Duration(milliseconds: 250),
+            );
+          },
+        ),
+      ]
     ),
     GoRoute(
-      path: Routes.chatList,
-      builder: (context, state) => const ChatListScreen(),
-    ),
-    GoRoute(
-      path: Routes.chatRoom,
-      builder: (context, state) {
-        final roomId = state.pathParameters['roomId']!;
-        return ChatRoomScreen(roomId: roomId);
+      path: Routes.searchUser,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          child: SearchUserScreen(),
+          transitionsBuilder: (context, animation, secondary, child) {
+            final fade = Tween<double>(begin: 0, end: 1).animate(animation);
+            final slide = Tween<Offset>(
+              begin: Offset(0.1, 0),
+              end: Offset.zero,
+            ).animate(animation);
+
+            return FadeTransition(
+              opacity: fade,
+              child: SlideTransition(position: slide, child: child),
+            );
+          },
+          transitionDuration: Duration(milliseconds: 250),
+        );
       },
     ),
   ],
