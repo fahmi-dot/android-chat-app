@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:android_chat_app/core/network/ws_client.dart';
 import 'package:android_chat_app/core/utils/token_holder.dart';
+import 'package:android_chat_app/features/auth/domain/entities/token.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/register_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/resend_code_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/set_username_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/verify_usecase.dart';
-import 'package:android_chat_app/features/user/domain/entities/user.dart';
 import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/check_usecase.dart';
@@ -39,31 +39,32 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
-  final userResitory = ref.watch(userRepositoryProvider);
 
-  return LoginUseCase(authRepository, userResitory);
+  return LoginUseCase(authRepository);
 });
 
 final forgotPasswordUseCaseProvide = Provider<ForgotPasswordUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
+
   return ForgotPasswordUseCase(repository);
 });
 
 final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
+
   return RegisterUseCase(repository);
 });
 
 final resendCodeUseCaseProvider = Provider<ResendCodeUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
+  
   return ResendCodeUseCase(repository);
 });
 
 final verifyUseCaseProvider = Provider<VerifyUseCase>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
-  final userResitory = ref.watch(userRepositoryProvider);
 
-  return VerifyUseCase(authRepository, userResitory);
+  return VerifyUseCase(authRepository);
 });
 
 final setUsernameUseCaseProvider = Provider<SetUsernameUseCase>((ref) {
@@ -74,18 +75,17 @@ final setUsernameUseCaseProvider = Provider<SetUsernameUseCase>((ref) {
 
 final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
-  final userResitory = ref.watch(userRepositoryProvider);
 
-  return CheckUsecase(authRepository, userResitory);
+  return CheckUsecase(authRepository);
 });
 
-final authProvider = AsyncNotifierProvider<AuthNotifier, User?>(
+final authProvider = AsyncNotifierProvider<AuthNotifier, Token?>(
   AuthNotifier.new,
 );
 
-class AuthNotifier extends AsyncNotifier<User?> {
+class AuthNotifier extends AsyncNotifier<Token?> {
   @override
-  FutureOr<User?> build() async {
+  FutureOr<Token?> build() async {
     return await ref.read(checkUseCaseProvider).execute();
   }
 
@@ -97,11 +97,11 @@ class AuthNotifier extends AsyncNotifier<User?> {
         throw Exception('Please enter username and password');
       }
 
-      final user = await ref
+      final token = await ref
           .read(loginUseCaseProvider)
           .execute(username, password);
 
-      state = AsyncData(user);
+      state = AsyncData(token);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
@@ -197,11 +197,11 @@ class AuthNotifier extends AsyncNotifier<User?> {
     state = AsyncLoading();
 
     try {
-      final user = await ref
+      await ref
           .read(setUsernameUseCaseProvider)
           .execute(username, null, null);
 
-      state = AsyncData(user);
+      state = AsyncData(null);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);

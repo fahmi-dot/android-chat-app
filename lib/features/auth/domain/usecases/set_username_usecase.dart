@@ -1,4 +1,3 @@
-import 'package:android_chat_app/features/user/domain/entities/user.dart';
 import 'package:android_chat_app/features/user/domain/repositories/user_repository.dart';
 
 class SetUsernameUseCase {
@@ -6,7 +5,7 @@ class SetUsernameUseCase {
 
   SetUsernameUseCase(this._userRepository);
 
-  Future<User> execute(String? username, String? displayName, String? password) async {
-    return await _userRepository.setProfile(username, displayName, password);
+  Future<void> execute(String? username, String? displayName, String? password) async {
+    await _userRepository.setProfile(username, displayName, password);
   }
 }
