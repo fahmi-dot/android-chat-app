@@ -3,6 +3,7 @@ import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_room_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
@@ -58,8 +59,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     final chatRoomState = ref.watch(chatRoomProvider(widget.roomId));
     final roomDetail = ref
         .watch(chatListProvider)
-        .value
-        ?.firstWhere((room) => room.id == widget.roomId);
+        .value?.firstWhereOrNull((room) => room.id == widget.roomId);
 
     return Scaffold(
       appBar: AppBar(

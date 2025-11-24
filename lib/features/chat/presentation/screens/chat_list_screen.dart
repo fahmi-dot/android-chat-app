@@ -1,8 +1,8 @@
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
+import 'package:android_chat_app/core/router/app_router.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:android_chat_app/features/chat/presentation/widgets/drawer_widget.dart';
-import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,9 +17,6 @@ class ChatListScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatListScreenState extends ConsumerState<ChatListScreen> {
-  final TextEditingController _controller = TextEditingController();
-  String _keyword = '';
-  bool _isSearching = false;
 
   @override
   void initState() {
@@ -28,18 +25,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
-  }
-
-  void _toggleSearch() {
-    setState(() {
-      _isSearching = !_isSearching;
-      if (!_isSearching) {
-        _controller.clear();
-        _keyword = '';
-      }
-    });
   }
 
   String formatTime(DateTime dateTime) {
@@ -76,24 +62,12 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             },
           ),
         ),
-        title: _isSearching
-            ? CustomTextField(
-                controller: _controller,
-                text: AppStrings.search,
-                showHint: true,
-                onChange: (value) {
-                  setState(() {
-                    _keyword = value.toLowerCase();
-                  });
-                },
-                type: CustomTextFieldType.text,
-              )
-            : Text(
-                AppStrings.appName,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-              ),
+        title: Text(
+          AppStrings.appName,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
+        ),
         actions: [
           IconButton(
             icon: HeroIcon(
@@ -101,7 +75,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               style: HeroIconStyle.outline,
               color: Theme.of(context).colorScheme.onPrimary,
             ),
-            onPressed: _toggleSearch,
+            onPressed: () => context.push(Routes.searchUser),
           ),
         ],
       ),
@@ -147,47 +121,40 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             );
           }
 
-          final filteredRooms = _keyword.isEmpty
-              ? rooms
-              : rooms.where((room) {
-                  return room.displayName.toLowerCase().contains(_keyword) ||
-                      room.lastMessage.toLowerCase().contains(_keyword);
-                }).toList();
-
-          if (filteredRooms.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  HeroIcon(
-                    HeroIcons.chatBubbleLeftRight,
-                    style: HeroIconStyle.solid,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
-                    size: 80.0,
-                  ),
-                  const SizedBox(height: AppSizes.paddingM),
-                  Text(
-                    AppStrings.noChatsFound,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
+          // if (filteredRooms.isEmpty) {
+          //   return Center(
+          //     child: Column(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       children: [
+          //         HeroIcon(
+          //           HeroIcons.chatBubbleLeftRight,
+          //           style: HeroIconStyle.solid,
+          //           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+          //           size: 80.0,
+          //         ),
+          //         const SizedBox(height: AppSizes.paddingM),
+          //         Text(
+          //           AppStrings.noChatsFound,
+          //           style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          //             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   );
+          // }
 
           return ListView.separated(
-            itemCount: filteredRooms.length,
+            itemCount: rooms.length,
             separatorBuilder: (context, index) =>
                 Divider(height: 1, color: Theme.of(context).colorScheme.surface),
             itemBuilder: (context, index) {
-              final room = filteredRooms[index];
+              final room = rooms[index];
               final hasUnread = room.unreadMessagesCount > 0;
 
               return InkWell(
                 onTap: () {
-                  context.push('/chats/${room.id}').then((_) {
+                  context.push(Routes.chatWithRoom(room.id)).then((_) {
                     ref.invalidate(chatListProvider);
                   });
                 },

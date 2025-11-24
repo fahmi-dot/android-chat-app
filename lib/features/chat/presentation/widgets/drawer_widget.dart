@@ -127,10 +127,9 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
           ),
           Expanded(
             child: ListView(
-              padding: EdgeInsets.all(AppSizes.paddingM),
               children: [
                 ListTile(
-                  contentPadding: EdgeInsets.zero,
+                  contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
                   leading: HeroIcon(
                     HeroIcons.userCircle,
                     style: HeroIconStyle.outline,
@@ -144,7 +143,7 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
                   ),
                 ),
                 ListTile(
-                  contentPadding: EdgeInsets.zero,
+                  contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
                   leading: HeroIcon(
                     HeroIcons.cog6Tooth,
                     style: HeroIconStyle.outline,
@@ -158,7 +157,7 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
                   ),
                 ),
                 ListTile(
-                  contentPadding: EdgeInsets.zero,
+                  contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
                   leading: HeroIcon(
                     HeroIcons.arrowLeftStartOnRectangle,
                     style: HeroIconStyle.outline,
@@ -176,11 +175,11 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
             ),
           ),
           Container(
-            margin: const EdgeInsets.only(bottom: AppSizes.paddingXL),
+            padding: const EdgeInsets.only(bottom: AppSizes.paddingXL),
             child: Image.asset(
               'assets/icons/icon_hello.png',
               width: AppSizes.screenWidth(context) * 0.15,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: Theme.of(context).colorScheme.secondary,
             ),
           ),
         ],
