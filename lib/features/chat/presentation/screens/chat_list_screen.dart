@@ -121,29 +121,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             );
           }
 
-          // if (filteredRooms.isEmpty) {
-          //   return Center(
-          //     child: Column(
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       children: [
-          //         HeroIcon(
-          //           HeroIcons.chatBubbleLeftRight,
-          //           style: HeroIconStyle.solid,
-          //           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
-          //           size: 80.0,
-          //         ),
-          //         const SizedBox(height: AppSizes.paddingM),
-          //         Text(
-          //           AppStrings.noChatsFound,
-          //           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          //             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   );
-          // }
-
           return ListView.separated(
             itemCount: rooms.length,
             separatorBuilder: (context, index) =>

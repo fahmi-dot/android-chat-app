@@ -1,47 +1,36 @@
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/chat/data/models/room_model.dart';
-import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:dio/dio.dart';
 
 abstract class ChatListRemoteDataSource {
-  Future<List<Room>> getChatRooms();
-  Future<Room> getChatRoomDetail(String roomId);
+  Future<List<RoomModel>> getChatRooms();
+  Future<RoomModel> getChatRoomDetail(String roomId);
   Future<void> markAsRead(String roomId);
 }
 
 class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
   final ApiClient api;
-  final String currentUsername;
 
-  ChatListRemoteDataSourceImpl({
-    required this.api,
-    required this.currentUsername,
-  });
+  ChatListRemoteDataSourceImpl({required this.api});
 
   @override
-  Future<List<Room>> getChatRooms() async {
+  Future<List<RoomModel>> getChatRooms() async {
     try {
       final response = await api.get('/chat/rooms');
       final data = response.data['data'] as List;
 
       return data.map((room) {
-        final participants = room['participants'] as List;
-        final target = participants.firstWhere(
-          (p) => p['username'] != currentUsername,
-          orElse: () => null,
-        );
-
         return RoomModel(
           id: room['id'],
-          username: target?['username'] ?? '',
-          displayName: target?['displayName'] ?? '',
-          avatarUrl: target?['avatarUrl'] ?? '',
+          username: room['username'] ?? '',
+          displayName: room['displayName'] ?? '',
+          avatarUrl: room['avatarUrl'] ?? '',
           lastMessage: room['lastMessage'] ?? '',
           lastMessageSentAt: room['lastMessageSentAt'] != null
               ? DateTime.parse(room['lastMessageSentAt'])
               : DateTime.now(),
           unreadMessagesCount: room['unreadMessagesCount'] ?? 0,
-        ).toEntity();
+        );
       }).toList();
     } on DioException catch (e) {
       throw Exception('Failed to get chat room list: $e');
@@ -49,27 +38,22 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
   }
 
   @override
-  Future<Room> getChatRoomDetail(String roomId) async {
+  Future<RoomModel> getChatRoomDetail(String roomId) async {
     try {
       final response = await api.get('/chat/rooms/$roomId');
       final data = response.data['data'];
-      final participants = data['participants'] as List;
-      final target = participants.firstWhere(
-        (p) => p['username'] != currentUsername,
-        orElse: () => null,
-      );
 
       return RoomModel(
         id: data['id'],
-        username: target?['username'] ?? '',
-        displayName: target?['displayName'] ?? '',
-        avatarUrl: target?['avatarUrl'] ?? '',
+        username: data['username'] ?? '',
+        displayName: data['displayName'] ?? '',
+        avatarUrl: data['avatarUrl'] ?? '',
         lastMessage: data['lastMessage'] ?? '',
         lastMessageSentAt: data['lastMessageSentAt'] != null
             ? DateTime.parse(data['lastMessageSentAt'])
             : DateTime.now(),
         unreadMessagesCount: data['unreadMessagesCount'] ?? 0,
-      ).toEntity();
+      );
     } on DioException catch (e) {
       throw Exception('Failed to get chat room detail: $e');
     }

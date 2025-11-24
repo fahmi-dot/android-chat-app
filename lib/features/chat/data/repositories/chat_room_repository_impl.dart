@@ -9,7 +9,8 @@ class ChatRoomRepositoryImpl implements ChatRoomRepository {
   
   @override
   Future<List<Message>> getChatMessages(String roomId, String userId) async {
-    return await chatRoomRemoteDataSource.getChatMessages(roomId, userId);
-  }
+    final messageModels = await chatRoomRemoteDataSource.getChatMessages(roomId, userId);
   
+    return messageModels.map((message) => message.toEntity()).toList();
+  }
 }

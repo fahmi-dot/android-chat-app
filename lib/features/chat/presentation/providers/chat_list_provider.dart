@@ -14,44 +14,39 @@ final wsMessageStreamProvider = StreamProvider.autoDispose<dynamic>((ref) {
   return ref.read(wsClientProvider).messageStream;
 });
 
-final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((
-  ref,
-) {
+final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((ref) {
   final api = ref.read(apiClientProvider);
-  final auth = ref.watch(authProvider).value;
-  final currentUsername = auth?.username ?? '';
-  return ChatListRemoteDataSourceImpl(
-    api: api,
-    currentUsername: currentUsername,
-  );
+
+  return ChatListRemoteDataSourceImpl(api: api);
 });
 
 final chatListRepositoryProvider = Provider<ChatListRepository>((ref) {
   final datasource = ref.watch(chatListRemoteDataSourceProvider);
+
   return ChatListRepositoryImpl(chatListRemoteDataSource: datasource);
 });
 
 final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
   final repository = ref.watch(chatListRepositoryProvider);
-  return GetChatRoomsUseCase(repository);
+
+  return GetChatRoomsUseCase(repository, ref);
 });
 
-final getChatRoomDetailUseCaseProvider = Provider<GetChatRoomDetailUseCase>((
-  ref,
-) {
+final getChatRoomDetailUseCaseProvider = Provider<GetChatRoomDetailUseCase>((ref) {
   final repository = ref.watch(chatListRepositoryProvider);
+
   return GetChatRoomDetailUseCase(repository);
 });
 
 final markAsReadUseCaseProvider = Provider<MarkAsReadUseCase>((ref) {
   final repository = ref.watch(chatListRepositoryProvider);
+
   return MarkAsReadUseCase(repository);
 });
 
-final chatListProvider =
-    AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
-      ChatListNotifier.new,
-    );
+final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
+  ChatListNotifier.new,
+);
 
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   @override

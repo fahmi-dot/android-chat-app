@@ -9,12 +9,16 @@ class ChatListRepositoryImpl implements ChatListRepository {
 
   @override
   Future<List<Room>> getChatRooms() async {
-    return await chatListRemoteDataSource.getChatRooms();
+    final roomModels = await chatListRemoteDataSource.getChatRooms();
+
+    return roomModels.map((user) => user.toEntity()).toList();
   }
   
   @override
   Future<Room> getChatRoomDetail(String roomId) async {
-    return await chatListRemoteDataSource.getChatRoomDetail(roomId);
+    final roomModel = await chatListRemoteDataSource.getChatRoomDetail(roomId);
+
+    return roomModel.toEntity();
   }
   
   @override

@@ -8,6 +8,7 @@ import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_room_repository.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_messages_usecase.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
+import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((
@@ -39,8 +40,8 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
 
   @override
   FutureOr<List<Message>?> build() async {
-    final auth = await ref.read(authProvider.future);
-    final userId = auth!.id;
+    final user = await ref.read(userProvider.future);
+    final userId = user!.id;
 
     final messages = await ref
         .read(getChatMessageUseCaseProvider)
@@ -98,8 +99,8 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
   Future<void> refresh() async {
     state = const AsyncLoading();
     try {
-      final auth = await ref.read(authProvider.future);
-      final userId = auth!.id;
+      final user = await ref.read(userProvider.future);
+      final userId = user!.id;
       
       final messages = await ref
           .read(getChatMessageUseCaseProvider)
