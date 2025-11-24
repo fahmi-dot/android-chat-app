@@ -4,26 +4,38 @@ import 'package:android_chat_app/features/user/data/datasources/user_remote_data
 import 'package:android_chat_app/features/user/data/repositories/user_repository_impl.dart';
 import 'package:android_chat_app/features/user/domain/entities/user.dart';
 import 'package:android_chat_app/features/user/domain/repositories/user_repository.dart';
+import 'package:android_chat_app/features/user/domain/usecases/get_profile_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final userRemoteDatasourceProvider = Provider<UserRemoteDataSource>((ref) {
   final api = ref.read(apiClientProvider);
+
   return UserRemoteDataSourceImpl(api: api);
 });
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   final datasource = ref.watch(userRemoteDatasourceProvider);
+  
   return UserRepositoryImpl(userRemoteDataSource: datasource);
 });
 
-final authProvider = AsyncNotifierProvider<AuthNotifier, User?>(
-  AuthNotifier.new,
+final getProfileUseCaseProvider = Provider<GetProfileUseCase>((ref) {
+  final repository = ref.watch(userRepositoryProvider);
+
+  return GetProfileUseCase(repository);
+});
+
+final userProvider = AsyncNotifierProvider<UserNotifier, User?>(
+  UserNotifier.new,
 );
 
-class AuthNotifier extends AsyncNotifier<User?> {
+class UserNotifier extends AsyncNotifier<User?> {
+
   @override
   FutureOr<User?> build() async {
-    return await ref.read(checkUseCaseProvider).execute();
+    await ref.read(checkUseCaseProvider).execute();
+
+    return ref.read(getProfileUseCaseProvider).execute();
   }
 
   Future<bool> setProfile(
@@ -34,11 +46,11 @@ class AuthNotifier extends AsyncNotifier<User?> {
     state = AsyncLoading();
 
     try {
-      final user = await ref
+      await ref
           .read(setUsernameUseCaseProvider)
           .execute(username, displayName, password);
 
-      state = AsyncData(user);
+      state = AsyncData(null);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);

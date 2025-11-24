@@ -1,5 +1,6 @@
 import 'package:android_chat_app/features/user/data/datasources/user_remote_datasource.dart';
 import 'package:android_chat_app/features/user/domain/entities/user.dart';
+import 'package:android_chat_app/features/user/domain/entities/user_summary.dart';
 import 'package:android_chat_app/features/user/domain/repositories/user_repository.dart';
 
 class UserRepositoryImpl extends UserRepository {
@@ -19,5 +20,12 @@ class UserRepositoryImpl extends UserRepository {
     final userModel = await userRemoteDataSource.getProfile();
 
     return userModel.toEntity();
+  }
+  
+  @override
+  Future<List<UserSummary>> searchUser(String key) async {
+    final userModels = await userRemoteDataSource.searchUser(key);
+    
+    return userModels.map((user) => user.toEntity()).toList();
   }
 }

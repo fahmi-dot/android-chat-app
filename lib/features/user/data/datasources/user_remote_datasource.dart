@@ -1,6 +1,7 @@
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/user/data/models/user_model.dart';
+import 'package:android_chat_app/features/user/data/models/user_summary_model.dart';
 import 'package:dio/dio.dart';
 
 abstract class UserRemoteDataSource {
@@ -10,12 +11,15 @@ abstract class UserRemoteDataSource {
     String? password,
   );
   Future<UserModel> getProfile();
+  Future<List<UserSummaryModel>> searchUser(String key);
 }
 
 class UserRemoteDataSourceImpl extends UserRemoteDataSource {
   final ApiClient api;
 
-  UserRemoteDataSourceImpl({required this.api});
+  UserRemoteDataSourceImpl({
+    required this.api,
+  });
 
   @override
   Future<UserModel> setProfile(
@@ -60,10 +64,27 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
         avatarUrl: data['avatarUrl'],
         bio: data['bio'],
       );
-    } on DioException catch (e) {
-      final status = e.response?.statusCode;
-      final message = e.response?.data?['message'] ?? e.message;
-      throw Exception('HTTP $status: $message');
+    } on DioException {
+      throw Exception(AppStrings.noAccountMessage);
+    }
+  }
+
+  @override
+  Future<List<UserSummaryModel>> searchUser(String key) async {
+    try {
+      final response = await api.get('/user/search?key=$key');
+      final data = response.data['data'] as List?;
+
+      return data?.map((user) {
+        return UserSummaryModel(
+          username: user['username'], 
+          displayName: user['displayName'], 
+          avatarUrl: user['avatarUrl'],
+        );
+      })
+      .toList() ?? [];
+    } on DioException {
+      return [];
     }
   }
 }
