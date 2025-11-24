@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
 
   another_flushbar: ^1.12.32
+  collection: ^1.19.1
   cupertino_icons: ^1.0.8
   dio: ^5.9.0
   equatable: ^2.0.7
