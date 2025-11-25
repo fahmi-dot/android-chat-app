@@ -20,11 +20,13 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
       final data = response.data['data'] as List;
 
       return data.map((room) {
+        final participants = (room['participants'] as List).first;
+
         return RoomModel(
-          id: room['id'],
-          username: room['username'] ?? '',
-          displayName: room['displayName'] ?? '',
-          avatarUrl: room['avatarUrl'] ?? '',
+          id: participants['id'],
+          username: participants['username'] ?? '',
+          displayName: participants['displayName'] ?? '',
+          avatarUrl: participants['avatarUrl'] ?? '',
           lastMessage: room['lastMessage'] ?? '',
           lastMessageSentAt: room['lastMessageSentAt'] != null
               ? DateTime.parse(room['lastMessageSentAt'])
@@ -42,12 +44,13 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
     try {
       final response = await api.get('/chat/rooms/$roomId');
       final data = response.data['data'];
+      final participants = (data['participants'] as List).first;
 
       return RoomModel(
-        id: data['id'],
-        username: data['username'] ?? '',
-        displayName: data['displayName'] ?? '',
-        avatarUrl: data['avatarUrl'] ?? '',
+        id: participants['id'],
+        username: participants['username'] ?? '',
+        displayName: participants['displayName'] ?? '',
+        avatarUrl: participants['avatarUrl'] ?? '',
         lastMessage: data['lastMessage'] ?? '',
         lastMessageSentAt: data['lastMessageSentAt'] != null
             ? DateTime.parse(data['lastMessageSentAt'])
