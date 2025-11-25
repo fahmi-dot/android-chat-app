@@ -50,9 +50,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
           widget.password,
         );
 
-    if (!mounted) return;
-
-    if (success) {
+    if (mounted && success) {
       context.go(Routes.setUsername);
     }
   }

@@ -29,14 +29,11 @@ class _SetUsernameScreenState extends ConsumerState<SetUsernameScreen> {
 
   void _setUsername() async {
     final username = _controller.text.trim();
-
     final success = await ref
         .read(authProvider.notifier)
         .setUsername(username);
 
-    if (!mounted) return;
-
-    if (success) {
+    if (mounted && success) {
       context.go(Routes.chatList);
     }
   }

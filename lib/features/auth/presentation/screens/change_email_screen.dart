@@ -37,7 +37,6 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
 
   void _changeEmail() async {
     final email = _controller.text.trim();
-
     final success = await ref
         .read(authProvider.notifier)
         .register(
@@ -47,9 +46,7 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
           widget.password,
         );
 
-    if (!mounted) return;
-
-    if (success) {
+    if (mounted && success) {
       context.pop(_controller.text);
     }
   }

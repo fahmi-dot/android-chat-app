@@ -39,14 +39,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final cPassword = _cPasswordController.text.trim();
-
     final success = await ref
         .read(authProvider.notifier)
         .register(phoneNumber, email, password, cPassword);
 
-    if (!mounted) return;
-
-    if (success) {
+    if (mounted && success) {
       context.go(
         Routes.verifyWithPhone(phoneNumber),
         extra: {'email': email, 'password': password},

@@ -29,12 +29,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   void _forgotPassword() async {
     final email = _controller.text.trim();
-
     final success = await ref.read(authProvider.notifier).forgotPassword(email);
 
-    if (!mounted) return;
-
-    if (success) {
+    if (mounted && success) {
       context.pop();
     }
   }

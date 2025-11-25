@@ -34,14 +34,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _login() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
-
     final success = await ref
         .read(authProvider.notifier)
         .login(username, password);
 
-    if (!mounted) return;
-
-    if (success) {
+    if (mounted && success) {
       context.go(Routes.chatList);
     }
   }
