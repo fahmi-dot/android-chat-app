@@ -5,7 +5,6 @@ import 'package:android_chat_app/features/auth/domain/entities/token.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/register_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/resend_code_usecase.dart';
-import 'package:android_chat_app/features/auth/domain/usecases/set_username_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/verify_usecase.dart';
 import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,12 +64,6 @@ final verifyUseCaseProvider = Provider<VerifyUseCase>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
 
   return VerifyUseCase(authRepository);
-});
-
-final setUsernameUseCaseProvider = Provider<SetUsernameUseCase>((ref) {
-  final userRepository = ref.watch(userRepositoryProvider);
-
-  return SetUsernameUseCase(userRepository);
 });
 
 final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
@@ -179,11 +172,11 @@ class AuthNotifier extends AsyncNotifier<Token?> {
     state = AsyncLoading();
 
     try {
-      final user = await ref
+      final token = await ref
           .read(verifyUseCaseProvider)
           .execute(phoneNumber, verificationCode, password);
 
-      state = AsyncData(user);
+      state = AsyncData(token);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
@@ -191,14 +184,12 @@ class AuthNotifier extends AsyncNotifier<Token?> {
     }
   }
 
-  Future<bool> setUsername(
-    String? username,
-  ) async {
+  Future<bool> setUsername(String username) async {
     state = AsyncLoading();
 
     try {
       await ref
-          .read(setUsernameUseCaseProvider)
+          .read(setProfileUseCaseProvider)
           .execute(username, null, null);
 
       state = AsyncData(null);
