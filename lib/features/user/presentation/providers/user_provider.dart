@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/user/data/datasources/user_remote_datasource.dart';
 import 'package:android_chat_app/features/user/data/repositories/user_repository_impl.dart';
 import 'package:android_chat_app/features/user/domain/entities/user.dart';
 import 'package:android_chat_app/features/user/domain/repositories/user_repository.dart';
 import 'package:android_chat_app/features/user/domain/usecases/get_profile_usecase.dart';
 import 'package:android_chat_app/features/user/domain/usecases/set_profile_usecase.dart';
+import 'package:android_chat_app/shared/providers/client_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final userRemoteDatasourceProvider = Provider<UserRemoteDataSource>((ref) {
@@ -40,9 +40,23 @@ class UserNotifier extends AsyncNotifier<User?> {
 
   @override
   FutureOr<User?> build() async {
-    await ref.read(checkUseCaseProvider).execute();
-
     return ref.read(getProfileUseCaseProvider).execute();
+  }
+
+  Future<bool> getProfile() async {
+    state = AsyncLoading();
+
+    try {
+      final user = await ref
+          .read(getProfileUseCaseProvider)
+          .execute();
+
+      state = AsyncData(user);
+      return true;
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
+      return false;
+    }
   }
 
   Future<bool> setProfile(
