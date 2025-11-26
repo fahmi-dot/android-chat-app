@@ -18,16 +18,15 @@ class WsClient {
 
   bool _isConnected = false;
   bool _isInitialized = false;
+  bool _isSubscribed = false;
 
   Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
   bool get isConnected => _isConnected;
 
   Future<void> initialize() async {
-    if (_isInitialized) {
-      return;
-    }
-
+    if (_isInitialized) return;
     _isInitialized = true;
+    
     connect();
   }
 
@@ -78,6 +77,9 @@ class WsClient {
   }
 
   void _subscribeToUserQueue() {
+    if (_isSubscribed) return;
+    _isSubscribed = true;
+
     try {
       print('Subscribing to /user/queue/notifications');
 
@@ -130,6 +132,7 @@ class WsClient {
   void disconnect() {
     _isConnected = false;
     _isInitialized = false;
+    _isSubscribed = false;
     _stompClient.deactivate();
   }
 
