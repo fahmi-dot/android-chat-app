@@ -23,7 +23,7 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
         final participants = (room['participants'] as List).first;
 
         return RoomModel(
-          id: participants['id'],
+          id: room['id'],
           username: participants['username'] ?? '',
           displayName: participants['displayName'] ?? '',
           avatarUrl: participants['avatarUrl'] ?? '',
@@ -47,7 +47,7 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
       final participants = (data['participants'] as List).first;
 
       return RoomModel(
-        id: participants['id'],
+        id: data['id'],
         username: participants['username'] ?? '',
         displayName: participants['displayName'] ?? '',
         avatarUrl: participants['avatarUrl'] ?? '',
