@@ -6,7 +6,7 @@ class GetChatRoomDetailUseCase {
 
   GetChatRoomDetailUseCase(this._chatListRepository);
 
-  Future<Room> execute(String roomId) {
-    return _chatListRepository.getChatRoomDetail(roomId);
+  Future<Room> execute(String roomId) async {
+    return await _chatListRepository.getChatRoomDetail(roomId);
   }
 }

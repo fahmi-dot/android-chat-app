@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/data/datasources/chat_room_remote_datasource.dart';
 import 'package:android_chat_app/features/chat/data/models/message_model.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_room_repository_impl.dart';
@@ -9,6 +7,7 @@ import 'package:android_chat_app/features/chat/domain/repositories/chat_room_rep
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_messages_usecase.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
+import 'package:android_chat_app/shared/providers/client_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((
@@ -41,13 +40,10 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
   @override
   FutureOr<List<Message>?> build() async {
     final user = await ref.read(userProvider.future);
-    final userId = user!.id;
 
     final messages = await ref
         .read(getChatMessageUseCaseProvider)
-        .execute(roomId, userId);
-
-    ref.read(wsClientProvider).subscribeToUserQueue();
+        .execute(roomId, user!.id);
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
       next.whenData((data) {
@@ -55,7 +51,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
         final messageRoomId = data['roomId'];
 
         if (type == 'new_message' && messageRoomId == roomId) {
-          _handleNewMessage(data, userId);
+          _handleNewMessage(data, user.id);
           ref.read(chatListProvider.notifier).markAsRead(messageRoomId);
         }
       });
@@ -76,8 +72,8 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
       if (!exists) {
         state = AsyncData([newMessage, ...messages]);
       }
-    } catch (e) {
-      print('Failed to handle new message: $e');
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
     }
   }
 
@@ -100,11 +96,9 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
     state = const AsyncLoading();
     try {
       final user = await ref.read(userProvider.future);
-      final userId = user!.id;
-      
       final messages = await ref
           .read(getChatMessageUseCaseProvider)
-          .execute(roomId, userId);
+          .execute(roomId, user!.id);
 
       state = AsyncData(messages);
     } catch (e, trace) {

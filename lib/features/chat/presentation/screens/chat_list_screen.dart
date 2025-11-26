@@ -19,11 +19,6 @@ class ChatListScreen extends ConsumerStatefulWidget {
 class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     super.dispose();
   }

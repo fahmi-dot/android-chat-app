@@ -6,6 +6,6 @@ class MarkAsReadUseCase {
   MarkAsReadUseCase(this._chatListRepository);
 
   Future<void> execute(String roomId) async {
-    _chatListRepository.markAsRead(roomId);
+    await _chatListRepository.markAsRead(roomId);
   }
 }

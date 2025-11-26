@@ -6,7 +6,7 @@ class GetChatMessageUseCase {
 
   GetChatMessageUseCase(this._chatRoomRepository);
 
-  Future<List<Message>> execute(String roomId, String userId) {
-    return _chatRoomRepository.getChatMessages(roomId, userId);
+  Future<List<Message>> execute(String roomId, String userId) async {
+    return await _chatRoomRepository.getChatMessages(roomId, userId);
   }
 }

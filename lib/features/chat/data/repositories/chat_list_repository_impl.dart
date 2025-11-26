@@ -5,7 +5,9 @@ import 'package:android_chat_app/features/chat/domain/repositories/chat_list_rep
 class ChatListRepositoryImpl implements ChatListRepository {
   final ChatListRemoteDataSource chatListRemoteDataSource;
 
-  ChatListRepositoryImpl({required this.chatListRemoteDataSource});
+  ChatListRepositoryImpl({
+    required this.chatListRemoteDataSource,
+  });
 
   @override
   Future<List<Room>> getChatRooms() async {
@@ -13,14 +15,14 @@ class ChatListRepositoryImpl implements ChatListRepository {
 
     return roomModels.map((user) => user.toEntity()).toList();
   }
-  
+
   @override
   Future<Room> getChatRoomDetail(String roomId) async {
     final roomModel = await chatListRemoteDataSource.getChatRoomDetail(roomId);
 
     return roomModel.toEntity();
   }
-  
+
   @override
   Future<void> markAsRead(String roomId) async {
     return await chatListRemoteDataSource.markAsRead(roomId);

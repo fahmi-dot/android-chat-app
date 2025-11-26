@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/features/chat/data/datasources/chat_list_remote_datasource.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_list_repository_impl.dart';
 import 'package:android_chat_app/features/chat/domain/entities/room.dart';
@@ -8,6 +7,7 @@ import 'package:android_chat_app/features/chat/domain/repositories/chat_list_rep
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_rooms_usecase.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_detail_usecase.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/mark_as_read_usecase.dart';
+import 'package:android_chat_app/shared/providers/client_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final wsMessageStreamProvider = StreamProvider.autoDispose<dynamic>((ref) {
@@ -51,11 +51,6 @@ final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, Lis
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   @override
   FutureOr<List<Room>?> build() async {
-    await ref.read(wsClientProvider).initialize();
-
-    final auth = await ref.read(authProvider.future);
-    if (auth == null) return null;
-
     final rooms = await ref.read(getChatRoomsUseCaseProvider).execute();
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
@@ -111,8 +106,8 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
       } else {
         _handleNewMessage(data);
       }
-    } catch (e) {
-      print('Failed to handle new room: $e');
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
     }
   }
 
@@ -144,8 +139,8 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
       }).toList();
 
       state = AsyncData(updatedRooms);
-    } catch (e) {
-      print('Failed to handle new message: $e');
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
     }
   }
 
@@ -161,20 +156,24 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   }
 
   void markAsRead(String roomId) async {
-    await ref.read(markAsReadUseCaseProvider).execute(roomId);
+    try {
+      await ref.read(markAsReadUseCaseProvider).execute(roomId);
 
-    state.whenData((rooms) {
-      if (rooms == null) return;
+      state.whenData((rooms) {
+        if (rooms == null) return;
 
-      final updatedRooms = rooms.map((room) {
-        if (room.id == roomId) {
-          return room.copyWith(unreadMessagesCount: 0);
-        }
+        final updatedRooms = rooms.map((room) {
+          if (room.id == roomId) {
+            return room.copyWith(unreadMessagesCount: 0);
+          }
 
-        return room;
-      }).toList();
+          return room;
+        }).toList();
 
-      state = AsyncData(updatedRooms);
-    });
+        state = AsyncData(updatedRooms);
+      });
+    } catch (e, trace) {
+      state = AsyncError(e, trace);
+    }
   }
 }
