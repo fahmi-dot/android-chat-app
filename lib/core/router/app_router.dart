@@ -175,28 +175,28 @@ final appRouter = GoRouter(
             );
           },
         ),
-      ]
-    ),
-    GoRoute(
-      path: Routes.searchUser,
-      pageBuilder: (context, state) {
-        return CustomTransitionPage(
-          child: SearchUserScreen(),
-          transitionsBuilder: (context, animation, secondary, child) {
-            final fade = Tween<double>(begin: 0, end: 1).animate(animation);
-            final slide = Tween<Offset>(
-              begin: Offset(0.1, 0),
-              end: Offset.zero,
-            ).animate(animation);
+        GoRoute(
+          path: Routes.searchUser,
+          pageBuilder: (context, state) {
+            return CustomTransitionPage(
+              child: SearchUserScreen(),
+              transitionsBuilder: (context, animation, secondary, child) {
+                final fade = Tween<double>(begin: 0, end: 1).animate(animation);
+                final slide = Tween<Offset>(
+                  begin: Offset(0.1, 0),
+                  end: Offset.zero,
+                ).animate(animation);
 
-            return FadeTransition(
-              opacity: fade,
-              child: SlideTransition(position: slide, child: child),
+                return FadeTransition(
+                  opacity: fade,
+                  child: SlideTransition(position: slide, child: child),
+                );
+              },
+              transitionDuration: Duration(milliseconds: 250),
             );
           },
-          transitionDuration: Duration(milliseconds: 250),
-        );
-      },
+        ),
+      ]
     ),
   ],
 );
