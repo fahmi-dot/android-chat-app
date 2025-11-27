@@ -10,11 +10,11 @@ final searchUserUseCaseProvider = Provider<SearchUserUseCase>((ref) {
   return SearchUserUseCase(repository);
 });
 
-final searchUserProvider = AsyncNotifierProvider<SearchUserNotifier, List<UserSummary>>(
-  SearchUserNotifier.new,
+final userSearchProvider = AsyncNotifierProvider<UserSearchNotifier, List<UserSummary>>(
+  UserSearchNotifier.new,
 );
 
-class SearchUserNotifier extends AsyncNotifier<List<UserSummary>> {
+class UserSearchNotifier extends AsyncNotifier<List<UserSummary>> {
   Timer? _debounce;
 
   @override
@@ -36,7 +36,7 @@ class SearchUserNotifier extends AsyncNotifier<List<UserSummary>> {
         final users = await ref
             .read(searchUserUseCaseProvider)
             .execute(key);
-
+        
         state = AsyncData(users);
       } catch (e, trace) {
         state = AsyncError(e, trace);
