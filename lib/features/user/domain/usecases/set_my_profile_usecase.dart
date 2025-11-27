@@ -1,11 +1,11 @@
 import 'package:android_chat_app/features/user/domain/repositories/user_repository.dart';
 
-class SetProfileUseCase {
+class SetMyProfileUseCase {
   final UserRepository _userRepository;
 
-  SetProfileUseCase(this._userRepository);
+  SetMyProfileUseCase(this._userRepository);
 
   Future<void> execute(String? username, String? displayName, String? password) async {
-    await _userRepository.setProfile(username, displayName, password);
+    await _userRepository.setMyProfile(username, displayName, password);
   }
 }
