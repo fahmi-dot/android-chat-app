@@ -3,8 +3,8 @@ import 'package:android_chat_app/features/user/data/datasources/user_remote_data
 import 'package:android_chat_app/features/user/data/repositories/user_repository_impl.dart';
 import 'package:android_chat_app/features/user/domain/entities/user.dart';
 import 'package:android_chat_app/features/user/domain/repositories/user_repository.dart';
-import 'package:android_chat_app/features/user/domain/usecases/get_profile_usecase.dart';
-import 'package:android_chat_app/features/user/domain/usecases/set_profile_usecase.dart';
+import 'package:android_chat_app/features/user/domain/usecases/get_my_profile_usecase.dart';
+import 'package:android_chat_app/features/user/domain/usecases/set_my_profile_usecase.dart';
 import 'package:android_chat_app/shared/providers/client_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,16 +20,16 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   return UserRepositoryImpl(userRemoteDataSource: datasource);
 });
 
-final setProfileUseCaseProvider = Provider<SetProfileUseCase>((ref) {
+final setMyProfileUseCaseProvider = Provider<SetMyProfileUseCase>((ref) {
   final repository = ref.watch(userRepositoryProvider);
 
-  return SetProfileUseCase(repository);
+  return SetMyProfileUseCase(repository);
 });
 
-final getProfileUseCaseProvider = Provider<GetProfileUseCase>((ref) {
+final getMyProfileUseCaseProvider = Provider<GetMyProfileUseCase>((ref) {
   final repository = ref.watch(userRepositoryProvider);
 
-  return GetProfileUseCase(repository);
+  return GetMyProfileUseCase(repository);
 });
 
 final userProvider = AsyncNotifierProvider<UserNotifier, User?>(
@@ -40,15 +40,15 @@ class UserNotifier extends AsyncNotifier<User?> {
 
   @override
   FutureOr<User?> build() async {
-    return ref.read(getProfileUseCaseProvider).execute();
+    return ref.read(getMyProfileUseCaseProvider).execute();
   }
 
-  Future<bool> getProfile() async {
+  Future<bool> getMyProfile() async {
     state = AsyncLoading();
 
     try {
       final user = await ref
-          .read(getProfileUseCaseProvider)
+          .read(getMyProfileUseCaseProvider)
           .execute();
 
       state = AsyncData(user);
@@ -59,7 +59,7 @@ class UserNotifier extends AsyncNotifier<User?> {
     }
   }
 
-  Future<bool> setProfile(
+  Future<bool> setMyProfile(
     String? username,
     String? displayName,
     String? password,
@@ -68,7 +68,7 @@ class UserNotifier extends AsyncNotifier<User?> {
 
     try {
       await ref
-          .read(setProfileUseCaseProvider)
+          .read(setMyProfileUseCaseProvider)
           .execute(username, displayName, password);
 
       state = AsyncData(null);

@@ -9,23 +9,30 @@ class UserRepositoryImpl extends UserRepository {
   UserRepositoryImpl({required this.userRemoteDataSource});
 
   @override
-  Future<User> setProfile(String? username, String? displayName, String? password) async {
-    final userModel = await userRemoteDataSource.setProfile(username, displayName, password);
+  Future<User> setMyProfile(String? username, String? displayName, String? password) async {
+    final userModel = await userRemoteDataSource.setMyProfile(username, displayName, password);
 
     return userModel.toEntity();
   }
 
   @override
-  Future<User> getProfile() async {
-    final userModel = await userRemoteDataSource.getProfile();
+  Future<User> getMyProfile() async {
+    final userModel = await userRemoteDataSource.getMyProfile();
 
     return userModel.toEntity();
+  }
+
+  @override
+  Future<UserSummary> getUserProfile(String username) async {
+    final userSummaryModel = await userRemoteDataSource.getUserProfile(username);
+
+    return userSummaryModel.toEntity();
   }
   
   @override
   Future<List<UserSummary>> searchUser(String key) async {
-    final userModels = await userRemoteDataSource.searchUser(key);
+    final userSummaryModels = await userRemoteDataSource.searchUser(key);
     
-    return userModels.map((user) => user.toEntity()).toList();
+    return userSummaryModels.map((user) => user.toEntity()).toList();
   }
 }

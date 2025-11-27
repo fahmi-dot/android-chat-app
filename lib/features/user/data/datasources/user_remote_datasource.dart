@@ -5,12 +5,13 @@ import 'package:android_chat_app/features/user/data/models/user_summary_model.da
 import 'package:dio/dio.dart';
 
 abstract class UserRemoteDataSource {
-  Future<UserModel> setProfile(
+  Future<UserModel> setMyProfile(
     String? username,
     String? displayName,
     String? password,
   );
-  Future<UserModel> getProfile();
+  Future<UserModel> getMyProfile();
+  Future<UserSummaryModel> getUserProfile(String username);
   Future<List<UserSummaryModel>> searchUser(String key);
 }
 
@@ -22,12 +23,12 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
   });
 
   @override
-  Future<UserModel> setProfile(
+  Future<UserModel> setMyProfile(
     String? username,
     String? displayName,
     String? password,
   ) async {
-    final user = await getProfile();
+    final user = await getMyProfile();
     final id = user.id;
     try {
       await api.patch(
@@ -39,7 +40,7 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
         },
       );
 
-      return await getProfile();
+      return await getMyProfile();
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       throw Exception(
@@ -51,7 +52,7 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
   }
 
   @override
-  Future<UserModel> getProfile() async {
+  Future<UserModel> getMyProfile() async {
     try {
       final response = await api.get('/user');
       final data = response.data['data'];
@@ -70,9 +71,25 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
   }
 
   @override
+  Future<UserSummaryModel> getUserProfile(String username) async {
+    try {
+      final response = await api.get('/user/profile?query=$username');
+      final data = response.data['data'];
+
+      return UserSummaryModel(
+        username: data['username'], 
+        displayName: data['displayName'], 
+        avatarUrl: data['avatarUrl'],
+      );
+    } on DioException {
+      throw Exception("User not found");
+    }
+  }
+
+  @override
   Future<List<UserSummaryModel>> searchUser(String key) async {
     try {
-      final response = await api.get('/user/search?key=$key');
+      final response = await api.get('/user/search?query=$key');
       final data = response.data['data'] as List?;
 
       return data?.map((user) {

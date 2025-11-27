@@ -1,7 +1,7 @@
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/router/app_router.dart';
-import 'package:android_chat_app/features/user/presentation/providers/search_user_provider.dart';
+import 'package:android_chat_app/features/user/presentation/providers/user_search_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +35,7 @@ class _SearchUserScreenState extends ConsumerState<SearchUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final searchUserState = ref.watch(searchUserProvider);
+    final searchUserState = ref.watch(userSearchProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -53,11 +53,11 @@ class _SearchUserScreenState extends ConsumerState<SearchUserScreen> {
             focusedBorder: InputBorder.none,
           ),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
           onChanged: (value) {
             setState(() {
-              ref.read(searchUserProvider.notifier).searchUser(
+              ref.read(userSearchProvider.notifier).searchUser(
                 value.toLowerCase().trim(),
               );
             });
@@ -83,7 +83,7 @@ class _SearchUserScreenState extends ConsumerState<SearchUserScreen> {
               final user = users[index];
 
               return InkWell(
-                onTap: () => context.push(Routes.chatWithRoom(user.username)),
+                onTap: () => context.push(Routes.chatWithRoom(user.username), extra: user.username),
                 onLongPress: () {},
                 child: Padding(
                   padding: const EdgeInsets.all(AppSizes.paddingM),
