@@ -17,23 +17,24 @@ final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((
   return ChatRoomRemoteDataSourceImpl(api: api);
 });
 
-final chatRepositoryProvider = Provider<ChatRoomRepository>((ref) {
+final chatRoomRepositoryProvider = Provider<ChatRoomRepository>((ref) {
   final datasource = ref.watch(chatRoomRemoteDataSourceProvider);
   return ChatRoomRepositoryImpl(chatRoomRemoteDataSource: datasource);
 });
 
 final getChatMessageUseCaseProvider = Provider<GetChatMessageUseCase>((ref) {
-  final repository = ref.watch(chatRepositoryProvider);
+  final repository = ref.watch(chatRoomRepositoryProvider);
+
   return GetChatMessageUseCase(repository);
 });
 
 final chatRoomProvider = AsyncNotifierProvider.family
-    .autoDispose<ChatRoomNotifier, List<Message>?, String>(
+    .autoDispose<ChatRoomNotifier, List<Message>?, String?>(
       ChatRoomNotifier.new,
     );
 
 class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
-  final String roomId;
+  final String? roomId;
 
   ChatRoomNotifier(this.roomId);
 
@@ -43,7 +44,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
 
     final messages = await ref
         .read(getChatMessageUseCaseProvider)
-        .execute(roomId, user!.id);
+        .execute(roomId!, user!.id);
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
       next.whenData((data) {
@@ -77,14 +78,11 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
     }
   }
 
-  Future<bool> sendMessage(String message) async {
+  Future<bool> sendMessage(String message, String? username) async {
     try {
       final ws = ref.read(wsClientProvider);
-      final roomDetail = await ref
-          .read(getChatRoomDetailUseCaseProvider)
-          .execute(roomId);
 
-      ws.sendMessage(roomId: roomId, content: message, receiver: roomDetail.username);
+      ws.sendMessage(roomId: roomId, content: message, receiver: username);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
@@ -98,7 +96,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
       final user = await ref.read(userProvider.future);
       final messages = await ref
           .read(getChatMessageUseCaseProvider)
-          .execute(roomId, user!.id);
+          .execute(roomId!, user!.id);
 
       state = AsyncData(messages);
     } catch (e, trace) {

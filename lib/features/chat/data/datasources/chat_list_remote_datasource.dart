@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 
 abstract class ChatListRemoteDataSource {
   Future<List<RoomModel>> getChatRooms();
-  Future<RoomModel> getChatRoomDetail(String roomId);
   Future<void> markAsRead(String roomId);
 }
 
@@ -36,29 +35,6 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
       }).toList();
     } on DioException catch (e) {
       throw Exception('Failed to get chat room list: $e');
-    }
-  }
-
-  @override
-  Future<RoomModel> getChatRoomDetail(String roomId) async {
-    try {
-      final response = await api.get('/chat/rooms/$roomId');
-      final data = response.data['data'];
-      final participants = (data['participants'] as List).first;
-
-      return RoomModel(
-        id: data['id'],
-        username: participants['username'] ?? '',
-        displayName: participants['displayName'] ?? '',
-        avatarUrl: participants['avatarUrl'] ?? '',
-        lastMessage: data['lastMessage'] ?? '',
-        lastMessageSentAt: data['lastMessageSentAt'] != null
-            ? DateTime.parse(data['lastMessageSentAt'])
-            : DateTime.now(),
-        unreadMessagesCount: data['unreadMessagesCount'] ?? 0,
-      );
-    } on DioException catch (e) {
-      throw Exception('Failed to get chat room detail: $e');
     }
   }
 

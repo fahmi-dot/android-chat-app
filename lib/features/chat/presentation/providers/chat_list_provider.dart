@@ -5,9 +5,9 @@ import 'package:android_chat_app/features/chat/data/repositories/chat_list_repos
 import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_list_repository.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_rooms_usecase.dart';
-import 'package:android_chat_app/features/chat/domain/usecases/get_chat_room_detail_usecase.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/mark_as_read_usecase.dart';
 import 'package:android_chat_app/shared/providers/client_provider.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final wsMessageStreamProvider = StreamProvider.autoDispose<dynamic>((ref) {
@@ -30,12 +30,6 @@ final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
   final repository = ref.watch(chatListRepositoryProvider);
 
   return GetChatRoomsUseCase(repository, ref);
-});
-
-final getChatRoomDetailUseCaseProvider = Provider<GetChatRoomDetailUseCase>((ref) {
-  final repository = ref.watch(chatListRepositoryProvider);
-
-  return GetChatRoomDetailUseCase(repository);
 });
 
 final markAsReadUseCaseProvider = Provider<MarkAsReadUseCase>((ref) {
@@ -78,10 +72,6 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
       if (roomId == null || content == null || senderId == null) return;
 
-      final roomDetail = await ref
-          .read(getChatRoomDetailUseCaseProvider)
-          .execute(roomId);
-
       final sentAt = sentAtStr != null
           ? DateTime.parse(sentAtStr)
           : DateTime.now();
@@ -90,13 +80,14 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
       if (rooms == null) return;
 
       final exists = rooms.any((room) => room.id == roomId);
+      final room = rooms.firstWhereOrNull((room) => room.id == roomId);
 
       if (!exists) {
         final newRoom = Room(
           id: roomId,
-          username: roomDetail.username,
-          displayName: roomDetail.displayName,
-          avatarUrl: roomDetail.avatarUrl,
+          username: room!.username,
+          displayName: room.displayName,
+          avatarUrl: room.avatarUrl,
           lastMessage: content,
           lastMessageSentAt: sentAt,
           unreadMessagesCount: 1,
@@ -116,8 +107,9 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
       final roomId = data['roomId'];
       final content = data['content'];
       final sentAtStr = data['sentAt'] as String?;
+      final senderId = data['senderId'];
 
-      if (roomId == null || content == null) return;
+      if (roomId == null || content == null || senderId == null) return;
 
       final sentAt = sentAtStr != null
           ? DateTime.parse(sentAtStr)
@@ -146,10 +138,11 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
 
   Future<void> getRooms() async {
     state = const AsyncLoading();
-    try {
-      final chatList = await ref.read(getChatRoomsUseCaseProvider).execute();
 
-      state = AsyncData(chatList);
+    try {
+      final rooms = await ref.read(getChatRoomsUseCaseProvider).execute();
+
+      state = AsyncData(rooms);
     } catch (e, trace) {
       state = AsyncError(e, trace);
     }

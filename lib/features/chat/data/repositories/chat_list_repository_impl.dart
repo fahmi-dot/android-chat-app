@@ -17,13 +17,6 @@ class ChatListRepositoryImpl implements ChatListRepository {
   }
 
   @override
-  Future<Room> getChatRoomDetail(String roomId) async {
-    final roomModel = await chatListRemoteDataSource.getChatRoomDetail(roomId);
-
-    return roomModel.toEntity();
-  }
-
-  @override
   Future<void> markAsRead(String roomId) async {
     return await chatListRemoteDataSource.markAsRead(roomId);
   }

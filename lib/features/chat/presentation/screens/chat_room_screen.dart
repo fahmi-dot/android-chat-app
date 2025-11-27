@@ -2,16 +2,17 @@ import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_room_provider.dart';
+import 'package:android_chat_app/features/user/presentation/providers/user_detail_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
-  final String roomId;
+  final String? roomId;
+  final String? username;
 
-  const ChatRoomScreen({super.key, required this.roomId});
+  const ChatRoomScreen({super.key, this.roomId, this.username});
 
   @override
   ConsumerState<ChatRoomScreen> createState() => _ChatRoomScreenState();
@@ -25,8 +26,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   void initState() {
     super.initState();
 
+    Future.microtask(() {
+      ref.read(userDetailProvider.notifier).getUserProfile(widget.username!);
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(chatListProvider.notifier).markAsRead(widget.roomId);
+      ref.read(chatListProvider.notifier).markAsRead(widget.roomId!);
     });
   }
 
@@ -43,7 +48,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
     await ref
         .read(chatRoomProvider(widget.roomId).notifier)
-        .sendMessage(message);
+        .sendMessage(message, widget.username);
 
     _controller.clear();
   }
@@ -57,9 +62,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   @override
   Widget build(BuildContext context) {
     final chatRoomState = ref.watch(chatRoomProvider(widget.roomId));
-    final roomDetail = ref
-        .watch(chatListProvider)
-        .value?.firstWhereOrNull((room) => room.id == widget.roomId);
+    final userDetailState = ref.watch(userDetailProvider).value;
 
     return Scaffold(
       appBar: AppBar(
@@ -68,8 +71,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           children: [
             CircleAvatar(
               radius: AppSizes.radiusL + 2.0,
-              backgroundImage: roomDetail?.avatarUrl != null
-                  ? NetworkImage(roomDetail!.avatarUrl)
+              backgroundImage: userDetailState?.avatarUrl != null 
+                  ? NetworkImage(userDetailState!.avatarUrl)
                   : null,
               backgroundColor: Theme.of(context).colorScheme.surface,
             ),
@@ -79,7 +82,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    roomDetail?.displayName ?? 'User',
+                    userDetailState?.displayName ?? 'User',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),

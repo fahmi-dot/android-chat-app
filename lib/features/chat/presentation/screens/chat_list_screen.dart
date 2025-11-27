@@ -126,7 +126,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
               return InkWell(
                 onTap: () {
-                  context.push(Routes.chatWithRoom(room.id)).then((_) {
+                  context.push(Routes.chatWithRoom(room.id), extra: room.username).then((_) {
                     ref.invalidate(chatListProvider);
                   });
                 },
