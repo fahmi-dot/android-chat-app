@@ -181,7 +181,7 @@ class AuthNotifier extends AsyncNotifier<Token?> {
 
     try {
       await ref
-          .read(setProfileUseCaseProvider)
+          .read(setMyProfileUseCaseProvider)
           .execute(username, null, null);
 
       state = AsyncData(null);
