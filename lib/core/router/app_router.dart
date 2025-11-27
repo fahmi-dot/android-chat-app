@@ -161,8 +161,12 @@ final appRouter = GoRouter(
           path: Routes.chatRoom,
           pageBuilder: (context, state) {
             final roomId = state.pathParameters['roomId']!;
+            final username = state.extra as String;
             return CustomTransitionPage(
-              child: ChatRoomScreen(roomId: roomId),
+              child: ChatRoomScreen(
+                roomId: roomId,
+                username: username,
+              ),
               transitionsBuilder: (context, animation, secondary, child) {
                 final slide = Tween<Offset>(begin: Offset(0.1, 0), end: Offset.zero)
                     .animate(
