@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:heroicons/heroicons.dart';
+
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/router/app_router.dart';
@@ -7,10 +12,6 @@ import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_notification.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:heroicons/heroicons.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -156,7 +157,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    AppStrings.haveAccount,
+                    AppStrings.alreadyHaveAccount,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),

@@ -1,18 +1,20 @@
 import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:android_chat_app/core/utils/token_holder.dart';
+import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:android_chat_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:android_chat_app/features/auth/domain/entities/token.dart';
+import 'package:android_chat_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:android_chat_app/features/auth/domain/usecases/check_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:android_chat_app/features/auth/domain/usecases/login_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/register_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/resend_code_usecase.dart';
 import 'package:android_chat_app/features/auth/domain/usecases/verify_usecase.dart';
 import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
 import 'package:android_chat_app/shared/providers/client_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:android_chat_app/features/auth/domain/usecases/check_usecase.dart';
-import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
-import 'package:android_chat_app/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:android_chat_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:android_chat_app/features/auth/domain/usecases/login_usecase.dart';
 
 
 final authRemoteDatasourceProvider = Provider<AuthRemoteDataSource>((ref) {
@@ -181,8 +183,8 @@ class AuthNotifier extends AsyncNotifier<Token?> {
 
     try {
       await ref
-          .read(setMyProfileUseCaseProvider)
-          .execute(username, null, null);
+          .read(userProvider.notifier)
+          .setMyProfile(username, null, null);
 
       state = AsyncData(null);
       return true;

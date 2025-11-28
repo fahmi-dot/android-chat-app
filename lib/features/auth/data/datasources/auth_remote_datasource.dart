@@ -1,8 +1,9 @@
+import 'package:dio/dio.dart';
+
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/core/network/ws_client.dart';
 import 'package:android_chat_app/features/auth/data/models/token_model.dart';
-import 'package:dio/dio.dart';
 
 abstract class AuthRemoteDataSource {
   Future<TokenModel> login(String username, String password);
@@ -32,12 +33,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         '/auth/login',
         data: {'username': username, 'password': password},
       );
-      final data = response.data['data'];
-
-      final token = TokenModel(
-        access: data['tokens']['accessToken'],
-        refresh: data['tokens']['refreshToken'],
-      );
+      final data = response.data['data']['tokens'];
+      final token = TokenModel.fromJson(data);
 
       await connect();
 
@@ -47,7 +44,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw Exception(
         status == 401
             ? AppStrings.invalidLoginMessage
-            : AppStrings.noAccountMessage,
+            : status == 404 
+              ? AppStrings.notFoundAccountMessage
+              : AppStrings.somethingWentWrongMessage,
       );
     }
   }
@@ -56,8 +55,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> forgotPassword(String email) async {
     try {
       await api.post('/auth/forgot', data: {'email': email});
-    } on DioException {
-      throw Exception();
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      throw Exception(
+        status == 404
+            ? AppStrings.notFoundEmailMessage
+            : AppStrings.somethingWentWrongMessage,
+      );
     }
   }
 
@@ -76,8 +80,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'password': password,
         },
       );
-    } on DioException {
-      throw Exception(AppStrings.registeredMessage);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      throw Exception(
+        status == 409 
+            ? AppStrings.alreadyRegisteredPhoneMessage
+            : AppStrings.somethingWentWrongMessage,
+      );
     }
   }
 
@@ -85,8 +94,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> resendCode(String phoneNumber) async {
     try {
       await api.post('/auth/resend', data: {'phoneNumber': phoneNumber});
-    } on DioException {
-      throw Exception(AppStrings.failedResendMessage);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      throw Exception(
+        status == 404
+            ? AppStrings.failedResendMessage
+            : AppStrings.somethingWentWrongMessage,
+      );
     }
   }
 
@@ -112,7 +126,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw Exception(
         status == 401
             ? AppStrings.invalidCodeMessage
-            : AppStrings.expiredCodeMessage,
+            : status == 409
+              ? AppStrings.expiredCodeMessage
+              : AppStrings.somethingWentWrongMessage,
       );
     }
   }
@@ -126,16 +142,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       final data = response.data['data'];
 
-      final token = TokenModel(
-        access: data['accessToken'],
-        refresh: data['refreshToken'],
-      );
-
-      return token;
+      return TokenModel.fromJson(data);
     } on DioException catch (e) {
       final status = e.response?.statusCode;
-      final message = e.response?.data?['message'] ?? e.message;
-      throw Exception('HTTP $status: $message');
+      throw Exception(
+        status == 401
+            ? AppStrings.invalidTokenMessage
+            : status == 409
+              ? AppStrings.expiredTokenMessage
+              : AppStrings.somethingWentWrongMessage,
+      );
     }
   }
 }

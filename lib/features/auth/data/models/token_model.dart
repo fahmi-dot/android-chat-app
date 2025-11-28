@@ -13,10 +13,18 @@ class TokenModel extends Token {
     );
   }
 
+  factory TokenModel.fromJson(Map<String, dynamic> json) {
+    return TokenModel(
+      access: json['accessToken'], 
+      refresh: json['refreshToken']
+    );
+  }
+
   Token toEntity() {
     return Token(
       access: access,
       refresh: refresh,
     );
   }
+
 }

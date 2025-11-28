@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:heroicons/heroicons.dart';
+
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/router/app_router.dart';
@@ -7,10 +12,6 @@ import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_notification.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:heroicons/heroicons.dart';
 
 class VerifyScreen extends ConsumerStatefulWidget {
   final String phoneNumber;
@@ -170,7 +171,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              AppStrings.didntReceive,
+                              AppStrings.didntReceiveCode,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),

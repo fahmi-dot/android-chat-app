@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:heroicons/heroicons.dart';
+
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
@@ -5,10 +10,6 @@ import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:heroicons/heroicons.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -29,7 +30,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   void _forgotPassword() async {
     final email = _controller.text.trim();
-    final success = await ref.read(authProvider.notifier).forgotPassword(email);
+    final success = await ref
+        .read(authProvider.notifier)
+        .forgotPassword(email);
 
     if (mounted && success) {
       context.pop();

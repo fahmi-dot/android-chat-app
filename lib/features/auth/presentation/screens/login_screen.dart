@@ -1,17 +1,18 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:heroicons/heroicons.dart';
+
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/router/app_router.dart';
 import 'package:android_chat_app/core/theme/theme_provider.dart';
+import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_notification.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_button.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:go_router/go_router.dart';
-import 'package:heroicons/heroicons.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
