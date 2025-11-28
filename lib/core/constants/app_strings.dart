@@ -16,13 +16,16 @@ class AppStrings {
   static const String setUsernameSubtitle = 'Create a new username to sign in later';
 
   static const String dontHaveAccount = "Don't have an account?";
-  static const String haveAccount = 'Have an account?';
-  static const String didntReceive = "Didn't receive the code?";
+  static const String alreadyHaveAccount = 'Already have an account?';
+  static const String didntReceiveCode = "Didn't receive the code?";
 
   static const String login = 'Sign in';
   static const String logout = 'Sign out';
   static const String register = 'Sign up';
   static const String verify = 'Verify';
+  static const String profile = 'Profile';
+  static const String myProfile = 'My profile';
+  static const String setting = 'Settings';
   static const String confirm = 'Confirm';
   static const String save = 'Save';
   static const String cancel = 'Cancel';
@@ -34,23 +37,30 @@ class AppStrings {
 
   static const String phoneNumber = 'Phone number';
   static const String email = 'Email';
+  static const String name = 'Name';
   static const String username = 'Username';
+  static const String bio = 'Bio';
   static const String password = 'Password';
   static const String cPassword = 'Confirm password';
   static const String message = 'Message';
   static const String search = 'Search';
 
-  static const String noChats = 'No chats yet';
-  static const String noChatsSub = 'Start a new conversation';
+  static const String noChatsTitle = 'No chats yet';
+  static const String noChatsSubtitle = 'Start a new conversation';
   static const String noChatsFound = 'No chats found';
-  static const String noMessages = 'No messages yet';
+  static const String noMessagesTitle = 'No messages yet';
 
-  static const String noAccountMessage = 'No account found. Please register first';
+  static const String somethingWentWrongMessage = 'Something went wrong. Please try again later';
+  static const String notFoundAccountMessage = 'No account found. Please register first';
+  static const String notFoundEmailMessage = "Couldn't find an account with that email";
+  static const String notFoundUserMessage = "Couldn't find an account with that username";
+  static const String alreadyTakenUsernameMessage = 'Username already taken';
+  static const String alreadyRegisteredPhoneMessage = 'Phone number already registered';
   static const String invalidLoginMessage = 'Invalid email or password';
-  static const String usernameTakenMessage = 'Username already taken';
-  static const String registeredMessage = 'Phone number already registered';
+  static const String invalidCodeMessage = 'Invalid verification code';
+  static const String invalidTokenMessage = 'Invalid token';
   static const String expiredCodeMessage = 'Verification code has expired';
-  static const String invalidCodeMessage = 'Invalid verification code'; 
+  static const String expiredTokenMessage = 'Token has expired';
   static const String successResendMessage = 'Verification code sent';
   static const String failedResendMessage = 'Failed to send verification code. Please try again';
 }
