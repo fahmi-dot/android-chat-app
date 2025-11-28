@@ -3,6 +3,7 @@ import 'package:android_chat_app/features/auth/presentation/screens/forgot_passw
 import 'package:android_chat_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/set_username_screen.dart';
 import 'package:android_chat_app/features/auth/presentation/screens/verify_screen.dart';
+import 'package:android_chat_app/features/user/presentation/screens/my_profile_screen.dart';
 import 'package:android_chat_app/features/user/presentation/screens/search_user_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,6 +23,7 @@ class Routes {
   static const chatList = '/chats';
   static const chatRoom = '/chats/:roomId';
   static const searchUser = '/user/search';
+  static const myProfile = '/profile';
 
   static String verifyWithPhone(String phoneNumber) => '/verify/$phoneNumber';
   static String chatWithRoom(String roomId) => '/chats/$roomId';
@@ -200,6 +202,23 @@ final appRouter = GoRouter(
             );
           },
         ),
+        GoRoute(
+          path: Routes.myProfile,
+          pageBuilder: (context, state) {
+            return CustomTransitionPage(
+              child: MyProfileScreen(),
+              transitionsBuilder: (context, animation, secondary, child) {
+                final slide = Tween<Offset>(begin: Offset(-1, 0), end: Offset.zero)
+                    .animate(
+                      CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                    );
+
+                return SlideTransition(position: slide, child: child);
+              },
+              transitionDuration: Duration(milliseconds: 250),
+            );
+          },
+        )
       ]
     ),
   ],
