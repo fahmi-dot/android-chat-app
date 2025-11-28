@@ -76,6 +76,7 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.surface,
+        surfaceContainer: AppColors.background,
         error: AppColors.error,
 
         onPrimary: Colors.white,
@@ -93,9 +94,10 @@ class AppTheme {
       colorScheme: const ColorScheme(
         brightness: Brightness.dark,
 
-        primary: AppColors.primary,
+        primary: AppColors.darkPrimary,
         secondary: AppColors.secondary,
         surface: AppColors.darkSurface,
+        surfaceContainer: AppColors.darkBackground,
         error: AppColors.error,
 
         onPrimary: Colors.white,
