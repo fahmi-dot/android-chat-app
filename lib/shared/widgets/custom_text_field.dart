@@ -15,6 +15,7 @@ class CustomTextField extends StatefulWidget {
   final int? maxLines;
   final Function(String value)? onChange;
   final Function(String value)? onSubmitted;
+  final HeroIcons? icon;
   final CustomTextFieldType type;
 
   const CustomTextField({
@@ -29,6 +30,7 @@ class CustomTextField extends StatefulWidget {
     this.showLabel = false,
     this.maxLines,
     this.onChange,
+    this.icon,
     this.onSubmitted,
     required this.type,
   });
@@ -38,6 +40,7 @@ class CustomTextField extends StatefulWidget {
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
+  bool _isReadOnly = true;
   bool _isObscure = true;
   FocusNode _focusNode = FocusNode();
 
@@ -106,6 +109,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
           FilteringTextInputFormatter.digitsOnly,
         ],
       ],
+      readOnly: widget.type == CustomTextFieldType.readOnly
+          ? _isReadOnly
+          : false,
     );
   }
 
@@ -113,12 +119,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     return Container(
       width: widget.width ?? AppSizes.screenWidth(context),
-      padding: widget.type != CustomTextFieldType.password
-          ? const EdgeInsets.symmetric(horizontal: AppSizes.paddingM)
-          : const EdgeInsets.only(
-              left: AppSizes.paddingM,
-              right: AppSizes.paddingS,
-            ),
+      padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingXL),
       constraints: BoxConstraints(
         minHeight: AppSizes.screenHeight(context) * 0.06,
         maxHeight: widget.maxLines == 1
@@ -139,16 +140,17 @@ class _CustomTextFieldState extends State<CustomTextField> {
           ? Row(
               children: [
                 Expanded(child: textField()),
-                IconButton(
-                  onPressed: () {
+                GestureDetector(
+                  onTap: () {
                     setState(() {
                       _isObscure = !_isObscure;
                     });
                   },
-                  icon: HeroIcon(
+                  child: HeroIcon(
                     _isObscure ? HeroIcons.eyeSlash : HeroIcons.eye,
                     color: Theme.of(context).colorScheme.onSurface,
                     style: HeroIconStyle.outline,
+                    size: 20.0,
                   ),
                 ),
               ],
@@ -166,9 +168,28 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 Expanded(child: textField()),
               ],
             )
+          : widget.type == CustomTextFieldType.readOnly
+          ? Row(
+              children: [
+                Expanded(child: textField()),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isReadOnly = !_isReadOnly;
+                    });
+                  },
+                  child: widget.icon == null ? SizedBox() : HeroIcon(
+                    _isReadOnly ? widget.icon! : HeroIcons.xMark,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    style: HeroIconStyle.outline,
+                    size: 20.0,
+                  ),
+                ),
+              ],
+            )
           : textField(),
     );
   }
 }
 
-enum CustomTextFieldType { text, password, phone, email, otp }
+enum CustomTextFieldType { text, password, phone, email, otp, readOnly }

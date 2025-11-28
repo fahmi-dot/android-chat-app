@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 
 class CustomBanner extends StatelessWidget {
-  final HeroIcons icon;
-  const CustomBanner({super.key, required this.icon});
+  final HeroIcons? icon;
+  final Widget? widget;
+  const CustomBanner({super.key, this.icon, this.widget});
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +25,14 @@ class CustomBanner extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             padding: EdgeInsets.all(32.0),
-            child: HeroIcon(
-              icon,
-              style: HeroIconStyle.outline,
-              color: Theme.of(context).colorScheme.primary,
-              size: 80.0,
-            ),
+            child: icon != null 
+              ? HeroIcon(
+                  icon!,
+                  style: HeroIconStyle.outline,
+                  color: Theme.of(context).colorScheme.secondary,
+                  size: 80.0,
+                )
+              : widget
           ),
         ),
         Positioned(
