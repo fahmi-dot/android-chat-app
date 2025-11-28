@@ -1,9 +1,10 @@
-import 'package:android_chat_app/core/theme/theme_provider.dart';
-import 'package:android_chat_app/shared/providers/client_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:android_chat_app/core/router/app_router.dart';
 import 'package:android_chat_app/core/theme/app_theme.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:android_chat_app/shared/providers/client_provider.dart';
+import 'package:android_chat_app/shared/providers/theme_provider.dart';
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
