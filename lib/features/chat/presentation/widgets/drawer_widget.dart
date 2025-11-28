@@ -1,11 +1,14 @@
-import 'package:android_chat_app/core/constants/app_sizes.dart';
-import 'package:android_chat_app/core/constants/app_strings.dart';
-import 'package:android_chat_app/core/theme/theme_provider.dart';
-import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
+
+import 'package:android_chat_app/core/constants/app_sizes.dart';
+import 'package:android_chat_app/core/constants/app_strings.dart';
+import 'package:android_chat_app/core/router/app_router.dart';
+import 'package:android_chat_app/core/theme/theme_provider.dart';
+import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
 
 class DrawerWidget extends ConsumerStatefulWidget {
   const DrawerWidget({super.key});
@@ -15,6 +18,16 @@ class DrawerWidget extends ConsumerStatefulWidget {
 }
 
 class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      ref.read(userProvider.notifier).getMyProfile();
+    });
+  }
+
   void _logout() async {
     final shouldLogout = await showDialog<bool>(
       context: context,
@@ -63,6 +76,9 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final userState = ref.watch(userProvider).value;
+    if (userState == null) return CircularProgressIndicator();
+
     return Drawer(
       child: Column(
         children: [
@@ -81,24 +97,32 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          height: 65.0,
-                          width: 65.0,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            shape: BoxShape.circle,
+                        GestureDetector(
+                          onTap: () => context.push(Routes.myProfile),
+                          child: Container(
+                            height: 65.0,
+                            width: 65.0,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              shape: BoxShape.circle,
+                            ),
+                            child: CircleAvatar(
+                              backgroundImage: NetworkImage(userState.avatarUrl),
+                              backgroundColor: Theme.of(context).colorScheme.surface,
+                            ),
                           ),
                         ),
                         SizedBox(height: AppSizes.paddingXS),
                         Text(
-                          'Display Name',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                          userState.displayName,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontSize: AppSizes.fontL,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
-                          'Phone Number',
+                          userState.phoneNumber,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.onPrimary,
@@ -110,13 +134,17 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      IconButton(
-                        onPressed: () =>
-                            ref.read(themeProvider.notifier).toggle(),
-                        icon: HeroIcon(
-                          HeroIcons.moon,
-                          style: HeroIconStyle.solid,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                      Padding(
+                        padding: const EdgeInsets.only(right: AppSizes.paddingM),
+                        child: GestureDetector(
+                          onTap: () => ref.read(themeProvider.notifier).toggle(),
+                          child: HeroIcon(
+                            Theme.of(context).colorScheme.brightness == Brightness.dark
+                                ? HeroIcons.moon
+                                : HeroIcons.sun,
+                            style: HeroIconStyle.solid,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -126,64 +154,54 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
             ),
           ),
           Expanded(
-            child: ListView(
-              children: [
-                ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
-                  leading: HeroIcon(
-                    HeroIcons.userCircle,
-                    style: HeroIconStyle.outline,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  title: Text(
-                    'My Profile',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        _buildMenu(HeroIcons.userCircle, AppStrings.myProfile, () => context.push(Routes.myProfile)),
+                        _buildMenu(HeroIcons.cog6Tooth, AppStrings.setting, () => context.push(Routes.myProfile)),
+                        _buildMenu(HeroIcons.arrowLeftStartOnRectangle, AppStrings.logout, () => _logout()),
+                      ],
                     ),
                   ),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
-                  leading: HeroIcon(
-                    HeroIcons.cog6Tooth,
-                    style: HeroIconStyle.outline,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  title: Text(
-                    'Settings',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+                  Container(
+                    padding: const EdgeInsets.all(AppSizes.paddingM),
+                    child: Image.asset(
+                      'assets/icons/icon_hello.png',
+                      width: AppSizes.screenWidth(context) * 0.15,
+                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5),
                     ),
                   ),
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
-                  leading: HeroIcon(
-                    HeroIcons.arrowLeftStartOnRectangle,
-                    style: HeroIconStyle.outline,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  title: Text(
-                    AppStrings.logout,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  onTap: _logout,
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.only(bottom: AppSizes.paddingXL),
-            child: Image.asset(
-              'assets/icons/icon_hello.png',
-              width: AppSizes.screenWidth(context) * 0.15,
-              color: Theme.of(context).colorScheme.secondary,
+                ],
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMenu(HeroIcons icon, String label, Function() onTap) {
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
+      leading: HeroIcon(
+        icon,
+        style: HeroIconStyle.outline,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+      title: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurface,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }

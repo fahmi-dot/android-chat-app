@@ -1,14 +1,15 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:android_chat_app/features/chat/data/datasources/chat_list_remote_datasource.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_list_repository_impl.dart';
 import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_list_repository.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/get_chat_rooms_usecase.dart';
-import 'package:android_chat_app/features/chat/domain/usecases/mark_as_read_usecase.dart';
+import 'package:android_chat_app/features/chat/presentation/providers/chat_room_provider.dart';
 import 'package:android_chat_app/shared/providers/client_provider.dart';
-import 'package:collection/collection.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final wsMessageStreamProvider = StreamProvider.autoDispose<dynamic>((ref) {
   return ref.read(wsClientProvider).messageStream;
@@ -30,12 +31,6 @@ final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
   final repository = ref.watch(chatListRepositoryProvider);
 
   return GetChatRoomsUseCase(repository, ref);
-});
-
-final markAsReadUseCaseProvider = Provider<MarkAsReadUseCase>((ref) {
-  final repository = ref.watch(chatListRepositoryProvider);
-
-  return MarkAsReadUseCase(repository);
 });
 
 final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
@@ -148,10 +143,10 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     }
   }
 
-  void markAsRead(String roomId) async {
+  Future<void> markAsRead(String roomId) async {
     try {
-      await ref.read(markAsReadUseCaseProvider).execute(roomId);
-
+      await ref.read(chatRoomProvider(roomId).notifier).markAsRead();
+      
       state.whenData((rooms) {
         if (rooms == null) return;
 

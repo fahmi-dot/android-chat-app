@@ -13,4 +13,9 @@ class ChatRoomRepositoryImpl implements ChatRoomRepository {
   
     return messageModels.map((message) => message.toEntity()).toList();
   }
+
+  @override
+  Future<void> markAsRead(String roomId) async {
+    return await chatRoomRemoteDataSource.markAsRead(roomId);
+  }
 }

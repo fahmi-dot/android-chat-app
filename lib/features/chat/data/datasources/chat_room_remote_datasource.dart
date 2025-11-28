@@ -1,9 +1,12 @@
+import 'package:dio/dio.dart';
+
+import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/chat/data/models/message_model.dart';
-import 'package:dio/dio.dart';
 
 abstract class ChatRoomRemoteDataSource {
   Future<List<MessageModel>> getChatMessages(String roomId, String userId);
+  Future<void> markAsRead(String roomId);
 }
 
 class ChatRoomRemoteDataSourceImpl extends ChatRoomRemoteDataSource {
@@ -17,20 +20,20 @@ class ChatRoomRemoteDataSourceImpl extends ChatRoomRemoteDataSource {
       final response = await api.get('/chat/rooms/$roomId/messages');
       final data = response.data['data'] as List;
 
-      return data.map((message) {
-        return MessageModel(
-          id: message['id'],
-          content: message['content'],
-          sentAt: message['sentAt'] != null
-              ? DateTime.parse(message['sentAt'])
-              : DateTime.now(),
-          isRead: message['read'],
-          senderId: message['senderId'],
-          isSentByMe: message['senderId'] == userId,
-        );
-      }).toList();
-    } on DioException catch (e) {
-      throw Exception('Failed to get chat messages: $e');
+      return data.map((message) =>
+        MessageModel.fromJson(message, userId)
+      ).toList();
+    } on DioException {
+      throw Exception(AppStrings.somethingWentWrongMessage);
+    }
+  }
+
+  @override
+  Future<void> markAsRead(String roomId) async {
+    try {
+      await api.patch('/chat/rooms/$roomId/messages');
+    } on DioException {
+      throw Exception(AppStrings.somethingWentWrongMessage);
     }
   }
 }

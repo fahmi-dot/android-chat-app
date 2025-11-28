@@ -23,13 +23,13 @@ class MessageModel extends Message {
 
   factory MessageModel.fromJson(Map<String, dynamic> json, String userId) {
     return MessageModel(
-      id: json['id'] ?? DateTime.now().toString(),
-      content: json['content'] ?? '',
+      id: json['id'],
+      content: json['content'],
       sentAt: json['sentAt'] != null
           ? DateTime.parse(json['sentAt'])
           : DateTime.now(),
-      isRead: json['isRead'] ?? false,
-      senderId: json['senderId'] ?? '',
+      isRead: json['isRead'],
+      senderId: json['senderId'],
       isSentByMe: json['senderId'] == userId,
     );
   }

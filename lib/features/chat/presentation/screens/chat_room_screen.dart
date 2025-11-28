@@ -1,12 +1,13 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:heroicons/heroicons.dart';
+
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_room_provider.dart';
 import 'package:android_chat_app/features/user/presentation/providers/user_detail_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:heroicons/heroicons.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String? roomId;
@@ -66,6 +67,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         titleSpacing: 0,
         title: Row(
           children: [
@@ -147,7 +149,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                         ),
                         const SizedBox(height: AppSizes.paddingM),
                         Text(
-                          AppStrings.noMessages,
+                          AppStrings.noMessagesTitle,
                           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                           ),

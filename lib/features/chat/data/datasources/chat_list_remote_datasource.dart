@@ -1,10 +1,11 @@
+import 'package:dio/dio.dart';
+
+import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/chat/data/models/room_model.dart';
-import 'package:dio/dio.dart';
 
 abstract class ChatListRemoteDataSource {
   Future<List<RoomModel>> getChatRooms();
-  Future<void> markAsRead(String roomId);
 }
 
 class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
@@ -33,17 +34,8 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
           unreadMessagesCount: room['unreadMessagesCount'] ?? 0,
         );
       }).toList();
-    } on DioException catch (e) {
-      throw Exception('Failed to get chat room list: $e');
-    }
-  }
-
-  @override
-  Future<void> markAsRead(String roomId) async {
-    try {
-      await api.patch('/chat/rooms/$roomId/messages');
-    } on DioException catch (e) {
-      throw Exception('Failed to mark as read: $e');
+    } on DioException {
+      throw Exception(AppStrings.somethingWentWrongMessage);
     }
   }
 }

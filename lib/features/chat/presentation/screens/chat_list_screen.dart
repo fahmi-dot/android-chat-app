@@ -1,13 +1,14 @@
-import 'package:android_chat_app/core/constants/app_sizes.dart';
-import 'package:android_chat_app/core/constants/app_strings.dart';
-import 'package:android_chat_app/core/router/app_router.dart';
-import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
-import 'package:android_chat_app/features/chat/presentation/widgets/drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:intl/intl.dart';
+
+import 'package:android_chat_app/core/constants/app_sizes.dart';
+import 'package:android_chat_app/core/constants/app_strings.dart';
+import 'package:android_chat_app/core/router/app_router.dart';
+import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
+import 'package:android_chat_app/features/chat/presentation/widgets/drawer_widget.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -27,7 +28,6 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
-
     final messageDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
     if (messageDate == today) {
@@ -45,6 +45,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         leading: Builder(
           builder: (context) => IconButton(
             icon: HeroIcon(
@@ -99,14 +100,14 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                   ),
                   const SizedBox(height: AppSizes.paddingM),
                   Text(
-                    AppStrings.noChats,
+                    AppStrings.noChatsTitle,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                     ),
                   ),
                   const SizedBox(height: AppSizes.paddingS),
                   Text(
-                    AppStrings.noChatsSub,
+                    AppStrings.noChatsSubtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                     ),
