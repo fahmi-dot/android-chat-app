@@ -1,4 +1,7 @@
 import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:android_chat_app/features/user/data/datasources/user_remote_datasource.dart';
 import 'package:android_chat_app/features/user/data/repositories/user_repository_impl.dart';
 import 'package:android_chat_app/features/user/domain/entities/user.dart';
@@ -6,7 +9,6 @@ import 'package:android_chat_app/features/user/domain/repositories/user_reposito
 import 'package:android_chat_app/features/user/domain/usecases/get_my_profile_usecase.dart';
 import 'package:android_chat_app/features/user/domain/usecases/set_my_profile_usecase.dart';
 import 'package:android_chat_app/shared/providers/client_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final userRemoteDatasourceProvider = Provider<UserRemoteDataSource>((ref) {
   final api = ref.read(apiClientProvider);
@@ -64,12 +66,13 @@ class UserNotifier extends AsyncNotifier<User?> {
     String? displayName,
     String? password,
   ) async {
+    final user = state.value;
     state = AsyncLoading();
 
     try {
       await ref
           .read(setMyProfileUseCaseProvider)
-          .execute(username, displayName, password);
+          .execute(user!.id, username, displayName, password);
 
       state = AsyncData(null);
       return true;

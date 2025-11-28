@@ -15,6 +15,14 @@ class UserSummaryModel extends UserSummary {
     );
   }
 
+  factory UserSummaryModel.fromJson(Map<String, dynamic> json) {
+    return UserSummaryModel(
+      username: json['username'], 
+      displayName: json['displayName'], 
+      avatarUrl: json['avatarUrl'],
+    );
+  }
+
   UserSummary toEntity() {
     return UserSummary(
       username: username,

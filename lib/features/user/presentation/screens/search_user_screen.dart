@@ -39,6 +39,7 @@ class _SearchUserScreenState extends ConsumerState<SearchUserScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         title: TextField(
           controller: _controller,
           focusNode: _focusNode,

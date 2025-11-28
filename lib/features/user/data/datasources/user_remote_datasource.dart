@@ -1,11 +1,13 @@
+import 'package:dio/dio.dart';
+
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
 import 'package:android_chat_app/features/user/data/models/user_model.dart';
 import 'package:android_chat_app/features/user/data/models/user_summary_model.dart';
-import 'package:dio/dio.dart';
 
 abstract class UserRemoteDataSource {
   Future<UserModel> setMyProfile(
+    String id,
     String? username,
     String? displayName,
     String? password,
@@ -24,14 +26,13 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
 
   @override
   Future<UserModel> setMyProfile(
+    String id,
     String? username,
     String? displayName,
     String? password,
   ) async {
-    final user = await getMyProfile();
-    final id = user.id;
     try {
-      await api.patch(
+      final response = await api.patch(
         '/user/$id/update',
         data: {
           'username': username,
@@ -39,14 +40,15 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
           'password': password,
         },
       );
+      final data = response.data['data'];
 
-      return await getMyProfile();
+      return UserModel.fromJson(data);
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       throw Exception(
         status == 409
-            ? AppStrings.usernameTakenMessage
-            : AppStrings.noAccountMessage,
+            ? AppStrings.alreadyTakenUsernameMessage
+            : AppStrings.somethingWentWrongMessage,
       );
     }
   }
@@ -57,16 +59,9 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
       final response = await api.get('/user');
       final data = response.data['data'];
 
-      return UserModel(
-        id: data['id'],
-        username: data['username'],
-        displayName: data['displayName'],
-        phoneNumber: data['phoneNumber'],
-        avatarUrl: data['avatarUrl'],
-        bio: data['bio'],
-      );
+      return UserModel.fromJson(data);
     } on DioException {
-      throw Exception(AppStrings.noAccountMessage);
+      throw Exception(AppStrings.somethingWentWrongMessage);
     }
   }
 
@@ -76,13 +71,14 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
       final response = await api.get('/user/profile?query=$username');
       final data = response.data['data'];
 
-      return UserSummaryModel(
-        username: data['username'], 
-        displayName: data['displayName'], 
-        avatarUrl: data['avatarUrl'],
+      return UserSummaryModel.fromJson(data);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      throw Exception(
+        status == 404
+            ? AppStrings.notFoundUserMessage
+            : AppStrings.somethingWentWrongMessage,
       );
-    } on DioException {
-      throw Exception("User not found");
     }
   }
 
@@ -92,14 +88,9 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
       final response = await api.get('/user/search?query=$key');
       final data = response.data['data'] as List?;
 
-      return data?.map((user) {
-        return UserSummaryModel(
-          username: user['username'], 
-          displayName: user['displayName'], 
-          avatarUrl: user['avatarUrl'],
-        );
-      })
-      .toList() ?? [];
+      return data?.map((user) =>
+        UserSummaryModel.fromJson(user)
+      ).toList() ?? [];
     } on DioException {
       return [];
     }

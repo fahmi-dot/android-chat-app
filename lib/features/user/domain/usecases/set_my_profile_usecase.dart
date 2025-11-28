@@ -5,7 +5,7 @@ class SetMyProfileUseCase {
 
   SetMyProfileUseCase(this._userRepository);
 
-  Future<void> execute(String? username, String? displayName, String? password) async {
-    await _userRepository.setMyProfile(username, displayName, password);
+  Future<void> execute(String id, String? username, String? displayName, String? password) async {
+    await _userRepository.setMyProfile(id, username, displayName, password);
   }
 }

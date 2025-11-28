@@ -5,6 +5,7 @@ class User extends Equatable {
   final String username;
   final String displayName;
   final String phoneNumber;
+  final String email;
   final String avatarUrl;
   final String? bio;
 
@@ -13,6 +14,7 @@ class User extends Equatable {
     required this.username,
     required this.displayName,
     required this.phoneNumber,
+    required this.email,
     required this.avatarUrl,
     required this.bio,
   });
@@ -21,6 +23,7 @@ class User extends Equatable {
     String? username,
     String? displayName,
     String? phoneNumber,
+    String? email,
     String? avatarUrl,
     String? bio,
   }) {
@@ -29,6 +32,7 @@ class User extends Equatable {
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,
       phoneNumber: phoneNumber ?? this.phoneNumber,
+      email: email ?? this.email,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       bio: bio ?? this.bio,
     );
@@ -40,6 +44,7 @@ class User extends Equatable {
     username,
     displayName,
     phoneNumber,
+    email,
     avatarUrl,
     bio,
   ];

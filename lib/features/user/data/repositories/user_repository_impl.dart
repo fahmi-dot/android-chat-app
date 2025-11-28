@@ -9,8 +9,8 @@ class UserRepositoryImpl extends UserRepository {
   UserRepositoryImpl({required this.userRemoteDataSource});
 
   @override
-  Future<User> setMyProfile(String? username, String? displayName, String? password) async {
-    final userModel = await userRemoteDataSource.setMyProfile(username, displayName, password);
+  Future<User> setMyProfile(String id, String? username, String? displayName, String? password) async {
+    final userModel = await userRemoteDataSource.setMyProfile(id, username, displayName, password);
 
     return userModel.toEntity();
   }
