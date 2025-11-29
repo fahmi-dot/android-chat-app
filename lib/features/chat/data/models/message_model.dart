@@ -28,7 +28,7 @@ class MessageModel extends Message {
       sentAt: json['sentAt'] != null
           ? DateTime.parse(json['sentAt'])
           : DateTime.now(),
-      isRead: json['isRead'],
+      isRead: json['read'],
       senderId: json['senderId'],
       isSentByMe: json['senderId'] == userId,
     );
