@@ -19,6 +19,8 @@ class ChatListScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatListScreenState extends ConsumerState<ChatListScreen> {
+  bool _onSelecting = false;
+  String _selectedRoom = '';
 
   @override
   void dispose() {
@@ -38,6 +40,56 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     } else {
       return DateFormat('dd/MM/yyyy').format(dateTime);
     }
+  }
+
+  void _showPopup(LongPressStartDetails details, RenderBox overlay) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromRect(
+        (details.globalPosition + Offset(0, AppSizes.paddingL)) 
+            & Size(40.0, 40.0),
+        Offset.zero & overlay.size,
+      ),
+      color: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusL),
+      ),
+      items: [
+        _popupItem(HeroIcons.queueList, 'Select', () => showCustomOnWorkingNotification(context)),
+        _popupItem(HeroIcons.archiveBoxArrowDown, 'Archive', () => showCustomOnWorkingNotification(context)),
+        _popupItem(HeroIcons.trash, 'Delete', () => showCustomOnWorkingNotification(context)),
+      ],
+    ).then((value) {
+      setState(() {
+        _onSelecting = false;
+        _selectedRoom = '';
+      });
+    });
+  }
+
+  PopupMenuItem<dynamic> _popupItem(HeroIcons icon, String label, Function()? onTap) {
+    return PopupMenuItem(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Row(
+          children: [
+            HeroIcon(
+              icon,
+              style: HeroIconStyle.solid,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 20.0,
+            ),
+            SizedBox(width: AppSizes.paddingM),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -126,15 +178,20 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
             itemBuilder: (context, index) {
               final room = rooms[index];
               final hasUnread = room.unreadMessagesCount > 0;
+              bool isSelected = _selectedRoom == room.id;
 
-              return InkWell(
-                onTap: () {
-                  context.push(Routes.chatWithRoom(room.id), extra: room.username).then((_) {
-                    ref.invalidate(chatListProvider);
-                  });
-                },
-                onLongPress: () {},
-                child: Padding(
+              return Opacity(
+                opacity: _onSelecting
+                    ? isSelected ? 1.0 : 0.3
+                    : 1.0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: _onSelecting
+                        ? isSelected 
+                            ? Theme.of(context).colorScheme.surface
+                            : Theme.of(context).colorScheme.surfaceContainer
+                        : Theme.of(context).colorScheme.surfaceContainer,
+                  ),
                   padding: const EdgeInsets.all(AppSizes.paddingM),
                   child: Row(
                     children: [
@@ -165,72 +222,87 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       ),
                       const SizedBox(width: AppSizes.paddingM),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    room.displayName,
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurface,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: AppSizes.paddingXL),
-                                Text(
-                                  formatTime(room.lastMessageSentAt),
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: hasUnread
-                                        ? Theme.of(context).colorScheme.secondary
-                                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                                    fontWeight: hasUnread ? FontWeight.bold : FontWeight.w400,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppSizes.paddingXS),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    room.lastMessage,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                if (hasUnread) ...[
-                                  const SizedBox(width: AppSizes.paddingXL),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      shape: BoxShape.circle,
-                                    ),
+                        child: GestureDetector(
+                          onTap: () {
+                            context.push(Routes.chatWithRoom(room.id), extra: room.username).then((_) {
+                              ref.invalidate(chatListProvider);
+                            });
+                          },
+                          onLongPressStart: (details) {
+                            setState(() {
+                              _onSelecting = true;
+                              _selectedRoom = room.id;
+                            });
+                            final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                            _showPopup(details, overlay);
+                          },  
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
                                     child: Text(
-                                      room.unreadMessagesCount > 99
-                                          ? '99+'
-                                          : room.unreadMessagesCount.toString(),
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onPrimary,
-                                      )
+                                      room.displayName,
+                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurface,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSizes.paddingXL),
+                                  Text(
+                                    formatTime(room.lastMessageSentAt),
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: hasUnread
+                                          ? Theme.of(context).colorScheme.secondary
+                                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                                      fontWeight: hasUnread ? FontWeight.bold : FontWeight.w400,
                                     ),
                                   ),
                                 ],
-                              ],
-                            ),
-                          ],
+                              ),
+                              const SizedBox(height: AppSizes.paddingXS),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      room.lastMessage,
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (hasUnread) ...[
+                                    const SizedBox(width: AppSizes.paddingXL),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(
+                                        room.unreadMessagesCount > 99
+                                            ? '99+'
+                                            : room.unreadMessagesCount.toString(),
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).colorScheme.onPrimary,
+                                        )
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

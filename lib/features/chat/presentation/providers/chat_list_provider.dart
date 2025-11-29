@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -40,6 +41,7 @@ final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, Lis
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   @override
   FutureOr<List<Room>?> build() async {
+    await ref.read(checkUseCaseProvider).execute();
     final rooms = await ref.read(getChatRoomsUseCaseProvider).execute();
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {

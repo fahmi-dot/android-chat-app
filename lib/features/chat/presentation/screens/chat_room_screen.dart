@@ -24,6 +24,8 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
+  bool _onSelecting = false;
+  String _selectedMessage = '';
 
   @override
   void initState() {
@@ -66,6 +68,57 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     _controller.clear();
   }
 
+  void _showPopup(LongPressStartDetails details, RenderBox overlay) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromRect(
+        (details.globalPosition + Offset(0, AppSizes.paddingL)) 
+            & Size(40.0, 40.0),
+        Offset.zero & overlay.size,
+      ),
+      color: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusL),
+      ),
+      items: [
+        _popupItem(HeroIcons.queueList, 'Select', () => showCustomOnWorkingNotification(context)),
+        _popupItem(HeroIcons.pencil, 'Edit', () => showCustomOnWorkingNotification(context)),
+        _popupItem(HeroIcons.trash, 'Delete', () => showCustomOnWorkingNotification(context)),
+      ],
+    ).then((value) {
+      setState(() {
+        _onSelecting = false;
+        _selectedMessage = '';
+      });
+    });
+  }
+
+
+  PopupMenuItem<dynamic> _popupItem(HeroIcons icon, String label, Function()? onTap) {
+    return PopupMenuItem(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Row(
+          children: [
+            HeroIcon(
+              icon,
+              style: HeroIconStyle.solid,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 20.0,
+            ),
+            SizedBox(width: AppSizes.paddingM),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   String _formatTime(DateTime time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
@@ -87,7 +140,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
             children: [
               CircleAvatar(
                 radius: AppSizes.radiusL + 2.0,
-                backgroundImage: userDetailState?.avatarUrl != null 
+                backgroundImage: userDetailState?.avatarUrl != null
                     ? NetworkImage(userDetailState!.avatarUrl)
                     : null,
                 backgroundColor: Theme.of(context).colorScheme.surface,
@@ -154,11 +207,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
               child: chatRoomState.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
-                  child: Text('Error loading messages: $e',
+                  child: Text(
+                    'Error loading messages: $e',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
-                  )
+                  ),
                 ),
                 data: (messages) {
                   if (messages == null || messages.isEmpty) {
@@ -169,21 +223,25 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                           HeroIcon(
                             HeroIcons.chatBubbleLeftEllipsis,
                             style: HeroIconStyle.solid,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.3),
                             size: 80.0,
                           ),
                           const SizedBox(height: AppSizes.paddingM),
                           Text(
                             AppStrings.noMessagesTitle,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.3),
+                                ),
                           ),
                         ],
                       ),
                     );
                   }
-        
+
                   return ListView.builder(
                     controller: _scrollController,
                     reverse: true,
@@ -195,88 +253,118 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                       final isNotLast = index < messages.length - 1;
                       final isLast = index != messages.length - 1;
                       bool sameAsPrev = true;
-        
+                      bool isSelected = _selectedMessage == message.id;
+                                        
                       if (isNotLast) {
                         sameAsPrev = isMe == messages[index + 1].isSentByMe
                             ? true
                             : false;
                       }
-        
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: AppSizes.paddingXS),
-                        child: Align(
-                          alignment: isMe
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSizes.paddingM,
-                              vertical: AppSizes.paddingS,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isMe
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(
-                                  sameAsPrev && !isMe && isLast
-                                      ? 4
-                                      : AppSizes.radiusM,
+                                        
+                      return Opacity(
+                        opacity: _onSelecting
+                            ? isSelected ? 1.0 : 0.3
+                            : 1.0,
+                        child: GestureDetector(
+                          onLongPressStart: (details) {
+                            setState(() {
+                              _onSelecting = true;
+                              _selectedMessage = message.id!;
+                            });
+                            final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                            _showPopup(details, overlay);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: AppSizes.paddingS),
+                            child: Align(
+                              alignment: isMe
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxWidth: AppSizes.screenWidth(context) * 0.75,
                                 ),
-                                topRight: Radius.circular(
-                                  sameAsPrev && isMe && isLast
-                                      ? 4
-                                      : AppSizes.radiusM,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSizes.paddingM,
+                                  vertical: AppSizes.paddingS,
                                 ),
-                                bottomLeft: Radius.circular(
-                                  isMe ? AppSizes.radiusM : 4,
-                                ),
-                                bottomRight: Radius.circular(
-                                  isMe ? 4 : AppSizes.radiusM,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    message.content,
-                                    style: TextStyle(
-                                      color: isMe 
-                                          ? Theme.of(context).colorScheme.onPrimary 
-                                          : Theme.of(context).colorScheme.onSurface,
-                                      fontSize: AppSizes.fontM,
+                                decoration: BoxDecoration(
+                                  color: isMe
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(
+                                      sameAsPrev && !isMe && isLast
+                                          ? 4
+                                          : AppSizes.radiusM,
+                                    ),
+                                    topRight: Radius.circular(
+                                      sameAsPrev && isMe && isLast
+                                          ? 4
+                                          : AppSizes.radiusM,
+                                    ),
+                                    bottomLeft: Radius.circular(
+                                      isMe ? AppSizes.radiusM : 4,
+                                    ),
+                                    bottomRight: Radius.circular(
+                                      isMe ? 4 : AppSizes.radiusM,
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: AppSizes.paddingS),
-                                Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      _formatTime(message.sentAt),
-                                      style: TextStyle(
-                                        fontSize: AppSizes.fontS,
-                                        color: isMe
-                                            ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)
-                                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                                    Flexible(
+                                      child: Text(
+                                        message.content,
+                                        style: TextStyle(
+                                          color: isMe
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary
+                                              : Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
+                                          fontSize: AppSizes.fontM,
+                                        ),
                                       ),
                                     ),
-                                    if (isMe) ...[
-                                      const SizedBox(width: AppSizes.paddingS),
-                                      Icon(
-                                        Icons.done_all,
-                                        size: AppSizes.iconS,
-                                        color: message.isRead
-                                            ? Colors.blue[200]
-                                            : Colors.grey[400],
-                                      ),
-                                    ],
+                                    const SizedBox(width: AppSizes.paddingS),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          _formatTime(message.sentAt),
+                                          style: TextStyle(
+                                            fontSize: AppSizes.fontS,
+                                            color: isMe
+                                                ? Theme.of(context)
+                                                      .colorScheme
+                                                      .onPrimary
+                                                      .withValues(alpha: 0.7)
+                                                : Theme.of(
+                                                    context,
+                                                  ).colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        if (isMe) ...[
+                                          const SizedBox(
+                                            width: AppSizes.paddingS,
+                                          ),
+                                          Icon(
+                                            Icons.done_all,
+                                            size: AppSizes.iconS,
+                                            color: message.isRead
+                                                ? Colors.blue[200]
+                                                : Colors.grey[400],
+                                          ),
+                                        ],
+                                      ],
+                                    ),
                                   ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ),
@@ -290,7 +378,9 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
               padding: const EdgeInsets.all(AppSizes.paddingS),
               child: SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingM,
+                  ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     spacing: AppSizes.paddingM,
@@ -302,62 +392,75 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                           child: HeroIcon(
                             HeroIcons.faceSmile,
                             style: HeroIconStyle.outline,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: Theme.of(context).colorScheme.onSurface,
                             size: AppSizes.iconL,
                           ),
                         ),
                       ),
                       Expanded(
                         child: CustomTextField(
-                          controller: _controller, 
+                          controller: _controller,
                           text: AppStrings.message,
                           maxLines: 5,
                           showHint: true,
                           onSubmitted: (value) => _sendMessage(),
-                          type: CustomTextFieldType.text
+                          type: CustomTextFieldType.text,
                         ),
                       ),
-                      _isTyping ? Container(
-                        height: AppSizes.screenHeight(context) * 0.06,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: HeroIcon(
-                            HeroIcons.paperAirplane,
-                            style: HeroIconStyle.solid,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          onPressed: _sendMessage,
-                        ),
-                      ) 
-                      : SizedBox(
-                        height: AppSizes.screenHeight(context) * 0.06,
-                        child: Row(
-                          spacing: AppSizes.paddingM,
-                          children: [
-                            GestureDetector(
-                              onTap: () => showCustomOnWorkingNotification(context),
-                              child: HeroIcon(
-                                HeroIcons.paperClip,
-                                style: HeroIconStyle.outline,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                size: AppSizes.iconL,
+                      _isTyping
+                          ? Container(
+                              height: AppSizes.screenHeight(context) * 0.06,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.secondary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: HeroIcon(
+                                  HeroIcons.paperAirplane,
+                                  style: HeroIconStyle.solid,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                ),
+                                onPressed: _sendMessage,
+                              ),
+                            )
+                          : SizedBox(
+                              height: AppSizes.screenHeight(context) * 0.06,
+                              child: Row(
+                                spacing: AppSizes.paddingM,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () =>
+                                        showCustomOnWorkingNotification(
+                                          context,
+                                        ),
+                                    child: HeroIcon(
+                                      HeroIcons.paperClip,
+                                      style: HeroIconStyle.outline,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                      size: AppSizes.iconL,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () =>
+                                        showCustomOnWorkingNotification(
+                                          context,
+                                        ),
+                                    child: HeroIcon(
+                                      HeroIcons.camera,
+                                      style: HeroIconStyle.outline,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                      size: AppSizes.iconL,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () => showCustomOnWorkingNotification(context),
-                              child: HeroIcon(
-                                HeroIcons.camera,
-                                style: HeroIconStyle.outline,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                size: AppSizes.iconL,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
                     ],
                   ),
                 ),
