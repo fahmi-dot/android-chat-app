@@ -22,19 +22,16 @@ class User extends Equatable {
   User copyWith({
     String? username,
     String? displayName,
-    String? phoneNumber,
-    String? email,
-    String? avatarUrl,
     String? bio,
   }) {
     return User(
       id: id,
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      email: email ?? this.email,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      bio: bio ?? this.bio,
+      phoneNumber: phoneNumber,
+      email: email,
+      avatarUrl: avatarUrl,
+      bio: bio,
     );
   }
 
