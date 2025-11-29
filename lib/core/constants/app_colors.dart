@@ -20,6 +20,6 @@ class AppColors {
 
   // Additional
   static const Color error = Color.fromRGBO(156, 33, 33, 1);
+  static const Color warning = Color.fromRGBO(255, 152, 0, 1);
   static const Color success = Color.fromRGBO(102, 187, 106, 1);
-  static const Color warning = Color.fromRGBO(255, 183, 77, 1);
 }

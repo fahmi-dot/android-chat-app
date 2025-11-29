@@ -78,12 +78,16 @@ class AppTheme {
         surface: AppColors.surface,
         surfaceContainer: AppColors.background,
         error: AppColors.error,
+        errorContainer: AppColors.warning,
+        tertiary: AppColors.success,
 
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
         onSurfaceVariant: AppColors.textSecondary,
         onError: Colors.white,
+        onErrorContainer: Colors.white,
+        onTertiary: Colors.white
       ),
       scaffoldBackgroundColor: AppColors.background,
     );
@@ -99,12 +103,16 @@ class AppTheme {
         surface: AppColors.darkSurface,
         surfaceContainer: AppColors.darkBackground,
         error: AppColors.error,
+        errorContainer: AppColors.warning,
+        tertiary: AppColors.success,
 
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.darkTextPrimary,
         onSurfaceVariant: AppColors.darkTextSecondary,
         onError: Colors.white,
+        onErrorContainer: Colors.white,
+        onTertiary: Colors.white
       ),
       scaffoldBackgroundColor: AppColors.darkBackground,
     );
