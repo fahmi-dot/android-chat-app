@@ -1,3 +1,4 @@
+import 'package:android_chat_app/shared/widgets/custom_on_working_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -47,15 +48,13 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: HeroIcon(
+          builder: (context) => GestureDetector(
+            onTap: () => Scaffold.of(context).openDrawer(),
+            child: HeroIcon(
               HeroIcons.bars3, 
               style: HeroIconStyle.outline,
               color: Theme.of(context).colorScheme.onPrimary,
             ),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
           ),
         ),
         title: Text(
@@ -65,13 +64,16 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: HeroIcon(
-              HeroIcons.magnifyingGlass,
-              style: HeroIconStyle.outline,
-              color: Theme.of(context).colorScheme.onPrimary,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
+            child: GestureDetector(
+              onTap: () => context.push(Routes.searchUser),
+              child: HeroIcon(
+                HeroIcons.magnifyingGlass,
+                style: HeroIconStyle.outline,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
-            onPressed: () => context.push(Routes.searchUser),
           ),
         ],
       ),
@@ -139,9 +141,8 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       Stack(
                         children: [
                           CircleAvatar(
-                            radius: 28,
+                            radius: AppSizes.radiusXXL,
                             backgroundImage: NetworkImage(room.avatarUrl),
-                            backgroundColor: Theme.of(context).colorScheme.surface,
                           ),
                           if (true)
                             Positioned(
@@ -173,8 +174,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                 Expanded(
                                   child: Text(
                                     room.displayName,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                       color: Theme.of(context).colorScheme.onSurface,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -184,7 +186,10 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                 Text(
                                   formatTime(room.lastMessageSentAt),
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    color: hasUnread
+                                        ? Theme.of(context).colorScheme.secondary
+                                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                                    fontWeight: hasUnread ? FontWeight.bold : FontWeight.w400,
                                   ),
                                 ),
                               ],
@@ -196,10 +201,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                   child: Text(
                                     room.lastMessage,
                                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: hasUnread
-                                          ? Theme.of(context).colorScheme.onSurface
-                                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                                      fontWeight: hasUnread ? FontWeight.w700 : FontWeight.w400,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -245,7 +247,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           style: HeroIconStyle.solid,
           color: Theme.of(context).colorScheme.onPrimary,
         ),
-        onPressed: () {},
+        onPressed: () => showCustomOnWorkingNotification(context),
       ),
     );
   }

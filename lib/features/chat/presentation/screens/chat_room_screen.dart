@@ -1,3 +1,4 @@
+import 'package:android_chat_app/shared/widgets/custom_on_working_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
@@ -22,6 +23,7 @@ class ChatRoomScreen extends ConsumerStatefulWidget {
 class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _isTyping = false;
 
   @override
   void initState() {
@@ -33,6 +35,16 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(chatListProvider.notifier).markAsRead(widget.roomId!);
+    });
+
+    _controller.addListener(() {
+      final hasText = _controller.text.isNotEmpty;
+
+      if (_isTyping != hasText) {
+        setState(() {
+          _isTyping = hasText;
+        });
+      }
     });
   }
 
@@ -69,243 +81,290 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         titleSpacing: 0,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: AppSizes.radiusL + 2.0,
-              backgroundImage: userDetailState?.avatarUrl != null 
-                  ? NetworkImage(userDetailState!.avatarUrl)
-                  : null,
-              backgroundColor: Theme.of(context).colorScheme.surface,
+        title: GestureDetector(
+          onTap: () => showCustomOnWorkingNotification(context),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: AppSizes.radiusL + 2.0,
+                backgroundImage: userDetailState?.avatarUrl != null 
+                    ? NetworkImage(userDetailState!.avatarUrl)
+                    : null,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+              ),
+              const SizedBox(width: AppSizes.paddingM),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userDetailState?.displayName ?? 'User',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSizes.paddingXS),
+                    Text(
+                      'Online',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
+            child: Row(
+              spacing: AppSizes.paddingM,
+              children: [
+                GestureDetector(
+                  onTap: () => showCustomOnWorkingNotification(context),
+                  child: HeroIcon(
+                    HeroIcons.phone,
+                    style: HeroIconStyle.solid,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => showCustomOnWorkingNotification(context),
+                  child: HeroIcon(
+                    HeroIcons.ellipsisVertical,
+                    style: HeroIconStyle.solid,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    size: AppSizes.iconL,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: AppSizes.paddingM),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    userDetailState?.displayName ?? 'User',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
+              child: chatRoomState.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(
+                  child: Text('Error loading messages: $e',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  )
+                ),
+                data: (messages) {
+                  if (messages == null || messages.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          HeroIcon(
+                            HeroIcons.chatBubbleLeftEllipsis,
+                            style: HeroIconStyle.solid,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                            size: 80.0,
+                          ),
+                          const SizedBox(height: AppSizes.paddingM),
+                          Text(
+                            AppStrings.noMessagesTitle,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+        
+                  return ListView.builder(
+                    controller: _scrollController,
+                    reverse: true,
+                    padding: const EdgeInsets.all(AppSizes.paddingL),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      final isMe = message.isSentByMe;
+                      final isNotLast = index < messages.length - 1;
+                      final isLast = index != messages.length - 1;
+                      bool sameAsPrev = true;
+        
+                      if (isNotLast) {
+                        sameAsPrev = isMe == messages[index + 1].isSentByMe
+                            ? true
+                            : false;
+                      }
+        
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: AppSizes.paddingXS),
+                        child: Align(
+                          alignment: isMe
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSizes.paddingM,
+                              vertical: AppSizes.paddingS,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isMe
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.surface,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(
+                                  sameAsPrev && !isMe && isLast
+                                      ? 4
+                                      : AppSizes.radiusM,
+                                ),
+                                topRight: Radius.circular(
+                                  sameAsPrev && isMe && isLast
+                                      ? 4
+                                      : AppSizes.radiusM,
+                                ),
+                                bottomLeft: Radius.circular(
+                                  isMe ? AppSizes.radiusM : 4,
+                                ),
+                                bottomRight: Radius.circular(
+                                  isMe ? 4 : AppSizes.radiusM,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    message.content,
+                                    style: TextStyle(
+                                      color: isMe 
+                                          ? Theme.of(context).colorScheme.onPrimary 
+                                          : Theme.of(context).colorScheme.onSurface,
+                                      fontSize: AppSizes.fontM,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: AppSizes.paddingS),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _formatTime(message.sentAt),
+                                      style: TextStyle(
+                                        fontSize: AppSizes.fontS,
+                                        color: isMe
+                                            ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)
+                                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    if (isMe) ...[
+                                      const SizedBox(width: AppSizes.paddingS),
+                                      Icon(
+                                        Icons.done_all,
+                                        size: AppSizes.iconS,
+                                        color: message.isRead
+                                            ? Colors.blue[200]
+                                            : Colors.grey[400],
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(AppSizes.paddingS),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    spacing: AppSizes.paddingM,
+                    children: [
+                      SizedBox(
+                        height: AppSizes.screenHeight(context) * 0.06,
+                        child: GestureDetector(
+                          onTap: () => showCustomOnWorkingNotification(context),
+                          child: HeroIcon(
+                            HeroIcons.faceSmile,
+                            style: HeroIconStyle.outline,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            size: AppSizes.iconL,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: CustomTextField(
+                          controller: _controller, 
+                          text: AppStrings.message,
+                          maxLines: 5,
+                          showHint: true,
+                          onSubmitted: (value) => _sendMessage(),
+                          type: CustomTextFieldType.text
+                        ),
+                      ),
+                      _isTyping ? Container(
+                        height: AppSizes.screenHeight(context) * 0.06,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: HeroIcon(
+                            HeroIcons.paperAirplane,
+                            style: HeroIconStyle.solid,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                          onPressed: _sendMessage,
+                        ),
+                      ) 
+                      : SizedBox(
+                        height: AppSizes.screenHeight(context) * 0.06,
+                        child: Row(
+                          spacing: AppSizes.paddingM,
+                          children: [
+                            GestureDetector(
+                              onTap: () => showCustomOnWorkingNotification(context),
+                              child: HeroIcon(
+                                HeroIcons.paperClip,
+                                style: HeroIconStyle.outline,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                size: AppSizes.iconL,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => showCustomOnWorkingNotification(context),
+                              child: HeroIcon(
+                                HeroIcons.camera,
+                                style: HeroIconStyle.outline,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                size: AppSizes.iconL,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
                   ),
-                  const SizedBox(height: AppSizes.paddingXS),
-                  Text(
-                    'Online',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ],
         ),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {},
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'view_contact',
-                child: Text('View Contact'),
-              ),
-              const PopupMenuItem(
-                value: 'media',
-                child: Text('Media, Links, and Docs'),
-              ),
-              const PopupMenuItem(
-                value: 'mute',
-                child: Text('Mute Notifications'),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: chatRoomState.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
-                child: Text('Error loading messages: $e',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                )
-              ),
-              data: (messages) {
-                if (messages == null || messages.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        HeroIcon(
-                          HeroIcons.chatBubbleLeftEllipsis,
-                          style: HeroIconStyle.solid,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                          size: 80.0,
-                        ),
-                        const SizedBox(height: AppSizes.paddingM),
-                        Text(
-                          AppStrings.noMessagesTitle,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  controller: _scrollController,
-                  reverse: true,
-                  padding: const EdgeInsets.all(AppSizes.paddingL),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.isSentByMe;
-                    final isNotLast = index < messages.length - 1;
-                    final isLast = index != messages.length - 1;
-                    bool sameAsPrev = true;
-
-                    if (isNotLast) {
-                      sameAsPrev = isMe == messages[index + 1].isSentByMe
-                          ? true
-                          : false;
-                    }
-
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: AppSizes.paddingXS),
-                      child: Align(
-                        alignment: isMe
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.paddingM,
-                            vertical: AppSizes.paddingS,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isMe
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(
-                                sameAsPrev && !isMe && isLast
-                                    ? 4
-                                    : AppSizes.radiusM,
-                              ),
-                              topRight: Radius.circular(
-                                sameAsPrev && isMe && isLast
-                                    ? 4
-                                    : AppSizes.radiusM,
-                              ),
-                              bottomLeft: Radius.circular(
-                                isMe ? AppSizes.radiusM : 4,
-                              ),
-                              bottomRight: Radius.circular(
-                                isMe ? 4 : AppSizes.radiusM,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  message.content,
-                                  style: TextStyle(
-                                    color: isMe 
-                                        ? Theme.of(context).colorScheme.onPrimary 
-                                        : Theme.of(context).colorScheme.onSurface,
-                                    fontSize: AppSizes.fontM,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: AppSizes.paddingS),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    _formatTime(message.sentAt),
-                                    style: TextStyle(
-                                      fontSize: AppSizes.fontS,
-                                      color: isMe
-                                          ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)
-                                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  if (isMe) ...[
-                                    const SizedBox(width: AppSizes.paddingS),
-                                    Icon(
-                                      Icons.done_all,
-                                      size: AppSizes.iconS,
-                                      color: message.isRead
-                                          ? Colors.blue[200]
-                                          : Colors.grey[400],
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(AppSizes.paddingS),
-            child: SafeArea(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.only(
-                        left: AppSizes.paddingM,
-                      ),
-                      child: CustomTextField(
-                        controller: _controller, 
-                        text: AppStrings.message,
-                        maxLines: 5,
-                        showHint: true,
-                        onSubmitted: (value) => _sendMessage(),
-                        type: CustomTextFieldType.text
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: AppSizes.paddingM),
-                  Container(
-                    margin: const EdgeInsets.only(
-                      right: AppSizes.paddingM,
-                    ),
-                    height: AppSizes.screenHeight(context) * 0.06,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: HeroIcon(
-                        HeroIcons.paperAirplane,
-                        style: HeroIconStyle.solid,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                      onPressed: _sendMessage,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
