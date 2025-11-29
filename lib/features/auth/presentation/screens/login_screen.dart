@@ -6,7 +6,6 @@ import 'package:heroicons/heroicons.dart';
 import 'package:android_chat_app/core/constants/app_sizes.dart';
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/router/app_router.dart';
-import 'package:android_chat_app/core/theme/theme_provider.dart';
 import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_banner.dart';
 import 'package:android_chat_app/shared/widgets/custom_button.dart';
@@ -57,6 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             context,
             HeroIcons.exclamationTriangle,
             message,
+            CustomNotificationType.error
           );
         },
       );
@@ -67,25 +67,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
+            Padding(
+              padding: EdgeInsets.all(AppSizes.paddingXS),
+              child: Center(
+                child: Image.asset(
+                  Theme.of(context).brightness != Brightness.dark 
+                      ? 'assets/icons/icon_hello_light.png'
+                      : 'assets/icons/icon_hello_dark.png', 
+                  width: AppSizes.screenWidth(context) * 0.2,
+                ),
+              ),
+            ),
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap: () => ref.read(themeProvider.notifier).toggle(),
-                            child: Image.asset(
-                              Theme.of(context).brightness != Brightness.dark 
-                                  ? 'assets/icons/icon_hello_light.png'
-                                  : 'assets/icons/icon_hello_dark.png', 
-                              width: AppSizes.screenWidth(context) * 0.2,
-                            ),
-                          ),
-                        ],
-                      ),
                       Padding(
                         padding: const EdgeInsets.all(32.0),
                         child: Column(

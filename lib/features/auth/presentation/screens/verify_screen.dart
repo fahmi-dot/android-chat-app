@@ -71,6 +71,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
       context,
       success ? HeroIcons.envelope : HeroIcons.exclamationTriangle,
       message,
+      success ? CustomNotificationType.success : CustomNotificationType.error,
     );
   }
 
@@ -98,6 +99,7 @@ class _CodeVerifyScreenState extends ConsumerState<VerifyScreen> {
             context,
             HeroIcons.exclamationTriangle,
             message,
+            CustomNotificationType.error,
           );
         },
       );

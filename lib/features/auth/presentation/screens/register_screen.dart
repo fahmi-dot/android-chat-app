@@ -65,6 +65,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             context,
             HeroIcons.exclamationTriangle,
             message,
+            CustomNotificationType.error
           );
         },
       );
