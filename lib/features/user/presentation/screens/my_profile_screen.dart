@@ -17,6 +17,9 @@ class MyProfileScreen extends ConsumerStatefulWidget {
 
 class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
   bool _onEdit = false;
+  final TextEditingController _displayNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
 
   @override
   void initState() {
@@ -27,10 +30,30 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
     });
   }
 
+  void _updateProfile() async {
+    final displayName = _displayNameController.text.trim();
+    final username = _usernameController.text.trim();
+    final bio = _bioController.text.trim();
+
+    await ref
+        .read(userProvider.notifier)
+        .setMyProfile(username, displayName, bio);
+  }
+
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userProvider).value;
     if (userState == null) return CircularProgressIndicator();
+
+    ref.listen(userProvider, (previous, next) {
+      next.whenData((user) {
+        if (user == null) return;
+
+        _displayNameController.text = user.displayName;
+        _usernameController.text = user.username;
+        _bioController.text = user.bio ?? "";
+      });
+    });
 
     return Scaffold(
       // appBar: AppBar(),
@@ -68,7 +91,12 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              _onEdit = !_onEdit;
+                              if (_onEdit) {
+                                _updateProfile();
+                                _onEdit = false;
+                              } else {
+                                _onEdit = true;
+                              }
                             });
                           },
                           child: HeroIcon(
@@ -107,14 +135,12 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
                             height: 80.0,
                             width: 80.0,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
                               shape: BoxShape.circle,
                             ),
-                            child: CircleAvatar(
+                            child: CircleAvatar( 
                               backgroundImage: NetworkImage(
                                 userState.avatarUrl,
                               ),
-                              backgroundColor: Theme.of(context).colorScheme.surface,
                             ),
                           )),
                           Text(
@@ -128,10 +154,10 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
-                          _buildField(AppStrings.username, userState.username),
-                          _buildField(AppStrings.bio, userState.bio ?? ''),
-                          _buildField(AppStrings.phoneNumber, userState.phoneNumber),
-                          _buildField(AppStrings.email, userState.email),
+                          _buildField(AppStrings.username, _usernameController),
+                          _buildField(AppStrings.bio, _bioController),
+                          _buildField(AppStrings.phoneNumber, TextEditingController(text: userState.phoneNumber)),
+                          _buildField(AppStrings.email, TextEditingController(text: userState.email)),
                           SizedBox(height: AppSizes.paddingL),
                           Image.asset(
                             'assets/icons/icon_hello.png',
@@ -166,7 +192,7 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
     );
   }
 
-  Widget _buildField(String label, String value) {
+  Widget _buildField(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -179,7 +205,7 @@ class _MyProfileScreenState extends ConsumerState<MyProfileScreen> {
         ),
         const SizedBox(height: 8),
         CustomTextField(
-          controller: TextEditingController(text: value),
+          controller: controller,
           icon: _onEdit ? HeroIcons.pencil : null,
           type: CustomTextFieldType.readOnly,
         ),

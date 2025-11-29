@@ -127,8 +127,9 @@ class _SearchUserScreenState extends ConsumerState<SearchUserScreen> {
                                 Expanded(
                                   child: Text(
                                     user.displayName,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                       color: Theme.of(context).colorScheme.onSurface,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
