@@ -1,4 +1,5 @@
 import 'package:android_chat_app/features/user/data/datasources/user_remote_datasource.dart';
+import 'package:android_chat_app/features/user/data/models/user_model.dart';
 import 'package:android_chat_app/features/user/domain/entities/user.dart';
 import 'package:android_chat_app/features/user/domain/entities/user_summary.dart';
 import 'package:android_chat_app/features/user/domain/repositories/user_repository.dart';
@@ -9,8 +10,8 @@ class UserRepositoryImpl extends UserRepository {
   UserRepositoryImpl({required this.userRemoteDataSource});
 
   @override
-  Future<User> setMyProfile(String id, String? username, String? displayName, String? password) async {
-    final userModel = await userRemoteDataSource.setMyProfile(id, username, displayName, password);
+  Future<User> setMyProfile(User user) async {
+    final userModel = await userRemoteDataSource.setMyProfile(UserModel.fromEntity(user));
 
     return userModel.toEntity();
   }

@@ -6,12 +6,7 @@ import 'package:android_chat_app/features/user/data/models/user_model.dart';
 import 'package:android_chat_app/features/user/data/models/user_summary_model.dart';
 
 abstract class UserRemoteDataSource {
-  Future<UserModel> setMyProfile(
-    String id,
-    String? username,
-    String? displayName,
-    String? password,
-  );
+  Future<UserModel> setMyProfile(UserModel data);
   Future<UserModel> getMyProfile();
   Future<UserSummaryModel> getUserProfile(String username);
   Future<List<UserSummaryModel>> searchUser(String key);
@@ -25,19 +20,14 @@ class UserRemoteDataSourceImpl extends UserRemoteDataSource {
   });
 
   @override
-  Future<UserModel> setMyProfile(
-    String id,
-    String? username,
-    String? displayName,
-    String? password,
-  ) async {
+  Future<UserModel> setMyProfile(UserModel user) async {
     try {
       final response = await api.patch(
-        '/user/$id/update',
+        '/user/${user.id}/update',
         data: {
-          'username': username,
-          'displayName': displayName,
-          'password': password,
+          'username': user.username,
+          'displayName': user.displayName,
+          'bio': user.bio,
         },
       );
       final data = response.data['data'];

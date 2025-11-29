@@ -64,17 +64,24 @@ class UserNotifier extends AsyncNotifier<User?> {
   Future<bool> setMyProfile(
     String? username,
     String? displayName,
-    String? password,
+    String? bio,
   ) async {
     final user = state.value;
+    if (user == null) return false;
     state = AsyncLoading();
 
     try {
+      final updatedUser = user.copyWith(
+        username: username,
+        displayName: displayName,
+        bio: bio
+      );
+
       await ref
           .read(setMyProfileUseCaseProvider)
-          .execute(user!.id, username, displayName, password);
+          .execute(updatedUser);
 
-      state = AsyncData(null);
+      state = AsyncData(updatedUser);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
