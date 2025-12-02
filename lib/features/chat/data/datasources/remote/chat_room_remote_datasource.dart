@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
-import 'package:android_chat_app/features/chat/data/models/message_model.dart';
+import 'package:android_chat_app/features/chat/data/models/remote/message_remote_model.dart';
 
 abstract class ChatRoomRemoteDataSource {
-  Future<List<MessageModel>> getChatMessages(String roomId, String userId);
+  Future<List<MessageRemoteModel>> getRoomMessages(String roomId, String userId);
   Future<void> markAsRead(String roomId);
 }
 
@@ -15,13 +15,13 @@ class ChatRoomRemoteDataSourceImpl extends ChatRoomRemoteDataSource {
   ChatRoomRemoteDataSourceImpl({required this.api});
 
   @override
-  Future<List<MessageModel>> getChatMessages(String roomId, String userId) async {
+  Future<List<MessageRemoteModel>> getRoomMessages(String roomId, String userId) async {
     try {
       final response = await api.get('/chat/rooms/$roomId/messages');
       final data = response.data['data'] as List;
 
       return data.map((message) =>
-        MessageModel.fromJson(message, userId)
+        MessageRemoteModel.fromJson(message, userId)
       ).toList();
     } on DioException {
       throw Exception(AppStrings.somethingWentWrongMessage);

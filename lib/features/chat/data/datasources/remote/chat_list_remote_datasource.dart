@@ -2,10 +2,10 @@ import 'package:dio/dio.dart';
 
 import 'package:android_chat_app/core/constants/app_strings.dart';
 import 'package:android_chat_app/core/network/api_client.dart';
-import 'package:android_chat_app/features/chat/data/models/room_model.dart';
+import 'package:android_chat_app/features/chat/data/models/remote/room_remote_model.dart';
 
 abstract class ChatListRemoteDataSource {
-  Future<List<RoomModel>> getChatRooms();
+  Future<List<RoomRemoteModel>> getChatRooms();
 }
 
 class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
@@ -14,7 +14,7 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
   ChatListRemoteDataSourceImpl({required this.api});
 
   @override
-  Future<List<RoomModel>> getChatRooms() async {
+  Future<List<RoomRemoteModel>> getChatRooms() async {
     try {
       final response = await api.get('/chat/rooms');
       final data = response.data['data'] as List;
@@ -22,7 +22,7 @@ class ChatListRemoteDataSourceImpl implements ChatListRemoteDataSource {
       return data.map((room) {
         final participants = (room['participants'] as List).first;
 
-        return RoomModel(
+        return RoomRemoteModel(
           id: room['id'],
           username: participants['username'] ?? '',
           displayName: participants['displayName'] ?? '',
