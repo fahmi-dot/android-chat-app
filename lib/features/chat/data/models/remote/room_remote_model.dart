@@ -1,7 +1,7 @@
 import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 
-class RoomModel extends Room {
-  const RoomModel({
+class RoomRemoteModel extends Room {
+  const RoomRemoteModel({
     required super.id,
     required super.username,
     required super.displayName,
@@ -11,8 +11,8 @@ class RoomModel extends Room {
     required super.unreadMessagesCount,
   });
 
-  factory RoomModel.fromEntity(Room room) {
-    return RoomModel(
+  factory RoomRemoteModel.fromEntity(Room room) {
+    return RoomRemoteModel(
       id: room.id,
       username: room.username,
       displayName: room.displayName,

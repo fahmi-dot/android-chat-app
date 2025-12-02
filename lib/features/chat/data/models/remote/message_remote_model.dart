@@ -1,7 +1,7 @@
 import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 
-class MessageModel extends Message {
-  const MessageModel({
+class MessageRemoteModel extends Message {
+  const MessageRemoteModel({
     required super.id,
     required super.roomId,
     required super.content,
@@ -12,8 +12,8 @@ class MessageModel extends Message {
     required super.isSentByMe
   });
 
-  factory MessageModel.fromEntity(Message message) {
-    return MessageModel(
+  factory MessageRemoteModel.fromEntity(Message message) {
+    return MessageRemoteModel(
       id: message.id,
       roomId: message.roomId,
       content: message.content,
@@ -25,8 +25,8 @@ class MessageModel extends Message {
     );
   }
 
-  factory MessageModel.fromJson(Map<String, dynamic> json, String userId) {
-    return MessageModel(
+  factory MessageRemoteModel.fromJson(Map<String, dynamic> json, String userId) {
+    return MessageRemoteModel(
       id: json['id'],
       roomId: json['roomId'],
       content: json['content'],
