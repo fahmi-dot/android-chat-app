@@ -269,7 +269,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                           onLongPressStart: (details) {
                             setState(() {
                               _onSelecting = true;
-                              _selectedMessage = message.id!;
+                              _selectedMessage = message.id;
                             });
                             final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
                             _showPopup(details, overlay);
