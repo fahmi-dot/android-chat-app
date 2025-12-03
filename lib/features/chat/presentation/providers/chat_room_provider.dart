@@ -2,16 +2,18 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:android_chat_app/features/chat/data/datasources/chat_room_remote_datasource.dart';
-import 'package:android_chat_app/features/chat/data/models/message_model.dart';
+import 'package:android_chat_app/features/chat/domain/usecases/get_room_messages_usecase.dart';
+import 'package:android_chat_app/features/chat/data/datasources/local/chat_room_local_datasource.dart';
+import 'package:android_chat_app/features/chat/data/datasources/remote/chat_room_remote_datasource.dart';
+import 'package:android_chat_app/features/chat/data/models/remote/message_remote_model.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_room_repository_impl.dart';
 import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_room_repository.dart';
-import 'package:android_chat_app/features/chat/domain/usecases/get_chat_messages_usecase.dart';
 import 'package:android_chat_app/features/chat/domain/usecases/mark_as_read_usecase.dart';
 import 'package:android_chat_app/features/chat/presentation/providers/chat_list_provider.dart';
 import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
 import 'package:android_chat_app/shared/providers/client_provider.dart';
+import 'package:android_chat_app/shared/providers/local_provider.dart';
 
 final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((
   ref,
@@ -20,15 +22,29 @@ final chatRoomRemoteDataSourceProvider = Provider<ChatRoomRemoteDataSource>((
   return ChatRoomRemoteDataSourceImpl(api: api);
 });
 
-final chatRoomRepositoryProvider = Provider<ChatRoomRepository>((ref) {
-  final datasource = ref.watch(chatRoomRemoteDataSourceProvider);
-  return ChatRoomRepositoryImpl(chatRoomRemoteDataSource: datasource);
+final chatRoomLocalDataSourceProvider = Provider<ChatRoomLocalDataSource>((
+  ref,
+) {
+  final hive = ref.read(hiveServiceProvider);
+  final sqlite = ref.read(sqliteServiceProvider);
+
+  return ChatRoomLocalDataSourceImpl(hive, sqlite);
 });
 
-final getChatMessageUseCaseProvider = Provider<GetChatMessageUseCase>((ref) {
+final chatRoomRepositoryProvider = Provider<ChatRoomRepository>((ref) {
+  final remoteDatasource = ref.watch(chatRoomRemoteDataSourceProvider);
+  final localDatasource = ref.watch(chatRoomLocalDataSourceProvider);
+
+  return ChatRoomRepositoryImpl(
+    chatRoomRemoteDataSource: remoteDatasource,
+    chatRoomLocalDataSource: localDatasource,
+  );
+});
+
+final getRoomMessagesUseCaseProvider = Provider<GetRoomMessagesUseCase>((ref) {
   final repository = ref.watch(chatRoomRepositoryProvider);
 
-  return GetChatMessageUseCase(repository);
+  return GetRoomMessagesUseCase(repository);
 });
 
 final markAsReadUseCaseProvider = Provider<MarkAsReadUseCase>((ref) {
@@ -51,7 +67,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
   FutureOr<List<Message>?> build() async {
     final user = await ref.read(userProvider.future);
     final messages = await ref
-        .read(getChatMessageUseCaseProvider)
+        .read(getRoomMessagesUseCaseProvider)
         .execute(roomId!, user!.id);
 
     ref.listen<AsyncValue<dynamic>>(wsMessageStreamProvider, (previous, next) {
@@ -71,7 +87,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
 
   void _handleNewMessage(dynamic data, String userId) {
     try {
-      final newMessage = MessageModel.fromJson(data, userId);
+      final newMessage = MessageRemoteModel.fromJson(data, userId).toEntity();
 
       final messages = state.value;
       if (messages == null) return;
@@ -111,7 +127,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
     try {
       final user = await ref.read(userProvider.future);
       final messages = await ref
-          .read(getChatMessageUseCaseProvider)
+          .read(getRoomMessagesUseCaseProvider)
           .execute(roomId!, user!.id);
 
       state = AsyncData(messages);

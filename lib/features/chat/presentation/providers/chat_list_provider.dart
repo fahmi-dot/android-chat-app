@@ -1,10 +1,12 @@
 import 'dart:async';
 
-import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:android_chat_app/features/chat/data/datasources/local/chat_list_local_datasource.dart';
+import 'package:android_chat_app/shared/providers/local_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:android_chat_app/features/chat/data/datasources/chat_list_remote_datasource.dart';
+import 'package:android_chat_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:android_chat_app/features/chat/data/datasources/remote/chat_list_remote_datasource.dart';
 import 'package:android_chat_app/features/chat/data/repositories/chat_list_repository_impl.dart';
 import 'package:android_chat_app/features/chat/domain/entities/room.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_list_repository.dart';
@@ -16,16 +18,31 @@ final wsMessageStreamProvider = StreamProvider.autoDispose<dynamic>((ref) {
   return ref.read(wsClientProvider).messageStream;
 });
 
-final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((ref) {
+final chatListRemoteDataSourceProvider = Provider<ChatListRemoteDataSource>((
+  ref,
+) {
   final api = ref.read(apiClientProvider);
 
   return ChatListRemoteDataSourceImpl(api: api);
 });
 
-final chatListRepositoryProvider = Provider<ChatListRepository>((ref) {
-  final datasource = ref.watch(chatListRemoteDataSourceProvider);
+final chatListLocalDataSourceProvider = Provider<ChatListLocalDataSource>((
+  ref,
+) {
+  final hive = ref.read(hiveServiceProvider);
+  final sqlite = ref.read(sqliteServiceProvider);
 
-  return ChatListRepositoryImpl(chatListRemoteDataSource: datasource);
+  return ChatListLocalDataSourceImpl(hive, sqlite);
+});
+
+final chatListRepositoryProvider = Provider<ChatListRepository>((ref) {
+  final remoteDatasource = ref.watch(chatListRemoteDataSourceProvider);
+  final localDatasource = ref.watch(chatListLocalDataSourceProvider);
+
+  return ChatListRepositoryImpl(
+    chatListRemoteDataSource: remoteDatasource,
+    chatListLocalDataSource: localDatasource,
+  );
 });
 
 final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
@@ -34,9 +51,10 @@ final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
   return GetChatRoomsUseCase(repository, ref);
 });
 
-final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
-  ChatListNotifier.new,
-);
+final chatListProvider =
+    AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
+      ChatListNotifier.new,
+    );
 
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   @override
@@ -148,7 +166,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   Future<void> markAsRead(String roomId) async {
     try {
       await ref.read(chatRoomProvider(roomId).notifier).markAsRead();
-      
+
       state.whenData((rooms) {
         if (rooms == null) return;
 
