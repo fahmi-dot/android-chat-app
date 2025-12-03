@@ -1,12 +1,12 @@
 import 'package:android_chat_app/features/chat/domain/entities/message.dart';
 import 'package:android_chat_app/features/chat/domain/repositories/chat_room_repository.dart';
 
-class GetChatMessageUseCase {
+class GetRoomMessagesUseCase {
   final ChatRoomRepository _chatRoomRepository;
 
-  GetChatMessageUseCase(this._chatRoomRepository);
+  GetRoomMessagesUseCase(this._chatRoomRepository);
 
   Future<List<Message>> execute(String roomId, String userId) async {
-    return await _chatRoomRepository.getChatMessages(roomId, userId);
+    return await _chatRoomRepository.getRoomMessages(roomId, userId);
   }
 }
