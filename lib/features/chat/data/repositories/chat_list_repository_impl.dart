@@ -17,15 +17,26 @@ class ChatListRepositoryImpl implements ChatListRepository {
 
   @override
   Future<List<Room>> getChatRooms() async {
-    final roomRemoteModels = await chatListRemoteDataSource.getChatRooms();
+    final roomLocaModels = await chatListRemoteDataSource.getChatRooms();
 
-    if (roomRemoteModels.isNotEmpty) {
+    if (roomLocaModels.isNotEmpty) {
       unawaited(_getFromRemote());
 
-      return roomRemoteModels.map((room) => room.toEntity()).toList();
+      return roomLocaModels.map((room) => room.toEntity()).toList();
     }
 
     return await _getFromRemote();
+  }
+
+  @override
+  Future<List<Room>> searchChatRooms(String query) async {
+    final roomLocalModels = await chatListLocalDataSource.searchChatRooms(query);
+
+    if (roomLocalModels.isNotEmpty) {
+      return roomLocalModels.map((room) => room.toEntity()).toList();
+    }
+
+    return [];
   }
 
   Future<List<Room>> _getFromRemote() async {

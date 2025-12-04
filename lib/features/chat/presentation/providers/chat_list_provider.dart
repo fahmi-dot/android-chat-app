@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:android_chat_app/features/chat/data/datasources/local/chat_list_local_datasource.dart';
+import 'package:android_chat_app/features/chat/domain/usecases/search_chat_rooms_usecase.dart';
 import 'package:android_chat_app/shared/providers/local_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,10 +52,15 @@ final getChatRoomsUseCaseProvider = Provider<GetChatRoomsUseCase>((ref) {
   return GetChatRoomsUseCase(repository, ref);
 });
 
-final chatListProvider =
-    AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
-      ChatListNotifier.new,
-    );
+final searchChatRoomsUseCaseProvider = Provider<SearchChatRoomsUseCase>((ref) {
+  final repository = ref.watch(chatListRepositoryProvider);
+
+  return SearchChatRoomsUseCase(repository);
+});
+
+final chatListProvider = AsyncNotifierProvider.autoDispose<ChatListNotifier, List<Room>?>(
+  ChatListNotifier.new,
+);
 
 class ChatListNotifier extends AsyncNotifier<List<Room>?> {
   @override
@@ -151,7 +157,7 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     }
   }
 
-  Future<void> getRooms() async {
+  Future<void> getChatRooms() async {
     state = const AsyncLoading();
 
     try {
@@ -161,6 +167,10 @@ class ChatListNotifier extends AsyncNotifier<List<Room>?> {
     } catch (e, trace) {
       state = AsyncError(e, trace);
     }
+  }
+
+  Future<List<Room>> searchChatRooms(String query) async {
+    return await ref.read(searchChatRoomsUseCaseProvider).execute(query);
   }
 
   Future<void> markAsRead(String roomId) async {
