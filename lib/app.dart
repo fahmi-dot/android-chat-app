@@ -1,3 +1,4 @@
+import 'package:android_chat_app/core/utils/token_holder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,8 +20,9 @@ class _MyAppState extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     
-    Future.microtask(() {
-      ref.read(wsClientProvider).initialize();
+    Future.microtask(() async {
+      final token = await TokenHolder.getAccessToken();
+      if (token != null) ref.read(wsClientProvider).initialize();
     });
   }
 
