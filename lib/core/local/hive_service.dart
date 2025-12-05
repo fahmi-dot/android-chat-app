@@ -18,10 +18,11 @@ class HiveService {
       Hive.deleteBoxFromDisk(roomMessageBoxName);
       return true;
     }());
-    
+
     if (!Hive.isBoxOpen(chatRoomBoxName)) {
       await Hive.openBox<RoomLocalModel>(chatRoomBoxName);
     }
+
     if (!Hive.isBoxOpen(roomMessageBoxName)) {
       await Hive.openBox<MessageLocalModel>(roomMessageBoxName);
     }
@@ -45,27 +46,19 @@ class HiveService {
 
   List<RoomLocalModel> getChatRooms() {
     return chatRoomBox.values.toList()
-        ..sort((a, b) => 
-          b.lastMessageSentAt.compareTo(a.lastMessageSentAt)
-        );
+      ..sort((a, b) => b.lastMessageSentAt.compareTo(a.lastMessageSentAt));
   }
 
   List<RoomLocalModel> searchChatRooms(String query) {
     if (query.isEmpty) return getChatRooms();
 
-    return chatRoomBox.values
-        .where((r) => r.username == query).toList()
-        ..sort((a, b) => 
-          b.lastMessageSentAt.compareTo(a.lastMessageSentAt)
-        );
+    return chatRoomBox.values.where((r) => r.username == query).toList()
+      ..sort((a, b) => b.lastMessageSentAt.compareTo(a.lastMessageSentAt));
   }
 
   List<MessageLocalModel> getRoomMessages(String roomId) {
-    return roomMessageBox.values
-        .where((m) => m.roomId == roomId).toList()
-        ..sort((a, b) => 
-          b.sentAt.compareTo(a.sentAt)
-        );
+    return roomMessageBox.values.where((m) => m.roomId == roomId).toList()
+      ..sort((a, b) => b.sentAt.compareTo(a.sentAt));
   }
 
   Future<void> deleteChatRoom(String id) async {
@@ -74,5 +67,10 @@ class HiveService {
 
   Future<void> deleteRoomMessage(String id) async {
     await roomMessageBox.delete(id);
+  }
+
+  Future<void> clearBox() async {
+    await Hive.box<RoomLocalModel>(chatRoomBoxName).clear();
+    await Hive.box<MessageLocalModel>(roomMessageBoxName).clear();
   }
 }
