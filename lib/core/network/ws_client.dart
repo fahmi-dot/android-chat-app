@@ -20,8 +20,9 @@ class WsClient {
   bool _isInitialized = false;
   bool _isSubscribed = false;
 
-  Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
   bool get isConnected => _isConnected;
+  Stream<Map<String, dynamic>> get messageStream => _messageController.stream;
+  Function(Map<String, dynamic>)? onMessage;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -90,10 +91,13 @@ class WsClient {
 
           if (frame.body == null || frame.body!.isEmpty) return;
 
+          final data = jsonDecode(frame.body!) as Map<String, dynamic>;
+
           try {
-            final message = jsonDecode(frame.body!) as Map<String, dynamic>;
+            final message = data;
 
             _messageController.add(message);
+            onMessage?.call(data);
           } catch (e) {
             print('Error parsing message: $e');
           }
