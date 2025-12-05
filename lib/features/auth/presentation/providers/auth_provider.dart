@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:android_chat_app/features/auth/data/datasources/local/auth_local_datasource.dart';
+import 'package:android_chat_app/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:android_chat_app/shared/providers/local_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:android_chat_app/core/utils/token_holder.dart';
 import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:android_chat_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:android_chat_app/features/auth/domain/entities/token.dart';
@@ -16,8 +18,14 @@ import 'package:android_chat_app/features/auth/domain/usecases/verify_usecase.da
 import 'package:android_chat_app/features/user/presentation/providers/user_provider.dart';
 import 'package:android_chat_app/shared/providers/client_provider.dart';
 
+final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
+  final hive = ref.read(hiveServiceProvider);
+  final sqlite = ref.read(sqliteServiceProvider);
 
-final authRemoteDatasourceProvider = Provider<AuthRemoteDataSource>((ref) {
+  return AuthLocalDataSourceImpl(hive, sqlite);
+});
+
+final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   final api = ref.read(apiClientProvider);
   final ws = ref.read(wsClientProvider);
 
@@ -25,9 +33,13 @@ final authRemoteDatasourceProvider = Provider<AuthRemoteDataSource>((ref) {
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final datasource = ref.watch(authRemoteDatasourceProvider);
+  final remoteDatasource = ref.watch(authRemoteDataSourceProvider);
+  final localDatasource = ref.watch(authLocalDataSourceProvider);
 
-  return AuthRepositoryImpl(authRemoteDataSource: datasource);
+  return AuthRepositoryImpl(
+    authRemoteDataSource: remoteDatasource,
+    authLocalDataSource: localDatasource,
+  );
 });
 
 final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
@@ -50,7 +62,7 @@ final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
 
 final resendCodeUseCaseProvider = Provider<ResendCodeUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
-  
+
   return ResendCodeUseCase(repository);
 });
 
@@ -64,6 +76,12 @@ final checkUseCaseProvider = Provider<CheckUsecase>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
 
   return CheckUsecase(authRepository);
+});
+
+final logoutUseCaseProvider = Provider<LogoutUseCase>((ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+
+  return LogoutUseCase(authRepository);
 });
 
 final authProvider = AsyncNotifierProvider<AuthNotifier, Token?>(
@@ -182,9 +200,7 @@ class AuthNotifier extends AsyncNotifier<Token?> {
     state = AsyncLoading();
 
     try {
-      await ref
-          .read(userProvider.notifier)
-          .setMyProfile(username, null, null);
+      await ref.read(userProvider.notifier).setMyProfile(username, null, null);
 
       state = AsyncData(null);
       return true;
@@ -194,14 +210,23 @@ class AuthNotifier extends AsyncNotifier<Token?> {
     }
   }
 
+  Future<bool> refresh() async {
+    try {
+      await ref.read(checkUseCaseProvider).execute();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     try {
-      await TokenHolder.deleteTokens();
+      await ref.read(logoutUseCaseProvider).execute();
       ref.read(wsClientProvider).disconnect();
 
       state = AsyncData(null);
     } catch (e, trace) {
-      state = AsyncError(e, trace); 
+      state = AsyncError(e, trace);
     }
   }
 }

@@ -1,18 +1,23 @@
 import 'package:android_chat_app/core/utils/token_holder.dart';
 import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:android_chat_app/features/auth/data/datasources/local/auth_local_datasource.dart';
 import 'package:android_chat_app/features/auth/data/models/token_model.dart';
 import 'package:android_chat_app/features/auth/domain/entities/token.dart';
 import 'package:android_chat_app/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource authRemoteDataSource;
+  final AuthLocalDataSource authLocalDataSource;
 
-  AuthRepositoryImpl({required this.authRemoteDataSource});
+  AuthRepositoryImpl({
+    required this.authRemoteDataSource,
+    required this.authLocalDataSource,
+  });
 
   @override
   Future<Token> login(String username, String password) async {
     final tokenModel = await authRemoteDataSource.login(username, password);
-    
+
     return saveTokens(tokenModel);
   }
 
@@ -20,21 +25,33 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> forgotPassword(String email) async {
     await authRemoteDataSource.forgotPassword(email);
   }
-  
+
   @override
-  Future<void> register(String phoneNumber, String email, String password) async {
-    await authRemoteDataSource.register(phoneNumber, email, password); 
+  Future<void> register(
+    String phoneNumber,
+    String email,
+    String password,
+  ) async {
+    await authRemoteDataSource.register(phoneNumber, email, password);
   }
 
   @override
   Future<void> resendCode(String phoneNumber) async {
     await authRemoteDataSource.resendCode(phoneNumber);
   }
-  
+
   @override
-  Future<Token> verify(String phoneNumber, String verificationCode, String password) async {
-    final tokenModel = await authRemoteDataSource.verify(phoneNumber, verificationCode, password);
-    
+  Future<Token> verify(
+    String phoneNumber,
+    String verificationCode,
+    String password,
+  ) async {
+    final tokenModel = await authRemoteDataSource.verify(
+      phoneNumber,
+      verificationCode,
+      password,
+    );
+
     return saveTokens(tokenModel);
   }
 
@@ -48,14 +65,20 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     final tokenModel = await authRemoteDataSource.refresh(refreshToken);
-    
+
     return saveTokens(tokenModel!);
+  }
+
+  @override
+  Future<void> logout() async {
+    await authLocalDataSource.logout();
+    TokenHolder.deleteTokens();
   }
 
   Future<Token> saveTokens(TokenModel tokenModel) async {
     await TokenHolder.saveTokens(
-        accessToken: tokenModel.access,
-        refreshToken: tokenModel.refresh,
+      accessToken: tokenModel.access,
+      refreshToken: tokenModel.refresh,
     );
 
     return tokenModel.toEntity();

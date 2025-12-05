@@ -7,4 +7,5 @@ abstract class AuthRepository {
   Future<void> resendCode(String phoneNumber);
   Future<Token> verify(String phoneNumber, String verificationCode, String password);
   Future<Token?> refresh();
+  Future<void> logout();
 }
