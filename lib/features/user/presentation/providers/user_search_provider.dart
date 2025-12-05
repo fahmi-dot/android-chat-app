@@ -10,7 +10,7 @@ final searchUserUseCaseProvider = Provider<SearchUserUseCase>((ref) {
   return SearchUserUseCase(repository);
 });
 
-final userSearchProvider = AsyncNotifierProvider<UserSearchNotifier, List<UserSummary>>(
+final userSearchProvider = AsyncNotifierProvider.autoDispose<UserSearchNotifier, List<UserSummary>>(
   UserSearchNotifier.new,
 );
 
@@ -23,7 +23,7 @@ class UserSearchNotifier extends AsyncNotifier<List<UserSummary>> {
   }
 
   Future<void> searchUser(String key) async {
-    if (key.isEmpty) {
+    if (key.isEmpty || key.length < 3) {
       _debounce?.cancel();
       state = const AsyncData([]);
       return;

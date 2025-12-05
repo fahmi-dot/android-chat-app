@@ -10,7 +10,7 @@ final getUserProfileUseCaseProvider = Provider<GetUserProfileUseCase>((ref) {
   return GetUserProfileUseCase(repository);
 });
 
-final userDetailProvider = AsyncNotifierProvider<UserDetailNotifier, UserSummary?>(
+final userDetailProvider = AsyncNotifierProvider.autoDispose<UserDetailNotifier, UserSummary?>(
   UserDetailNotifier.new,
 );
 
@@ -30,7 +30,6 @@ class UserDetailNotifier extends AsyncNotifier<UserSummary?> {
           .execute(query);
 
       state = AsyncData(user);
-      print(user);
     } catch (e, trace) {
       state = AsyncError(e, trace);
     }

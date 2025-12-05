@@ -34,7 +34,7 @@ final getMyProfileUseCaseProvider = Provider<GetMyProfileUseCase>((ref) {
   return GetMyProfileUseCase(repository);
 });
 
-final userProvider = AsyncNotifierProvider<UserNotifier, User?>(
+final userProvider = AsyncNotifierProvider.autoDispose<UserNotifier, User?>(
   UserNotifier.new,
 );
 
