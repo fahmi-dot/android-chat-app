@@ -6,7 +6,7 @@ class SearchChatRoomsUseCase {
 
   SearchChatRoomsUseCase(this._chatListRepository);
 
-  Future<List<Room>> execute(String query) async {
-    return await _chatListRepository.searchChatRooms(query);
+  Future<List<Room>> execute(String key) async {
+    return await _chatListRepository.searchChatRooms(key);
   }
 }

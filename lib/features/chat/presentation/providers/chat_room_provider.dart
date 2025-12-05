@@ -66,6 +66,9 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
   @override
   FutureOr<List<Message>?> build() async {
     final user = await ref.read(userProvider.future);
+
+    if (roomId == null) return [];
+
     final messages = await ref
         .read(getRoomMessagesUseCaseProvider)
         .execute(roomId!, user!.id);
@@ -106,7 +109,7 @@ class ChatRoomNotifier extends AsyncNotifier<List<Message>?> {
     try {
       final ws = ref.read(wsClientProvider);
 
-      ws.sendMessage(roomId: roomId, content: message, receiver: username);
+      ws.sendMessage(roomId: roomId ?? '', content: message, receiver: username);
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
