@@ -119,7 +119,9 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSizes.paddingM),
             child: GestureDetector(
-              onTap: () => context.push(Routes.searchUser),
+              onTap: () => context.push(Routes.searchUser).then((_) {
+                ref.invalidate(chatListProvider);
+              }),
               child: HeroIcon(
                 HeroIcons.magnifyingGlass,
                 style: HeroIconStyle.outline,
@@ -224,7 +226,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            context.push(Routes.chatWithRoom(room.id), extra: room.username).then((_) {
+                            context.push(Routes.chatWithRoom(room.username)).then((_) {
                               ref.invalidate(chatListProvider);
                             });
                           },
@@ -286,7 +288,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.primary,
+                                        color: Theme.of(context).colorScheme.secondary,
                                         shape: BoxShape.circle,
                                       ),
                                       child: Text(

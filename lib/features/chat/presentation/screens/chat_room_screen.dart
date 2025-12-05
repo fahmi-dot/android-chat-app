@@ -1,3 +1,4 @@
+import 'package:android_chat_app/shared/providers/client_provider.dart';
 import 'package:android_chat_app/shared/widgets/custom_on_working_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,10 +12,9 @@ import 'package:android_chat_app/features/user/presentation/providers/user_detai
 import 'package:android_chat_app/shared/widgets/custom_text_field.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
-  final String? roomId;
-  final String? username;
+  final String username;
 
-  const ChatRoomScreen({super.key, this.roomId, this.username});
+  const ChatRoomScreen({super.key, required this.username});
 
   @override
   ConsumerState<ChatRoomScreen> createState() => _ChatRoomScreenState();
@@ -26,17 +26,29 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   bool _isTyping = false;
   bool _onSelecting = false;
   String _selectedMessage = '';
+  String? roomId;
 
   @override
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      ref.read(userDetailProvider.notifier).getUserProfile(widget.username!);
-    });
+    final ws = ref.read(wsClientProvider);
+    ws.onMessage = _onWsMessage;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(chatListProvider.notifier).markAsRead(widget.roomId!);
+    Future.microtask(() async {
+      ref.read(userDetailProvider.notifier).getUserProfile(widget.username);
+      final rooms = await ref
+          .read(chatListProvider.notifier)
+          .searchChatRooms(widget.username);
+
+      if (rooms.isNotEmpty) {
+        setState(() {
+          roomId = rooms.first.id;
+        });
+
+        await ref.read(chatListProvider.notifier).markAsRead(roomId!);
+      }
+
     });
 
     _controller.addListener(() {
@@ -57,12 +69,26 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     super.dispose();
   }
 
+  void _onWsMessage(Map<String, dynamic> data) {
+    if (data['type'] == 'new_room') {
+      final rId = data['roomId'];
+
+      if (roomId == null) {
+        setState(() {
+          roomId = rId;
+        });
+
+        ref.invalidate(chatRoomProvider(roomId));
+      }
+    }
+  }
+
   void _sendMessage() async {
     final message = _controller.text.trim();
     if (message.isEmpty) return;
 
     await ref
-        .read(chatRoomProvider(widget.roomId).notifier)
+        .read(chatRoomProvider(roomId).notifier)
         .sendMessage(message, widget.username);
 
     _controller.clear();
@@ -127,7 +153,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final chatRoomState = ref.watch(chatRoomProvider(widget.roomId));
+    final chatRoomState = ref.watch(chatRoomProvider(roomId));
     final userDetailState = ref.watch(userDetailProvider).value;
 
     return Scaffold(

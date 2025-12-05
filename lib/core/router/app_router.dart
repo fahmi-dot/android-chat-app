@@ -21,12 +21,12 @@ class Routes {
   static const changeEmail = '/change/email';
   static const setUsername = '/set/username';
   static const chatList = '/chats';
-  static const chatRoom = '/chats/:roomId';
+  static const chatRoom = '/chats/:username';
   static const searchUser = '/user/search';
   static const myProfile = '/profile';
 
   static String verifyWithPhone(String phoneNumber) => '/verify/$phoneNumber';
-  static String chatWithRoom(String roomId) => '/chats/$roomId';
+  static String chatWithRoom(String username) => '/chats/$username';
 }
 
 final appRouter = GoRouter(
@@ -162,11 +162,9 @@ final appRouter = GoRouter(
         GoRoute(
           path: Routes.chatRoom,
           pageBuilder: (context, state) {
-            final roomId = state.pathParameters['roomId']!;
-            final username = state.extra as String;
+            final username = state.pathParameters['username']!;
             return CustomTransitionPage(
               child: ChatRoomScreen(
-                roomId: roomId,
                 username: username,
               ),
               transitionsBuilder: (context, animation, secondary, child) {
