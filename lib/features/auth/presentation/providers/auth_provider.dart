@@ -89,6 +89,8 @@ final authProvider = AsyncNotifierProvider<AuthNotifier, Token?>(
 );
 
 class AuthNotifier extends AsyncNotifier<Token?> {
+  Timer? _refreshTimer;
+
   @override
   FutureOr<Token?> build() async {
     return await ref.read(checkUseCaseProvider).execute();
@@ -107,6 +109,7 @@ class AuthNotifier extends AsyncNotifier<Token?> {
           .execute(username, password);
 
       state = AsyncData(token);
+      _scheduleRefresh();
       return true;
     } catch (e, trace) {
       state = AsyncError(e, trace);
@@ -201,7 +204,6 @@ class AuthNotifier extends AsyncNotifier<Token?> {
 
     try {
       await ref.read(userProvider.notifier).setMyProfile(username, null, null);
-
       state = AsyncData(null);
       return true;
     } catch (e, trace) {
@@ -212,7 +214,9 @@ class AuthNotifier extends AsyncNotifier<Token?> {
 
   Future<bool> refresh() async {
     try {
-      await ref.read(checkUseCaseProvider).execute();
+      final token = await ref.read(checkUseCaseProvider).execute();
+      state = AsyncData(token);
+      _scheduleRefresh();
       return true;
     } catch (e) {
       return false;
@@ -228,5 +232,18 @@ class AuthNotifier extends AsyncNotifier<Token?> {
     } catch (e, trace) {
       state = AsyncError(e, trace);
     }
+  }
+
+  void _scheduleRefresh() {
+    final expiryAt = state.value!.expiryAt;
+    final now = DateTime.now();
+    Duration duration = expiryAt.difference(now) - Duration(seconds: 60);
+
+    if (duration.isNegative) duration = Duration.zero;
+
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer(duration, () async {
+      await refresh();
+    });
   }
 }
