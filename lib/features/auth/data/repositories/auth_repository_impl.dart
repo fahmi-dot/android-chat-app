@@ -1,5 +1,5 @@
 import 'package:android_chat_app/core/utils/token_holder.dart';
-import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:android_chat_app/features/auth/data/datasources/remote/auth_remote_datasource.dart';
 import 'package:android_chat_app/features/auth/data/datasources/local/auth_local_datasource.dart';
 import 'package:android_chat_app/features/auth/data/models/token_model.dart';
 import 'package:android_chat_app/features/auth/domain/entities/token.dart';

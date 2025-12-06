@@ -5,7 +5,7 @@ import 'package:android_chat_app/features/auth/domain/usecases/logout_usecase.da
 import 'package:android_chat_app/shared/providers/local_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:android_chat_app/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:android_chat_app/features/auth/data/datasources/remote/auth_remote_datasource.dart';
 import 'package:android_chat_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:android_chat_app/features/auth/domain/entities/token.dart';
 import 'package:android_chat_app/features/auth/domain/repositories/auth_repository.dart';
