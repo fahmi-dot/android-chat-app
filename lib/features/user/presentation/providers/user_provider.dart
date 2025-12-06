@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:android_chat_app/features/user/data/datasources/user_remote_datasource.dart';
+import 'package:android_chat_app/features/user/data/datasources/remote/user_remote_datasource.dart';
 import 'package:android_chat_app/features/user/data/repositories/user_repository_impl.dart';
 import 'package:android_chat_app/features/user/domain/entities/user.dart';
 import 'package:android_chat_app/features/user/domain/repositories/user_repository.dart';

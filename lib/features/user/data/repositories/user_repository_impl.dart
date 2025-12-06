@@ -1,4 +1,4 @@
-import 'package:android_chat_app/features/user/data/datasources/user_remote_datasource.dart';
+import 'package:android_chat_app/features/user/data/datasources/remote/user_remote_datasource.dart';
 import 'package:android_chat_app/features/user/data/models/user_model.dart';
 import 'package:android_chat_app/features/user/domain/entities/user.dart';
 import 'package:android_chat_app/features/user/domain/entities/user_summary.dart';
